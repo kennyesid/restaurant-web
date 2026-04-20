@@ -7,6 +7,7 @@ import { ProductGrid } from '@/components/product-grid';
 import { ShoppingCart } from '@/components/shopping-cart';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import ButtonGeneric from '@/components/common/Button/ButtonGeneric';
 
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -52,38 +53,32 @@ export default function POSPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Sistema POS</h1>
-        <p className="text-muted-foreground">Gestión de ventas en punto de venta</p>
+      <div className='flex justify-center'>
+        <h1 className="text-3xl text-rest-primary font-bold">Gestión de ventas</h1>
+        {/* <p className="text-muted-foreground">Gestión de ventas en punto de venta</p> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Products Section */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={selectedCategory === null ? 'default' : 'outline'}
+          <div className="flex flex-row gap-2">
+            <ButtonGeneric
+            variant={selectedCategory === null ? 'red' : 'primaryRed'}
               onClick={() => handleCategoryFilter(null)}
             >
               Todos
-            </Button>
+            </ButtonGeneric>
             {categories.map((category) => (
-              <Button
+              <ButtonGeneric
                 key={category.categoryId}
-                variant={selectedCategory === category.categoryId ? 'default' : 'outline'}
+                variant={selectedCategory === category.categoryId ? 'red' : 'primaryRed'}
                 onClick={() => handleCategoryFilter(category.categoryId)}
               >
                 {category.name}
-              </Button>
+              </ButtonGeneric>
             ))}
           </div>
-
-          {/* Product Grid */}
           <ProductGrid products={filteredProducts} />
         </div>
-
-        {/* Shopping Cart */}
         <div className="lg:col-span-1">
           <ShoppingCart />
         </div>

@@ -31,26 +31,34 @@ export interface RolePermission {
 }
 
 // Product Management
-export interface Category {
-  id_category: string;
-  name: string;
-  description: string;
-  id_tenant: string;
-}
+// export interface Category {
+//   categoryId: number;
+//   name: string;
+//   description: string;
+//     created_at: string;
+//   updated_at: string;
+//   state: boolean;
+// }
 
-export interface Product {
-  id_product: string;
-  name: string;
-  description: string;
-  price: number;
-  image: string; // base64 or image URL
-  id_category: string;
-  id_ingredient_group: string;
-  is_available: boolean;
-  id_tenant: string;
-  created_at: string;
-  updated_at: string;
-}
+// export interface Product {
+//   productId: number;
+//   categoryId: number;
+//   name: string;
+//   description: string;
+//   legend: string;
+//   price: number;
+//   isPromotion: boolean;
+//   imageUrl: string; // base64 or image URL
+//   isFeatured: boolean;
+//   displayOrder: number;
+//   // promotionId: int;
+//   // id_ingredient_group: string;
+//   // is_available: boolean;
+//   // id_tenant: string;
+//   created_at: string;
+//   updated_at: string;
+//   state: boolean;
+// }
 
 export interface Ingredient {
   id_ingredient: string;
@@ -147,8 +155,16 @@ export interface Tenant {
 }
 
 // Cart Item (for POS)
-export interface CartItem {
-  id_product: string;
-  quantity: number;
-  unit_price: number;
-}
+// export interface CartItem {
+//   productId: number;
+//   quantity: number;
+//   unit_price: number;
+// }
+
+// export interface CartItem {
+//   productId: number;
+//   name: string;      // Añadido
+//   price: number;
+//   categoryId: number; // Añadido
+//   quantity: number;
+// }

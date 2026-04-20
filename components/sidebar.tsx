@@ -28,7 +28,7 @@ export function Sidebar() {
 
   const mainMenuItems = [
     { label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
-    { label: 'POS', icon: ShoppingCart, href: '/dashboard/pos' },
+    { label: 'Carrito de Compras', icon: ShoppingCart, href: '/cart' },
     { label: 'Productos', icon: Package, href: '/product' },
     { label: 'Ingredientes', icon: Beef, href: '/dashboard/ingredients' },
   ];
@@ -57,9 +57,11 @@ export function Sidebar() {
       {/* Sidebar Principal */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-30 h-screen w-64 bg-[#011631] text-white transition-transform duration-300 flex flex-col',
-          !isOpen && '-translate-x-full lg:translate-x-0'
-        )}
+    'fixed left-0 top-0 z-30 h-screen w-64 bg-[#011631] text-white transition-transform duration-300 flex flex-col',
+    // ESTA CLASE AGREGA LA SOMBRA AL LADO DERECHO
+    'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]', 
+    !isOpen && '-translate-x-full lg:translate-x-0'
+  )}
       >
         {/* Header / Logo Section */}
         <div className="p-8 mb-4">
@@ -75,7 +77,7 @@ export function Sidebar() {
         </div>
 
         {/* Navegación Principal */}
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1  space-y-2 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">
             Navegación
           </p>
@@ -88,19 +90,14 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative',
-                  isActive 
-                    ? 'bg-[#FACC15] text-[#011631] font-bold shadow-lg shadow-yellow-500/10' 
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
-                )}
+                    'flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative',
+                    isActive 
+                      ? 'bg-[#FACC15] text-[#011631] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
+                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  )}
               >
                 <Icon size={20} className={cn(isActive ? 'text-[#011631]' : 'group-hover:scale-110 transition-transform')} />
                 <span className="text-sm tracking-wide">{item.label}</span>
-                
-                {/* Indicador visual pequeño si está activo */}
-                {isActive && (
-                    <div className="absolute right-2 w-1.5 h-1.5 bg-[#011631] rounded-full" />
-                )}
               </Link>
             );
           })}

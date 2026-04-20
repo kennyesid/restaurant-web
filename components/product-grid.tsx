@@ -1,12 +1,13 @@
 'use client';
 
-import { Product } from '@/lib/types';
+import { Product } from '@/types/index';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToCart } from '@/lib/slices/cartSlice';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ProductCard } from './common/cart/product-card';
 
 interface ProductGridProps {
   products: Product[];
@@ -17,65 +18,74 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
   const dispatch = useAppDispatch();
 
   const handleAddToCart = (product: Product) => {
+
     dispatch(
       addToCart({
-        id: product.id_product,
+        productId: product.productId,
         name: product.name,
         price: product.price,
-        category: product.id_category,
+        categoryId: product.categoryId,
         quantity: 1,
+        imageUrl: product.imageUrl,
       })
     );
     onProductSelect?.(product);
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {products.map((product) => (
-        <Card
-          key={product.id_product}
-          className={cn(
-            'p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-105 group',
-            product.is_available ? 'bg-card' : 'opacity-50'
-          )}
-          onClick={() => !product.is_available || handleAddToCart(product)}
-        >
-          {/* Product Image */}
-          <div className="w-full h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg mb-3 flex items-center justify-center group-hover:shadow-lg transition-shadow overflow-hidden">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="text-center">
-                <p className="text-2xl">🍔</p>
-                <p className="text-xs text-muted-foreground mt-1 truncate px-1">Sin imagen</p>
-              </div>
-            )}
-          </div>
-
-          {/* Product Info */}
-          <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
-          <p className="text-lg font-bold text-primary mt-2">
-            ${product.price.toLocaleString('es-CO')}
-          </p>
-
-          {/* Add Button */}
-          <Button
-            size="sm"
-            className="w-full mt-3"
-            disabled={!product.is_available}
-            onClick={(e) => {
-              e.stopPropagation();
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    suppressHydrationWarning
+    >
+      {products.map((product, index) => (
+                        <ProductCard 
+                          product={product}
+                          onEdit={null}
+                          onDelete={null}
+                          onClick={(e) => {
+              // e.stopPropagation();
               handleAddToCart(product);
             }}
-          >
-            <Plus size={16} className="mr-1" />
-            Agregar
-          </Button>
-        </Card>
+                        />
+        // <Card
+        //   key={product.productId}
+        //   suppressHydrationWarning
+        //   className={cn(
+        //     'p-4 cursor-pointer transition-all hover:shadow-lg hover:scale-105 group',
+        //     product.isAvailable ? 'bg-card' : 'opacity-50'
+        //   )}
+        //   onClick={() => handleAddToCart(product)}
+        // >
+        //   <div className="w-full h-32 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg mb-3 flex items-center justify-center group-hover:shadow-lg transition-shadow overflow-hidden">
+        //     {product.imageUrl ? (
+        //       <img
+        //         src={product.imageUrl}
+        //         alt={product.name}
+        //         className="w-full h-full object-cover"
+        //       />
+        //     ) : (
+        //       <div className="text-center">
+        //         <p className="text-2xl">🍔</p>
+        //         <p className="text-xs text-muted-foreground mt-1 truncate px-1">Sin imagen</p>
+        //       </div>
+        //     )}
+        //   </div>
+        //   <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
+        //   <p className="text-lg font-bold text-primary mt-2">
+        //     Bs {product.price.toString()}
+        //   </p>
+        //   <Button
+        //     size="sm"
+        //     className="w-full mt-3"
+        //     disabled={!product.isAvailable}
+        //     onClick={(e) => {
+        //       e.stopPropagation();
+        //       handleAddToCart(product);
+        //     }}
+        //   >
+        //     <Plus size={16} className="mr-1" />
+        //     Agregar
+        //   </Button>
+        // </Card>
       ))}
     </div>
   );

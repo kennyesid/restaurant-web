@@ -2,10 +2,17 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ReduxProvider } from '@/lib/providers'
+import localFont from 'next/font/local';
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
+
+const caveatBrush = localFont({
+  src: './fonts/CaveatBrush-Regular.ttf',
+  variable: '--font-caveat', // Nombre de la variable CSS
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Restaurant Admin Dashboard',
@@ -36,11 +43,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
+    <html lang="en" className={`${caveatBrush.variable}`} suppressHydrationWarning>
+      {/* <body className="font-sans antialiased"> */}
+      <body className="font-caveat" suppressHydrationWarning>
         <ReduxProvider>
-          {children}
-          {process.env.NODE_ENV === 'production' && <Analytics />}
+          <div className='pt-10'>
+            {children}
+            {process.env.NODE_ENV === 'production' && <Analytics />}
+          </div>
         </ReduxProvider>
       </body>
     </html>

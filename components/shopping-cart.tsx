@@ -8,10 +8,11 @@ import { Trash2, Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { createSale } from '@/services/sales';
 import { toast } from 'sonner';
+import { CartItem } from '@/types';
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
-  const { items, paymentType } = useAppSelector(state => state.cart);
+  const { items, paymentType } = useAppSelector(state => state.cart) as { items: CartItem[], paymentType: string };
   const [isProcessing, setIsProcessing] = useState(false);
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -32,7 +33,7 @@ export function ShoppingCart() {
     setIsProcessing(true);
     try {
       const saleItems = items.map(item => ({
-        productId: item.id,
+        productId: item.productId,
         name: item.name,
         quantity: item.quantity,
         price: item.price,
@@ -55,15 +56,20 @@ export function ShoppingCart() {
     }
   };
 
+  const getImageUrl = (url?: string) => {
+    if (!url) return `data:image/avif;base64`;
+    return url.startsWith('data:') ? url : `data:image/avif;base64,${url}`;
+  };
+
   return (
-    <Card className="h-full flex flex-col">
-      <div className="p-4 border-b border-border">
-        <h3 className="font-semibold text-lg">Carrito</h3>
-        <p className="text-sm text-muted-foreground">{items.length} artículos</p>
+    <Card className="h-full flex flex-col overflow-hidden rounded-none">
+      <div className="p-4 flex justify-between items-center bg-[#052A3D] text-white ">
+        <h3 className="font-semibold text-lg tracking-wide">Carrito</h3>
+        <p className="text-sm opacity-90 tracking-wide">{items.length} artículos</p>
       </div>
 
       {/* Items List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-[#052A3D]/20 to-transparent">
         {items.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center">
@@ -73,15 +79,26 @@ export function ShoppingCart() {
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="border border-border rounded-lg p-3 space-y-2">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">${item.price.toLocaleString('es-CO')}</p>
+            <div key={item.productId} className="border bg-white border-border rounded-lg p-2 space-y-2">
+              <div className="flex justify-between items-center">
+                <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
+                  <img 
+                    src={getImageUrl(item.imageUrl)}
+                    alt={item.name} 
+                    className="h-full w-full object-cover" 
+                  />
+                </div>
+                
+                <div className="flex-1 flex flex-col justify-center min-w-0 px-1">
+                  <p className="font-medium text-sm tracking-normal leading-tight">{item.name}</p>
+                  <p className="text-xs text-muted-foreground tracking-wider">
+                    Bs {item.price.toString()}
+                  </p>
+                  
                 </div>
                 <button
-                  onClick={() => dispatch(removeFromCart(item.id))}
-                  className="text-destructive hover:bg-destructive/10 p-1 rounded"
+                  onClick={() => dispatch(removeFromCart(item.productId))}
+                  className="text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -90,7 +107,7 @@ export function ShoppingCart() {
               {/* Quantity Controls */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => dispatch(updateQuantity({ id: item.id, quantity: Math.max(1, item.quantity - 1) }))}
+                  onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: Math.max(1, item.quantity - 1) }))}
                   className="p-1 border border-border rounded hover:bg-muted"
                 >
                   <Minus size={14} />
@@ -99,18 +116,18 @@ export function ShoppingCart() {
                   type="number"
                   value={item.quantity}
                   onChange={(e) =>
-                    dispatch(updateQuantity({ id: item.id, quantity: parseInt(e.target.value) || 1 }))
+                    dispatch(updateQuantity({ productId: item.productId, quantity: parseInt(e.target.value) || 1 }))
                   }
                   className="w-12 text-center text-sm border border-border rounded"
                 />
                 <button
-                  onClick={() => dispatch(updateQuantity({ id: item.id, quantity: item.quantity + 1 }))}
+                  onClick={() => dispatch(updateQuantity({ productId: item.productId, quantity: item.quantity + 1 }))}
                   className="p-1 border border-border rounded hover:bg-muted"
                 >
                   <Plus size={14} />
                 </button>
-                <p className="ml-auto font-semibold text-sm">
-                  ${(item.price * item.quantity).toLocaleString('es-CO')}
+                <p className="ml-auto font-semibold text-base">
+                  Bs {(item.price * item.quantity).toString()}
                 </p>
               </div>
             </div>
@@ -128,7 +145,7 @@ export function ShoppingCart() {
                 <button
                   key={method}
                   onClick={() => dispatch(setPaymentType(method as any))}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 px-3 text-sm font-medium transition-colors cursor-pointer ${
                     paymentType === method
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-muted text-foreground hover:bg-muted/80'
@@ -152,7 +169,7 @@ export function ShoppingCart() {
           </div>
 
           <Button
-            className="w-full"
+            className="w-full rounded-none cursor-pointer"
             size="lg"
             onClick={handleCheckout}
             disabled={isProcessing || items.length === 0}
@@ -163,7 +180,7 @@ export function ShoppingCart() {
           {items.length > 0 && (
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full rounded-none cursor-pointer"
               onClick={() => dispatch(clearCart())}
               disabled={isProcessing}
             >
