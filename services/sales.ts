@@ -1,100 +1,135 @@
+import { storage } from '@/lib/storage';
+
 export interface Sale {
-  id: number;
-  items: { productId: number; name: string; quantity: number; price: number }[];
+  id_sale: string;
+  items: { id_product: string; name: string; quantity: number; price: number }[];
   total: number;
-  paymentType: 'cash' | 'qr' | 'mixed';
-  timestamp: Date;
-  shift: 'morning' | 'afternoon' | 'night';
+  payment_type: 'cash' | 'qr' | 'mixed';
+  timestamp: string;
+  shift: string;
+  id_tenant: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export type SalesByShift = {
-  morning: number;
-  afternoon: number;
-  night: number;
-};
+const SALES_KEY = 'sales';
+const DEFAULT_TENANT_ID = 'tenant-1';
 
-const mockSales: Sale[] = [
-  {
-    id: 1,
-    items: [
-      { productId: 1, name: 'Hamburguesa', quantity: 2, price: 25000 },
-      { productId: 10, name: 'Coca-Cola', quantity: 2, price: 5000 },
-    ],
-    total: 60000,
-    paymentType: 'cash',
-    timestamp: new Date(Date.now() - 3600000 * 4),
-    shift: 'morning',
-  },
-  {
-    id: 2,
-    items: [
-      { productId: 4, name: 'Pollo Frito', quantity: 1, price: 22000 },
-      { productId: 7, name: 'Papas Fritas', quantity: 1, price: 8000 },
-    ],
-    total: 30000,
-    paymentType: 'qr',
-    timestamp: new Date(Date.now() - 3600000 * 2),
-    shift: 'afternoon',
-  },
-  {
-    id: 3,
-    items: [
-      { productId: 2, name: 'Cheeseburger', quantity: 3, price: 28000 },
-    ],
-    total: 84000,
-    paymentType: 'cash',
-    timestamp: new Date(Date.now() - 3600000),
-    shift: 'afternoon',
-  },
-];
+function generateId(): string {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
+// Initialize default data
+function initializeDefaults() {
+  const existingSales = storage.getCollection<Sale>(SALES_KEY);
+  if (existingSales.length === 0) {
+    const defaultSales: Sale[] = [
+      {
+        id_sale: generateId(),
+        items: [
+          { id_product: 'prod-1', name: 'Hamburguesa', quantity: 2, price: 25000 },
+          { id_product: 'prod-8', name: 'Coca-Cola', quantity: 2, price: 5000 },
+        ],
+        total: 60000,
+        payment_type: 'cash',
+        timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
+        shift: 'Mañana',
+        id_tenant: DEFAULT_TENANT_ID,
+        created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+      },
+      {
+        id_sale: generateId(),
+        items: [
+          { id_product: 'prod-4', name: 'Pollo Frito', quantity: 1, price: 22000 },
+          { id_product: 'prod-6', name: 'Papas Fritas', quantity: 1, price: 8000 },
+        ],
+        total: 30000,
+        payment_type: 'qr',
+        timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
+        shift: 'Tarde',
+        id_tenant: DEFAULT_TENANT_ID,
+        created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+        updated_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+      },
+      {
+        id_sale: generateId(),
+        items: [
+          { id_product: 'prod-2', name: 'Cheeseburger', quantity: 3, price: 28000 },
+        ],
+        total: 84000,
+        payment_type: 'cash',
+        timestamp: new Date(Date.now() - 3600000).toISOString(),
+        shift: 'Tarde',
+        id_tenant: DEFAULT_TENANT_ID,
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+        updated_at: new Date(Date.now() - 3600000).toISOString(),
+      },
+    ];
+    storage.setCollection(SALES_KEY, defaultSales);
+  }
+}
+
+if (typeof window !== 'undefined') {
+  initializeDefaults();
+}
+
+// Sale CRUD
 export async function getSales(): Promise<Sale[]> {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return mockSales;
+  return storage.getCollection<Sale>(SALES_KEY);
 }
 
-export async function getSalesByShift(shift: 'morning' | 'afternoon' | 'night'): Promise<Sale[]> {
-  await new Promise(resolve => setTimeout(resolve, 200));
-  return mockSales.filter(s => s.shift === shift);
+export async function getSaleById(id: string): Promise<Sale | null> {
+  return storage.getFromCollection<Sale>(SALES_KEY, id, 'id_sale');
 }
 
-export async function createSale(sale: Omit<Sale, 'id'>): Promise<Sale> {
-  console.log('Creando venta:', sale);
-  await new Promise(resolve => setTimeout(resolve, 300));
-  const newSale = { ...sale, id: Date.now() };
-  mockSales.push(newSale);
+export async function getSalesByShift(shift: string): Promise<Sale[]> {
+  const sales = storage.getCollection<Sale>(SALES_KEY);
+  return sales.filter(s => s.shift === shift);
+}
+
+export async function createSale(sale: Omit<Sale, 'id_sale' | 'created_at' | 'updated_at'>): Promise<Sale> {
+  const newSale: Sale = {
+    ...sale,
+    id_sale: generateId(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  storage.addToCollection(SALES_KEY, newSale, 'id_sale');
   return newSale;
 }
 
-// export function getTotalSalesByShift(): Record<string, number> {
-//   const shifts = { morning: 0, afternoon: 0, night: 0 };
-//   mockSales.forEach(sale => {
-//     shifts[sale.shift] += sale.total;
-//   });
-//   return shifts;
-// }
-export function getTotalSalesByShift(): SalesByShift {
-  const shifts: SalesByShift = { morning: 0, afternoon: 0, night: 0 };
+export async function deleteSale(id: string): Promise<boolean> {
+  return storage.removeFromCollection(SALES_KEY, id, 'id_sale');
+}
+
+// Analytics
+export function getTotalSalesByShift(): Record<string, number> {
+  const sales = storage.getCollection<Sale>(SALES_KEY);
+  const shifts: Record<string, number> = {};
   
-  mockSales.forEach(sale => {
-    // Usamos 'as keyof SalesByShift' para que TS sepa que sale.shift es válido
-    shifts[sale.shift as keyof SalesByShift] += sale.total;
+  sales.forEach(sale => {
+    if (!shifts[sale.shift]) {
+      shifts[sale.shift] = 0;
+    }
+    shifts[sale.shift] += sale.total;
   });
   
   return shifts;
 }
 
 export function getTopProducts(limit: number = 5) {
-  const productMap = new Map<number, { name: string; quantity: number; revenue: number }>();
+  const sales = storage.getCollection<Sale>(SALES_KEY);
+  const productMap = new Map<string, { name: string; quantity: number; revenue: number }>();
 
-  mockSales.forEach(sale => {
+  sales.forEach(sale => {
     sale.items.forEach(item => {
-      if (productMap.has(item.productId)) {
-        const existing = productMap.get(item.productId)!;
+      if (productMap.has(item.id_product)) {
+        const existing = productMap.get(item.id_product)!;
         existing.quantity += item.quantity;
         existing.revenue += item.price * item.quantity;
       } else {
-        productMap.set(item.productId, {
+        productMap.set(item.id_product, {
           name: item.name,
           quantity: item.quantity,
           revenue: item.price * item.quantity,
@@ -109,5 +144,6 @@ export function getTopProducts(limit: number = 5) {
 }
 
 export function getTotalRevenue(): number {
-  return mockSales.reduce((sum, sale) => sum + sale.total, 0);
+  const sales = storage.getCollection<Sale>(SALES_KEY);
+  return sales.reduce((sum, sale) => sum + sale.total, 0);
 }
