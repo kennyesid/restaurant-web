@@ -1,16 +1,34 @@
 import { storage } from '@/lib/storage';
+import { Product } from '@/types';
+
+export interface SaleDetail extends Product {
+  quantity: number;
+}
 
 export interface Sale {
-  id_sale: string;
-  items: { id_product: string; name: string; quantity: number; price: number }[];
+  saleId: number;
+  detail: SaleDetail[]; // Cambiado de 'items' a 'detail'
+  userId: number;
   total: number;
   payment_type: 'cash' | 'qr' | 'mixed';
-  timestamp: string;
+  timestamp: Date;
   shift: string;
   id_tenant: string;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
+
+// export interface Sale {
+//   id_sale: string;
+//   items: { productId: string; name: string; quantity: number; price: number }[];
+//   total: number;
+//   payment_type: 'cash' | 'qr' | 'mixed';
+//   timestamp: string;
+//   shift: string;
+//   id_tenant: string;
+//   created_at: string;
+//   updated_at: string;
+// }
 
 const SALES_KEY = 'sales';
 const DEFAULT_TENANT_ID = 'tenant-1';
