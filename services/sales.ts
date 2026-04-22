@@ -1,5 +1,5 @@
-import { storage } from '@/lib/storage';
-import { Product } from '@/types';
+import { storage } from "@/lib/storage";
+import { CartItem, Product } from "@/types";
 
 export interface SaleDetail extends Product {
   quantity: number;
@@ -7,15 +7,16 @@ export interface SaleDetail extends Product {
 
 export interface Sale {
   saleId: number;
-  detail: SaleDetail[]; // Cambiado de 'items' a 'detail'
+  // detail: SaleDetail[];
+  detail: CartItem[]; // Cambiado de 'items' a 'detail'
   userId: number;
+  tenantId: number;
   total: number;
-  payment_type: 'cash' | 'qr' | 'mixed';
-  timestamp: Date;
+  payment_type: "cash" | "qr" | "mixed";
   shift: string;
-  id_tenant: string;
   created_at: Date;
   updated_at: Date;
+  state: boolean;
 }
 
 // export interface Sale {
@@ -29,66 +30,40 @@ export interface Sale {
 //   created_at: string;
 //   updated_at: string;
 // }
+const SALES_KEY = "sales";
+const DEFAULT_TENANT_ID = 1;
+const DEFAULT_USER_ID = 1;
 
-const SALES_KEY = 'sales';
-const DEFAULT_TENANT_ID = 'tenant-1';
-
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+// Función para generar ID numérico basado en la colección existente
+function generateNumericId(collection: Sale[]): number {
+  if (collection.length === 0 || collection === null) return 1;
+  const maxId = Math.max(...collection.map((s) => s.saleId));
+  return maxId + 1;
 }
 
-// Initialize default data
+// Inicialización de datos con la nueva estructura
 function initializeDefaults() {
   const existingSales = storage.getCollection<Sale>(SALES_KEY);
   if (existingSales.length === 0) {
     const defaultSales: Sale[] = [
       {
-        id_sale: generateId(),
-        items: [
-          { id_product: 'prod-1', name: 'Hamburguesa', quantity: 2, price: 25000 },
-          { id_product: 'prod-8', name: 'Coca-Cola', quantity: 2, price: 5000 },
-        ],
-        total: 60000,
-        payment_type: 'cash',
-        timestamp: new Date(Date.now() - 3600000 * 4).toISOString(),
-        shift: 'Mañana',
-        id_tenant: DEFAULT_TENANT_ID,
-        created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-        updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-      },
-      {
-        id_sale: generateId(),
-        items: [
-          { id_product: 'prod-4', name: 'Pollo Frito', quantity: 1, price: 22000 },
-          { id_product: 'prod-6', name: 'Papas Fritas', quantity: 1, price: 8000 },
-        ],
-        total: 30000,
-        payment_type: 'qr',
-        timestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
-        shift: 'Tarde',
-        id_tenant: DEFAULT_TENANT_ID,
-        created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-        updated_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-      },
-      {
-        id_sale: generateId(),
-        items: [
-          { id_product: 'prod-2', name: 'Cheeseburger', quantity: 3, price: 28000 },
-        ],
-        total: 84000,
-        payment_type: 'cash',
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        shift: 'Tarde',
-        id_tenant: DEFAULT_TENANT_ID,
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        updated_at: new Date(Date.now() - 3600000).toISOString(),
+        saleId: 1,
+        userId: DEFAULT_USER_ID,
+        tenantId: DEFAULT_TENANT_ID,
+        detail: [], // Aquí irían los objetos SaleDetail completos
+        total: 60,
+        payment_type: "cash",
+        shift: "Mañana",
+        state: true,
+        created_at: new Date(),
+        updated_at: new Date(),
       },
     ];
     storage.setCollection(SALES_KEY, defaultSales);
   }
 }
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   initializeDefaults();
 }
 
@@ -97,57 +72,66 @@ export async function getSales(): Promise<Sale[]> {
   return storage.getCollection<Sale>(SALES_KEY);
 }
 
-export async function getSaleById(id: string): Promise<Sale | null> {
-  return storage.getFromCollection<Sale>(SALES_KEY, id, 'id_sale');
+export async function getSaleById(id: number): Promise<Sale | null> {
+  // Cambiado a 'saleId' para coincidir con la interfaz
+  return storage.getFromCollection<Sale>(SALES_KEY, id, "saleId");
 }
 
 export async function getSalesByShift(shift: string): Promise<Sale[]> {
-  const sales = storage.getCollection<Sale>(SALES_KEY);
-  return sales.filter(s => s.shift === shift);
+  const sales = await getSales();
+  return sales.filter((s) => s.shift === shift);
 }
 
-export async function createSale(sale: Omit<Sale, 'id_sale' | 'created_at' | 'updated_at'>): Promise<Sale> {
+export async function createSale(
+  sale: Omit<Sale, "saleId" | "created_at" | "updated_at">,
+): Promise<Sale> {
+  const currentSales = storage.getCollection<Sale>(SALES_KEY);
   const newSale: Sale = {
     ...sale,
-    id_sale: generateId(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    saleId: generateNumericId(currentSales),
+    created_at: new Date(),
+    updated_at: new Date(),
   };
-  storage.addToCollection(SALES_KEY, newSale, 'id_sale');
+
+  storage.addToCollection(SALES_KEY, newSale, "saleId");
   return newSale;
 }
 
-export async function deleteSale(id: string): Promise<boolean> {
-  return storage.removeFromCollection(SALES_KEY, id, 'id_sale');
+export async function deleteSale(id: number): Promise<boolean> {
+  return storage.removeFromCollection(SALES_KEY, id, "saleId");
 }
 
-// Analytics
+// Analytics Corregidos
 export function getTotalSalesByShift(): Record<string, number> {
   const sales = storage.getCollection<Sale>(SALES_KEY);
   const shifts: Record<string, number> = {};
-  
-  sales.forEach(sale => {
+
+  sales.forEach((sale) => {
     if (!shifts[sale.shift]) {
       shifts[sale.shift] = 0;
     }
     shifts[sale.shift] += sale.total;
   });
-  
+
   return shifts;
 }
 
 export function getTopProducts(limit: number = 5) {
   const sales = storage.getCollection<Sale>(SALES_KEY);
-  const productMap = new Map<string, { name: string; quantity: number; revenue: number }>();
+  const productMap = new Map<
+    number,
+    { name: string; quantity: number; revenue: number }
+  >();
 
-  sales.forEach(sale => {
-    sale.items.forEach(item => {
-      if (productMap.has(item.id_product)) {
-        const existing = productMap.get(item.id_product)!;
+  sales.forEach((sale) => {
+    // Cambiado de 'items' a 'detail'
+    sale.detail.forEach((item) => {
+      if (productMap.has(item.productId)) {
+        const existing = productMap.get(item.productId)!;
         existing.quantity += item.quantity;
         existing.revenue += item.price * item.quantity;
       } else {
-        productMap.set(item.id_product, {
+        productMap.set(item.productId, {
           name: item.name,
           quantity: item.quantity,
           revenue: item.price * item.quantity,

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { getProducts, getCategories } from '@/services/products';
-import { Product, Category } from '@/types/index';
-import { ProductGrid } from '@/components/product-grid';
-import { ShoppingCart } from '@/components/shopping-cart';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
-import ButtonGeneric from '@/components/common/Button/ButtonGeneric';
+import { useEffect, useState } from "react";
+import { getProducts, getCategories } from "@/services/products";
+import { Product, Category } from "@/types/index";
+import { ProductGrid } from "@/components/product-grid";
+import { ShoppingCart } from "@/components/shopping-cart";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import ButtonGeneric from "@/components/common/Button/ButtonGeneric";
 
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,7 +37,7 @@ export default function POSPage() {
   const handleCategoryFilter = (categoryId: number | null) => {
     setSelectedCategory(categoryId);
     if (categoryId) {
-      setFilteredProducts(products.filter(p => p.categoryId === categoryId));
+      setFilteredProducts(products.filter((p) => p.categoryId === categoryId));
     } else {
       setFilteredProducts(products);
     }
@@ -53,8 +53,10 @@ export default function POSPage() {
 
   return (
     <div className="space-y-6">
-      <div className='flex justify-center'>
-        <h1 className="text-3xl text-rest-primary font-bold">Gestión de ventas</h1>
+      <div className="flex justify-center">
+        <h1 className="text-3xl text-rest-primary font-bold">
+          Gestión de ventas
+        </h1>
         {/* <p className="text-muted-foreground">Gestión de ventas en punto de venta</p> */}
       </div>
 
@@ -62,7 +64,7 @@ export default function POSPage() {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex flex-row gap-2">
             <ButtonGeneric
-            variant={selectedCategory === null ? 'red' : 'primaryRed'}
+              variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
             >
               Todos
@@ -70,7 +72,11 @@ export default function POSPage() {
             {categories.map((category) => (
               <ButtonGeneric
                 key={category.categoryId}
-                variant={selectedCategory === category.categoryId ? 'red' : 'primaryRed'}
+                variant={
+                  selectedCategory === category.categoryId
+                    ? "red"
+                    : "primaryRed"
+                }
                 onClick={() => handleCategoryFilter(category.categoryId)}
               >
                 {category.name}
