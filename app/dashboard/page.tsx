@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { getTotalSalesByShift, getTopProducts, getTotalRevenue } from '@/services/sales';
+import { getTotalSalesByShift, getTopProducts, getTotalRevenue } from '@/services/salesService';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
 

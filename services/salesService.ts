@@ -1,23 +1,23 @@
 import { storage } from "@/lib/storage";
-import { CartItem, Product } from "@/types";
+import { CartItem, Product, Sale } from "@/types";
 
 export interface SaleDetail extends Product {
   quantity: number;
 }
 
-export interface Sale {
-  saleId: number;
-  // detail: SaleDetail[];
-  detail: CartItem[]; // Cambiado de 'items' a 'detail'
-  userId: number;
-  tenantId: number;
-  total: number;
-  payment_type: "cash" | "qr" | "mixed";
-  shift: string;
-  created_at: Date;
-  updated_at: Date;
-  state: boolean;
-}
+// export interface Sale {
+//   saleId: number;
+//   // detail: SaleDetail[];
+//   detail: CartItem[]; // Cambiado de 'items' a 'detail'
+//   userId: number;
+//   tenantId: number;
+//   total: number;
+//   payment_type: "cash" | "qr" | "mixed";
+//   shift: string;
+//   created_at: Date;
+//   updated_at: Date;
+//   state: boolean;
+// }
 
 // export interface Sale {
 //   id_sale: string;
@@ -52,11 +52,11 @@ function initializeDefaults() {
         tenantId: DEFAULT_TENANT_ID,
         detail: [], // Aquí irían los objetos SaleDetail completos
         total: 60,
-        payment_type: "cash",
+        paymentType: "cash",
         shift: "Mañana",
         state: true,
-        created_at: new Date(),
-        updated_at: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
     storage.setCollection(SALES_KEY, defaultSales);
@@ -89,8 +89,8 @@ export async function createSale(
   const newSale: Sale = {
     ...sale,
     saleId: generateNumericId(currentSales),
-    created_at: new Date(),
-    updated_at: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   storage.addToCollection(SALES_KEY, newSale, "saleId");
@@ -125,7 +125,7 @@ export function getTopProducts(limit: number = 5) {
 
   sales.forEach((sale) => {
     // Cambiado de 'items' a 'detail'
-    sale.detail.forEach((item) => {
+    sale.detail?.forEach((item) => {
       if (productMap.has(item.productId)) {
         const existing = productMap.get(item.productId)!;
         existing.quantity += item.quantity;

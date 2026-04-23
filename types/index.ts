@@ -6,4 +6,5 @@ export type { Product } from "@/types/product/product";
 export type { Category } from "@/types/category/category";
 export type { CartItem } from "@/types/cart/cartItem";
 export type { CartState } from "@/types/cart/cartState";
+export type { Sale } from "@/types/sale/sale";
 export { ToastType } from "@/types/enum/toasType";

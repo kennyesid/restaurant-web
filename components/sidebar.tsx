@@ -29,7 +29,7 @@ export function Sidebar() {
   const mainMenuItems = [
     { label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
     { label: 'Carrito de Compras', icon: ShoppingCart, href: '/cart' },
-    { label: 'Ventas', icon: Beef, href: '/dashboard/sales' },
+    { label: 'Ventas', icon: Beef, href: '/sales' },
     { label: 'Productos', icon: Package, href: '/product' },
     { label: 'Ingredientes', icon: Beef, href: '/dashboard/ingredients' },
   ];

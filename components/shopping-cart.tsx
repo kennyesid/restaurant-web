@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trash2, Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import { createSale } from "@/services/sales";
+import { createSale } from "@/services/salesService";
 import { toast } from "sonner";
 import { CartItem } from "@/types";
 import { SuccessToastImplement } from "./common/toast/ToastImplement";

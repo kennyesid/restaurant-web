@@ -36,7 +36,7 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
     suppressHydrationWarning
     >
-      {products.map((product, index) => (
+      {products.map((product) => (
                         <ProductCard 
                           product={product}
                           onEdit={null}
