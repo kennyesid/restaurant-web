@@ -5,23 +5,52 @@ import { Card } from '@/components/ui/card';
 import { getTotalSalesByShift, getTopProducts, getTotalRevenue } from '@/services/salesService';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+import { handleResponse } from '@/utils/api-helpers';
 
 export default function DashboardPage() {
-  const [salesByShift, setSalesByShift] = useState({ morning: 0, afternoon: 0, night: 0 });
+  // const [salesByShift, setSalesByShift] = useState({ morning: 0, afternoon: 0, night: 0 });
+  const [salesByShift, setSalesByShift] = useState<Record<string, number>>({});
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const shiftData = getTotalSalesByShift();
-        const products = getTopProducts();
-        const revenue = getTotalRevenue();
+        // const shiftData = getTotalSalesByShift();
+        // const products = getTopProducts();
+        // const revenue = getTotalRevenue();
+        // setSalesByShift(shiftData);
+        // setTopProducts(products);
+        // setTotalRevenue(revenue);
 
-        setSalesByShift(shiftData);
-        setTopProducts(products);
-        setTotalRevenue(revenue);
+        const [resShift, resProducts, resRevenue] = await Promise.all([
+          getTotalSalesByShift(),
+          getTopProducts(),
+          getTotalRevenue()
+        ]); 
+
+        handleResponse(resShift, setSalesByShift);
+        handleResponse(resProducts, setTopProducts);
+        handleResponse(resRevenue, setTotalRevenue);
+
+        // const resShift = await getTotalSalesByShift();
+        // const resProducts = await getTopProducts();
+        // const resRevenue = await getTotalRevenue();
+
+        // if (resShift.codigo === 200 && resShift.contenido) {
+        //   setSalesByShift(resShift.contenido);
+        // }
+
+        // if (resProducts.codigo === 200 && resProducts.contenido) {
+        //   setTopProducts(resProducts.contenido);
+        // }
+
+        // if (resRevenue.codigo === 200 && resRevenue.contenido !== null) {
+        //   setTotalRevenue(resRevenue.contenido);
+        // }
+
       } finally {
         setIsLoading(false);
       }

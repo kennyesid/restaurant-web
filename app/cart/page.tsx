@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getProducts, getCategories } from "@/services/products";
 import { Product, Category } from "@/types/index";
 import { ProductGrid } from "@/components/product-grid";
-import { ShoppingCart } from "@/components/shopping-cart";
+import { ShoppingCart } from "@/components/cart/shopping-cart";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import ButtonGeneric from "@/components/common/Button/ButtonGeneric";

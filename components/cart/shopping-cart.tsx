@@ -14,16 +14,22 @@ import { useState } from "react";
 import { createSale } from "@/services/salesService";
 import { toast } from "sonner";
 import { CartItem } from "@/types";
-import { SuccessToastImplement } from "./common/toast/ToastImplement";
-import { CustomNotification } from "./common/toast/CustomNotification";
+import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
-import { GenericModal } from "./common/modal/GenericModal";
+import { GenericModal } from "@/components/common/modal/GenericModal";
+import { ToastBody } from "@/types/generic/toastBody";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
 
   const [showSummary, setShowSummary] = useState(false);
+  const [toastBody, setToastBody] = useState<ToastBody>({
+    type: ToastType.Successfully,
+    message: "Registro Completado",
+    description: "Registro Guardado Exitosamente.",
+    image: null 
+  });
 
   const { items, paymentType } = useAppSelector((state) => state.cart) as {
     items: CartItem[];
@@ -57,43 +63,38 @@ export function ShoppingCart() {
         quantity: item.quantity,
         price: item.price,
         categoryId: item.categoryId,
-        // imageUrl: item.imageUrl,
       }));
 
-      await createSale({
+      const response = await createSale({
         detail: saleItems,
-        payment_type: paymentType as any,
+        paymentType: paymentType as any,
         userId: 1,
         tenantId: 1,
         state: true,
         total,
         shift: getCurrentShift(),
       });
+      const isSuccess = response.codigo >= 200 && response.codigo <= 299;
+      const currentToastBody = {
+      type: isSuccess ? ToastType.Successfully : ToastType.Fail,
+      message: isSuccess ? "Venta Completada" : "Error",
+      description: isSuccess ? "Venta realizada satisfactoriamente." : response.mensaje,
+      image: null
+    };
 
-      // toast.success("Venta completada exitosamente");
-      // toast.custom((t) => <SuccessToastImplement total={total} t={t} />);
-      toast.custom((t) => (
-        <CustomNotification
-          t={t}
-          type={ToastType.Successfully}
-          message="Venta Completada"
-          description="El registro se guardó en la base de datos local."
-          // image="/path-to-your-image.png" // Opcional
-        />
-      ));
+    toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
 
+    if (!isSuccess) {
+      return; 
+    }
       dispatch(clearCart());
+      setShowSummary(false);
     } catch (error) {
       toast.error("Error al procesar la venta");
     } finally {
       setIsProcessing(false);
     }
   };
-
-  // const getImageUrl = (url?: string) => {
-  //   if (!url) return `data:image/avif;base64`;
-  //   return url.startsWith("data:") ? url : `data:image/avif;base64,${url}`;
-  // };
 
   const handlePreCheckout = () => {
     if (items.length === 0) return toast.error("Carrito vacío");

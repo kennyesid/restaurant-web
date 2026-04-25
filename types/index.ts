@@ -8,3 +8,4 @@ export type { CartItem } from "@/types/cart/cartItem";
 export type { CartState } from "@/types/cart/cartState";
 export type { Sale } from "@/types/sale/sale";
 export { ToastType } from "@/types/enum/toasType";
+export type { RespuestaGenericaDto } from "@/types/generic/RespuestaGenericaDto";

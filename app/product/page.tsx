@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { ImageUpload } from '@/components/image-upload';
 import { Plus, Trash2, Edit2, Star, ChevronLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { ShoppingCart } from '@/components/shopping-cart';
+import { ShoppingCart } from '@/components/cart/shopping-cart';
 import { ProductCard } from '@/components/common/cart/product-card';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToCart } from '@/lib/slices/cartSlice';

@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import { CheckCircle2, AlertTriangle, XCircle, X } from "lucide-react";
 import { ToastType } from "@/types";
+import { ToastBody } from "@/types/generic/toastBody";
 
 // 1. Enum de tipos
 // export enum ToastType {
@@ -11,21 +12,26 @@ import { ToastType } from "@/types";
 
 interface CustomToastProps {
   t: any;
-  type: ToastType;
-  message: string;
-  description?: string;
-  image?: string; // Prop para imagen opcional
+  // type: ToastType;
+  // message: string;
+  // description?: string;
+  // image?: string; 
+  body: ToastBody;
 }
 
 export const CustomNotification = ({
   t,
-  type,
-  message,
-  description,
-  image,
+  body
+  // message,
+  // description,
+  // image,
 }: CustomToastProps) => {
   // 2. Mapeo de estilos por tipo
-  const configs = {
+const { type, message, description, image } = body;
+
+// 2. Mapeo de estilos tipado correctamente para evitar el error de índice
+  // Usamos Record para asegurar que todas las opciones de ToastType tengan su configuración
+  const configs: Record<ToastType, { bg: string; icon: JSX.Element; textColor: string }> = {
     [ToastType.Successfully]: {
       bg: "bg-green-50 border-green-500",
       icon: <CheckCircle2 className="text-green-600" size={24} />,
@@ -42,6 +48,23 @@ export const CustomNotification = ({
       textColor: "text-red-800",
     },
   };
+  // const configs = {
+  //   [ToastType.Successfully]: {
+  //     bg: "bg-green-50 border-green-500",
+  //     icon: <CheckCircle2 className="text-green-600" size={24} />,
+  //     textColor: "text-green-800",
+  //   },
+  //   [ToastType.Warning]: {
+  //     bg: "bg-yellow-50 border-yellow-500",
+  //     icon: <AlertTriangle className="text-yellow-600" size={24} />,
+  //     textColor: "text-yellow-800",
+  //   },
+  //   [ToastType.Fail]: {
+  //     bg: "bg-red-50 border-red-500",
+  //     icon: <XCircle className="text-red-600" size={24} />,
+  //     textColor: "text-red-800",
+  //   },
+  // };
 
   const style = configs[type];
 

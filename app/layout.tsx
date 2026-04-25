@@ -52,7 +52,7 @@ export default function RootLayout({
       {/* <body className="font-sans antialiased"> */}
       <body className="font-caveat" suppressHydrationWarning>
         <ReduxProvider>
-          <div className="pt-10">
+          <div>
             {children}
             {process.env.NODE_ENV === "production" && <Analytics />}
             <Toaster position="top-right" richColors />
