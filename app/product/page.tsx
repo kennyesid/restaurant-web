@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Product, Category } from '@/types/index';
-import { getProducts, createProduct, updateProduct, deleteProduct, getCategories } from '@/services/products';
+import { getProducts, createProduct, updateProduct, deleteProduct, getCategories } from '@/services/productsSservice';
 import { DraggableFeaturedProducts } from '@/components/draggable-featured-products';
 import ButtonGeneric from '@/components/common/Button/ButtonGeneric';
 import { Button } from '@/components/ui/button';

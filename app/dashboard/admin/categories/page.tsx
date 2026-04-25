@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Category } from '@/lib/types';
-import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/products';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/productsSservice';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
