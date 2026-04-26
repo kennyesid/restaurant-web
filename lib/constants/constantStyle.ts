@@ -16,7 +16,7 @@ export const STYLE_INTERNAL = {
 confirmModalPrimary: `
   flex items-center gap-2
   justify-center
-  px-4 py-2
+  
 
   text-white
 
@@ -38,7 +38,7 @@ confirmModalPrimary: `
 cancelModalRed: `
   flex items-center gap-2
   justify-center
-  px-4 py-2
+  
 
   text-white
 

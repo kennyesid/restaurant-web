@@ -8,6 +8,12 @@ import { ShoppingCart } from "@/components/cart/Shopping-cart";
 import { Loader2 } from "lucide-react";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 
+const getFeaturedProducts = (products: Product[]) => {
+  return products
+    .filter((p) => p.isFeatured)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+};
+
 export default function CartPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -23,7 +29,9 @@ export default function CartPage() {
           getCategories(),
         ]);
         setProducts(allProducts);
-        setFilteredProducts(allProducts);
+
+        // setFilteredProducts(allProducts);
+        setFilteredProducts(getFeaturedProducts(allProducts));
         setCategories(allCategories);
       } finally {
         setIsLoading(false);
@@ -38,7 +46,8 @@ export default function CartPage() {
     if (categoryId) {
       setFilteredProducts(products.filter((p) => p.categoryId === categoryId));
     } else {
-      setFilteredProducts(products);
+      // setFilteredProducts(products);
+      setFilteredProducts(getFeaturedProducts(products));
     }
   };
 
@@ -66,7 +75,7 @@ export default function CartPage() {
               variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
             >
-              Todos
+              Favoritos
             </ButtonGeneric>
             {categories.map((category) => (
               <ButtonGeneric
@@ -85,7 +94,9 @@ export default function CartPage() {
           <ProductGrid products={filteredProducts} />
         </div>
         <div className="lg:col-span-1">
-          <ShoppingCart />
+          <div className="h-[calc(100vh-170px)] overflow-y-auto border rounded-xl shadow-sm">
+            <ShoppingCart />
+          </div>
         </div>
       </div>
     </div>

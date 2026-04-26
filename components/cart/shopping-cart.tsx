@@ -19,6 +19,8 @@ import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
 import { GenericModal } from "@/components/common/modal/GenericModal";
 import { ToastBody } from "@/types/generic/toastBody";
+import ButtonGeneric from "../common/button/ButtonGeneric";
+import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -28,7 +30,7 @@ export function ShoppingCart() {
     type: ToastType.Successfully,
     message: "Registro Completado",
     description: "Registro Guardado Exitosamente.",
-    image: null 
+    image: null
   });
 
   const { items, paymentType } = useAppSelector((state) => state.cart) as {
@@ -76,17 +78,17 @@ export function ShoppingCart() {
       });
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
-      type: isSuccess ? ToastType.Successfully : ToastType.Fail,
-      message: isSuccess ? "Venta Completada" : "Error",
-      description: isSuccess ? "Venta realizada satisfactoriamente." : response.mensaje,
-      image: null
-    };
+        type: isSuccess ? ToastType.Successfully : ToastType.Fail,
+        message: isSuccess ? "Exito" : "Error",
+        description: isSuccess ? "Venta realizada satisfactoriamente." : response.mensaje,
+        image: null
+      };
 
-    toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
+      toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
 
-    if (!isSuccess) {
-      return; 
-    }
+      if (!isSuccess) {
+        return;
+      }
       dispatch(clearCart());
       setShowSummary(false);
     } catch (error) {
@@ -104,9 +106,9 @@ export function ShoppingCart() {
   return (
     <>
       <Card className="h-full flex flex-col overflow-hidden rounded-none">
-        <div className="p-4 flex justify-between items-center bg-[#052A3D] text-white ">
-          <h3 className="font-semibold text-lg tracking-wide">Carrito</h3>
-          <p className="text-sm opacity-90 tracking-wide">
+        <div className={`p-4 flex justify-between items-center text-white/80 ${STYLE_INTERNAL.headerModalPrimary} `}>
+          <h3 className=" text-lg tracking-wide">Carrito</h3>
+          <p className="text-sm tracking-wide">
             {items.length} artículos
           </p>
         </div>
@@ -124,85 +126,90 @@ export function ShoppingCart() {
             items.map((item) => (
               <div
                 key={item.productId}
-                className="border bg-white border-border rounded-lg p-2 space-y-2"
+                className="border bg-white border-border rounded-lg p-2"
               >
-                <div className="flex items-center gap-2">
-  {/* Imagen */}
-  <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
-    <img
-      src={getImageUrl(item.imageUrl)}
-      alt={item.name}
-      className="h-full w-full object-cover"
-    />
-  </div>
+                <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
 
-  {/* Info */}
-  <div className="flex-1 min-w-0">
-    <p className="font-medium text-sm leading-tight truncate">
-      {item.name}
-    </p>
-    <p className="text-xs text-muted-foreground">
-      Bs {item.price.toString()}
-    </p>
-  </div>
+                  {/* COLUMN 1 — Imagen + Info */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
+                      <img
+                        src={getImageUrl(item.imageUrl)}
+                        alt={item.name}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
 
-  {/* Controles */}
-  <div className="flex items-center gap-1">
-    <button
-      onClick={() =>
-        dispatch(
-          updateQuantity({
-            productId: item.productId,
-            quantity: Math.max(1, item.quantity - 1),
-          }),
-        )
-      }
-      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
-    >
-      <Minus size={12} />
-    </button>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm leading-tight truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Bs {item.price.toString()}
+                      </p>
+                    </div>
+                  </div>
 
-    <input
-      type="number"
-      value={item.quantity}
-      onChange={(e) =>
-        dispatch(
-          updateQuantity({
-            productId: item.productId,
-            quantity: parseInt(e.target.value) || 1,
-          }),
-        )
-      }
-      className="w-10 text-center text-xs border border-border rounded"
-    />
+                  {/* COLUMN 2 — Cantidad */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() =>
+                        dispatch(
+                          updateQuantity({
+                            productId: item.productId,
+                            quantity: Math.max(1, item.quantity - 1),
+                          }),
+                        )
+                      }
+                      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+                    >
+                      <Minus size={12} />
+                    </button>
 
-    <button
-      onClick={() =>
-        dispatch(
-          updateQuantity({
-            productId: item.productId,
-            quantity: item.quantity + 1,
-          }),
-        )
-      }
-      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
-    >
-      <Plus size={12} />
-    </button>
-  </div>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        dispatch(
+                          updateQuantity({
+                            productId: item.productId,
+                            quantity: parseInt(e.target.value) || 1,
+                          }),
+                        )
+                      }
+                      className="w-10 text-center text-xs border border-border rounded"
+                    />
 
-<div>
-    <button
-    onClick={() => dispatch(removeFromCart(item.productId))}
-    className="cursor-pointer text-destructive hover:bg-destructive/10 p-1 rounded transition-colors "
-  >
-    <Trash2 size={14} />
-  </button>
-  <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
-    Bs {(item.price * item.quantity).toString()}
-  </p>
-</div>
-</div>
+                    <button
+                      onClick={() =>
+                        dispatch(
+                          updateQuantity({
+                            productId: item.productId,
+                            quantity: item.quantity + 1,
+                          }),
+                        )
+                      }
+                      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+                    >
+                      <Plus size={12} />
+                    </button>
+                  </div>
+
+                  {/* COLUMN 3 — Delete + Total */}
+                  <div className="flex flex-col items-end">
+                    <button
+                      onClick={() => dispatch(removeFromCart(item.productId))}
+                      className="cursor-pointer text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+
+                    <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
+                      Bs {(item.price * item.quantity).toString()}
+                    </p>
+                  </div>
+
+                </div>
               </div>
             ))
           )}
@@ -210,7 +217,7 @@ export function ShoppingCart() {
         {items.length > 0 && (
           <div className="border-t border-border p-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 text-rest-primary">
                 Método de Pago
               </label>
               <div className="flex gap-2">
@@ -218,11 +225,10 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
-                      paymentType === method
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground hover:bg-muted/80"
-                    }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
+                      ? "bg-[#facc15]  text-rest-primary"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                      }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -236,21 +242,22 @@ export function ShoppingCart() {
 
             <div className="space-y-2 pt-2">
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
-                <span>Total:</span>
+                <span className="text-rest-primary">Total:</span>
                 <span className="text-rest-primary">
                   Bs {total.toString()}
                 </span>
               </div>
             </div>
 
-            <Button
-              className="w-full rounded-none cursor-pointer"
-              size="lg"
+            <ButtonGeneric
+              // className="w-full rounded-none cursor-pointer"
+              // size="lg"
+              variant="confirmModalPrimary"
               onClick={handlePreCheckout}
               disabled={isProcessing || items.length === 0}
             >
               {isProcessing ? "Procesando..." : "Completar Venta"}
-            </Button>
+            </ButtonGeneric>
 
             {items.length > 0 && (
               <Button

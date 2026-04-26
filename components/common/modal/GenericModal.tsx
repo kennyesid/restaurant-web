@@ -42,7 +42,6 @@ export function GenericModal({
             onClick={onConfirm}
             variant="confirmModalPrimary"
             disabled={isProcessing}
-            // className="px-4 py-2 text-sm font-medium bg-[#052A3D] text-white rounded-md hover:bg-[#052A3D]/90 disabled:opacity-50"
           >
             
             {isProcessing ? "Procesando..." : "Confirmar"}

@@ -4,7 +4,7 @@ export interface ProductIngredientDetail {
     id: number;
     productId: number;
     name: string;
-    description: string | null;
+    description?: string | null;
     createdAt: string | null;
     createdBy: string | null;
     state: boolean | null;

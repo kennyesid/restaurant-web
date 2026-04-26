@@ -1,4 +1,4 @@
-import { ProductIngredientDetail } from "./ProductIngredientDetail";
+import { ProductIngredientDetail } from "./productIngredientDetail";
 
 export interface Product {
   productId: number;
@@ -6,6 +6,7 @@ export interface Product {
   categoryId: number;
   name: string;
   description: string;
+  code?: string;
   legend: string;
   price: number;
   isPromotion: boolean;

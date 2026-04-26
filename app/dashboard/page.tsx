@@ -8,6 +8,9 @@ import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
 import { handleResponse } from '@/utils/api-helpers';
 import ButtonGeneric from '@/components/common/button/ButtonGeneric';
 import { EnvConfig } from '@/config/env.config';
+import { ToastType } from '@/types';
+import { toast } from 'sonner';
+import { CustomNotification } from '@/components/common/toast/CustomNotification';
 
 export default function DashboardPage() {
   // const [salesByShift, setSalesByShift] = useState({ morning: 0, afternoon: 0, night: 0 });
@@ -75,6 +78,18 @@ export default function DashboardPage() {
     );
   }
 
+const handleTestToas = () => {
+  const currentToastBody = {
+        type: ToastType.Successfully,
+        message: "Venta Completada",
+        description: "Venta realizada satisfactoriamente.",
+        image: null
+      };
+
+toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
+}
+
+
   return (
     <div className="space-y-8">
       {/* KPI Cards */}
@@ -121,7 +136,7 @@ export default function DashboardPage() {
         {/* Sales by Shift */}
             <ButtonGeneric
                 variant="primaryRed"
-                onClick={() => alert(EnvConfig.testPendejo)}
+                onClick={handleTestToas}
                 className=" w-1/2 "
             >
                 {/* <Plus size={20} /> */}

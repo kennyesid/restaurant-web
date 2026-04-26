@@ -55,13 +55,13 @@ export default function LoginPage() {
           alt="Background" 
           className="w-full h-full object-cover filter brightness-[0.4]"
         /> */}
-<Image 
-  src="./images/login/background-04.jpg" 
-  alt="Platillo" 
-  fill 
-  priority 
-  className="object-cover"
-/>
+        <Image 
+          src="./images/login/background-04.jpg" 
+          alt="Platillo" 
+          fill 
+          priority 
+          className="object-cover"
+        />
       </div>
 
       {/* Tarjeta de Login estilo Modal de la imagen */}

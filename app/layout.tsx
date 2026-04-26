@@ -16,21 +16,25 @@ const caveatBrush = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Restaurant Admin Dashboard",
+  title: "p.dev - Restaurante",
   description: "Admin dashboard for restaurant management",
   generator: "v0.app",
   icons: {
     icon: [
+      // {
+      //   url: "/icon-light-32x32.png",
+      //   media: "(prefers-color-scheme: light)",
+      // },
+      // {
+      //   url: "/icon-dark-32x32.png",
+      //   media: "(prefers-color-scheme: dark)",
+      // },
+      // {
+      //   url: "/icon.svg",
+      //   type: "image/svg+xml",
+      // },
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
+        url: "/ico/icon_patasca.ico",
         type: "image/svg+xml",
       },
     ],

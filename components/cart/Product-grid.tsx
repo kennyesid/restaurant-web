@@ -30,19 +30,20 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-    suppressHydrationWarning
+      suppressHydrationWarning
     >
       {products.map((product, index) => (
-                        <ProductCard 
-                          key={index}
-                          product={product}
-                          onEdit={null}
-                          onDelete={null}
-                          onClick={(e) => {
-              // e.stopPropagation();
-              handleAddToCart(product);
-            }}
-                        />
+        <ProductCard
+          key={index}
+          product={product}
+          showActions={false}
+          onEdit={null}
+          onDelete={null}
+          onClick={(e) => {
+            // e.stopPropagation();
+            handleAddToCart(product);
+          }}
+        />
         // <Card
         //   key={product.productId}
         //   suppressHydrationWarning

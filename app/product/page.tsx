@@ -199,10 +199,11 @@ const dispatch = useAppDispatch();
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredProducts.map((product) => {
+            {filteredProducts.map((product, index) => {
               const isFeatured = featuredProducts.some(p => p.productId === product.productId);
               return (
                 <ProductCard 
+                  key={index}
                   product={product}
                   onEdit={(p) => handleOpenDialog(p)}
                   onDelete={(id) => handleDelete(id)}
