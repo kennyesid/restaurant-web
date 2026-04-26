@@ -3,11 +3,7 @@
 import { Product } from '@/types/index';
 import { useAppDispatch } from '@/lib/hooks';
 import { addToCart } from '@/lib/slices/cartSlice';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { ProductCard } from './common/cart/product-card';
+import { ProductCard } from '@/components/cart/Product-card';
 
 interface ProductGridProps {
   products: Product[];

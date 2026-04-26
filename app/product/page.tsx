@@ -4,17 +4,14 @@ import { useEffect, useState } from 'react';
 import { Product, Category } from '@/types/index';
 import { getProducts, createProduct, updateProduct, deleteProduct, getCategories } from '@/services/productsSservice';
 import { DraggableFeaturedProducts } from '@/components/draggable-featured-products';
-import ButtonGeneric from '@/components/common/Button/ButtonGeneric';
+import ButtonGeneric from '@/components/common/button/ButtonGeneric';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ImageUpload } from '@/components/image-upload';
-import { Plus, Trash2, Edit2, Star, ChevronLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { ShoppingCart } from '@/components/cart/shopping-cart';
-import { ProductCard } from '@/components/common/cart/product-card';
+import { ProductCard } from '@/components/cart/Product-card';
 import { useAppDispatch } from '@/lib/hooks';
-import { addToCart } from '@/lib/slices/cartSlice';
 
 export default function ProductsPage() {
 

@@ -1,5 +1,8 @@
+import { ProductIngredientDetail } from "./ProductIngredientDetail";
+
 export interface Product {
   productId: number;
+  productIngredientDetail?: ProductIngredientDetail[];
   categoryId: number;
   name: string;
   description: string;
@@ -10,6 +13,7 @@ export interface Product {
   isFeatured: boolean;
   displayOrder: number;
   isAvailable: boolean;
+  piecesOfChicken?: number;
   created_at: string;
   updated_at: string;
   state: boolean;

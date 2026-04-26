@@ -126,82 +126,87 @@ export function ShoppingCart() {
                 key={item.productId}
                 className="border bg-white border-border rounded-lg p-2 space-y-2"
               >
-                <div className="flex justify-between items-center">
-                  <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
-                    <img
-                      src={getImageUrl(item.imageUrl)}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-
-                  <div className="flex-1 flex flex-col justify-center min-w-0 px-1">
-                    <p className="font-medium text-sm tracking-normal leading-tight">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground tracking-wider">
-                      Bs {item.price.toString()}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => dispatch(removeFromCart(item.productId))}
-                    className="text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-
-                {/* Quantity Controls */}
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      dispatch(
-                        updateQuantity({
-                          productId: item.productId,
-                          quantity: Math.max(1, item.quantity - 1),
-                        }),
-                      )
-                    }
-                    className="p-1 border border-border rounded hover:bg-muted"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      dispatch(
-                        updateQuantity({
-                          productId: item.productId,
-                          quantity: parseInt(e.target.value) || 1,
-                        }),
-                      )
-                    }
-                    className="w-12 text-center text-sm border border-border rounded"
-                  />
-                  <button
-                    onClick={() =>
-                      dispatch(
-                        updateQuantity({
-                          productId: item.productId,
-                          quantity: item.quantity + 1,
-                        }),
-                      )
-                    }
-                    className="p-1 border border-border rounded hover:bg-muted"
-                  >
-                    <Plus size={14} />
-                  </button>
-                  <p className="ml-auto font-semibold text-base">
-                    Bs {(item.price * item.quantity).toString()}
-                  </p>
-                </div>
+  {/* Imagen */}
+  <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
+    <img
+      src={getImageUrl(item.imageUrl)}
+      alt={item.name}
+      className="h-full w-full object-cover"
+    />
+  </div>
+
+  {/* Info */}
+  <div className="flex-1 min-w-0">
+    <p className="font-medium text-sm leading-tight truncate">
+      {item.name}
+    </p>
+    <p className="text-xs text-muted-foreground">
+      Bs {item.price.toString()}
+    </p>
+  </div>
+
+  {/* Controles */}
+  <div className="flex items-center gap-1">
+    <button
+      onClick={() =>
+        dispatch(
+          updateQuantity({
+            productId: item.productId,
+            quantity: Math.max(1, item.quantity - 1),
+          }),
+        )
+      }
+      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+    >
+      <Minus size={12} />
+    </button>
+
+    <input
+      type="number"
+      value={item.quantity}
+      onChange={(e) =>
+        dispatch(
+          updateQuantity({
+            productId: item.productId,
+            quantity: parseInt(e.target.value) || 1,
+          }),
+        )
+      }
+      className="w-10 text-center text-xs border border-border rounded"
+    />
+
+    <button
+      onClick={() =>
+        dispatch(
+          updateQuantity({
+            productId: item.productId,
+            quantity: item.quantity + 1,
+          }),
+        )
+      }
+      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+    >
+      <Plus size={12} />
+    </button>
+  </div>
+
+<div>
+    <button
+    onClick={() => dispatch(removeFromCart(item.productId))}
+    className="cursor-pointer text-destructive hover:bg-destructive/10 p-1 rounded transition-colors "
+  >
+    <Trash2 size={14} />
+  </button>
+  <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
+    Bs {(item.price * item.quantity).toString()}
+  </p>
+</div>
+</div>
               </div>
             ))
           )}
         </div>
-
-        {/* Payment and Total */}
         {items.length > 0 && (
           <div className="border-t border-border p-4 space-y-4">
             <div>
@@ -213,7 +218,7 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-2 px-3 text-sm font-medium transition-colors cursor-pointer ${
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
                       paymentType === method
                         ? "bg-primary text-primary-foreground"
                         : "bg-muted text-foreground hover:bg-muted/80"
@@ -230,14 +235,10 @@ export function ShoppingCart() {
             </div>
 
             <div className="space-y-2 pt-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal:</span>
-                <span>${total.toLocaleString("es-CO")}</span>
-              </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
                 <span>Total:</span>
-                <span className="text-primary">
-                  ${total.toLocaleString("es-CO")}
+                <span className="text-rest-primary">
+                  Bs {total.toString()}
                 </span>
               </div>
             </div>
@@ -245,7 +246,6 @@ export function ShoppingCart() {
             <Button
               className="w-full rounded-none cursor-pointer"
               size="lg"
-              // onClick={handleCheckout}
               onClick={handlePreCheckout}
               disabled={isProcessing || items.length === 0}
             >

@@ -6,6 +6,8 @@ import { getTotalSalesByShift, getTopProducts, getTotalRevenue } from '@/service
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
 import { handleResponse } from '@/utils/api-helpers';
+import ButtonGeneric from '@/components/common/button/ButtonGeneric';
+import { EnvConfig } from '@/config/env.config';
 
 export default function DashboardPage() {
   // const [salesByShift, setSalesByShift] = useState({ morning: 0, afternoon: 0, night: 0 });
@@ -117,6 +119,14 @@ export default function DashboardPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sales by Shift */}
+            <ButtonGeneric
+                variant="primaryRed"
+                onClick={() => alert(EnvConfig.testPendejo)}
+                className=" w-1/2 "
+            >
+                {/* <Plus size={20} /> */}
+                Nuevo Producto
+            </ButtonGeneric>
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Ventas por Turno</h3>
           <ResponsiveContainer width="100%" height={300}>

@@ -1,5 +1,8 @@
 import { BaseModal } from "@/components/ui/Modal/BaseModal";
 import { CartItem } from "@/types";
+import { ButtonGeneric } from "@/components/common/button/ButtonGeneric";
+import { Save, X } from "lucide-react";
+import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 
 interface SaleModalProps {
   isOpen: boolean;
@@ -27,26 +30,31 @@ export function GenericModal({
       size="lg"
       footer={
         <>
-          <button
+          <ButtonGeneric
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-md"
+            variant="cancelModalRed"
             disabled={isProcessing}
           >
             Cancelar
-          </button>
-          <button
+            <X size={16} />
+          </ButtonGeneric>
+          <ButtonGeneric
             onClick={onConfirm}
+            variant="confirmModalPrimary"
             disabled={isProcessing}
-            className="px-4 py-2 text-sm font-medium bg-[#052A3D] text-white rounded-md hover:bg-[#052A3D]/90 disabled:opacity-50"
+            // className="px-4 py-2 text-sm font-medium bg-[#052A3D] text-white rounded-md hover:bg-[#052A3D]/90 disabled:opacity-50"
           >
-            {isProcessing ? "Procesando..." : "Confirmar y Guardar"}
-          </button>
+            
+            {isProcessing ? "Procesando..." : "Confirmar"}
+            <Save size={16} />
+          </ButtonGeneric>
         </>
       }
     >
-      <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-md">
+      <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-sm">
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 sticky top-0">
+          {/* <thead className={`sticky text-white ${STYLE_INTERNAL.headerModalPrimary}`} > */}
+          <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm text-gray-800 border-b shadow-sm">
             <tr>
               <th className="p-2">Producto</th>
               <th className="p-2 text-center">Cant.</th>
@@ -55,9 +63,14 @@ export function GenericModal({
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr key={item.productId} className="border-t">
+              // className="border-t" 
+              <tr key={item.productId} >
                 <td className="p-2 font-medium">{item.name}</td>
-                <td className="p-2 text-center">{item.quantity}</td>
+                <td className="p-2 text-center">
+                  <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
+                    {item.quantity}
+                  </span>
+                </td>
                 <td className="p-2 text-right">
                   Bs {(item.price * item.quantity).toLocaleString()}
                 </td>

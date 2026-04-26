@@ -119,11 +119,18 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --color-rest-primary: #052A3D;
+  --color-rest-primary-up: #0A3D57;
+  --color-rest-primary-down: #031C28;
   --color-rest-secondary: #facc15;
   --color-rest-yellow: #facc15;
   --color-rest-gray: #e8ebecaf;
   --color-rest-slate: #90a1b9;
   --color-rest-red: #cd301c;
+  --color-rest-red-up: #E14A36;
+  --color-rest-red-down: #8F1F12;
+  --color-rest-gray-down: #1a1a1a;      
+  --color-rest-gray-middle: #2d2d2d;    
+  --color-rest-gray-up: #3d3d3d; 
   /* --color-sidebar-ring: var(--sidebar-ring); */
 }
 

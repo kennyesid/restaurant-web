@@ -50,7 +50,7 @@ export function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-[#011631] text-white border border-white/10"
+        className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-[#052A3D] text-white border border-white/10"
       >
         <Menu size={20} />
       </button>
@@ -58,17 +58,17 @@ export function Sidebar() {
       {/* Sidebar Principal */}
       <aside
         className={cn(
-    'fixed left-0 top-0 z-30 h-screen w-64 bg-[#011631] text-white transition-transform duration-300 flex flex-col',
-    // ESTA CLASE AGREGA LA SOMBRA AL LADO DERECHO
-    'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]', 
-    !isOpen && '-translate-x-full lg:translate-x-0'
-  )}
+          'fixed left-0 top-0 z-30 h-screen w-64 bg-[#052A3D] text-white transition-transform duration-300 flex flex-col',
+          // ESTA CLASE AGREGA LA SOMBRA AL LADO DERECHO
+          'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]', 
+          !isOpen && '-translate-x-full lg:translate-x-0'
+        )}
       >
         {/* Header / Logo Section */}
         <div className="p-8 mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#FACC15] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
-              <span className="text-xl font-black text-[#011631]">Y</span>
+              <span className="text-xl font-black text-[#052A3D]">Y</span>
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight text-white">YesiD REST</h1>
@@ -93,11 +93,11 @@ export function Sidebar() {
                 className={cn(
                     'flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative',
                     isActive 
-                      ? 'bg-[#FACC15] text-[#011631] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
+                      ? 'bg-[#FACC15] text-[#052A3D] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   )}
               >
-                <Icon size={20} className={cn(isActive ? 'text-[#011631]' : 'group-hover:scale-110 transition-transform')} />
+                <Icon size={20} className={cn(isActive ? 'text-[#052A3D]' : 'group-hover:scale-110 transition-transform')} />
                 <span className="text-sm tracking-wide">{item.label}</span>
               </Link>
             );

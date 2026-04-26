@@ -73,10 +73,48 @@ if (existingProducts.length === 0) {
       imageUrl: IMAGE_URL,
       isFeatured: false,
       displayOrder: 1,
-      isAvailable: true, // Asegúrate de que tu interfaz incluya esto
+      isAvailable: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 1,
+          productId: 1,
+          name: 'Pan de hamburguesa',
+          description: 'Pan artesanal con sésamo',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 2,
+          productId: 1,
+          name: 'Carne de res',
+          description: 'Carne 100% de res, 180g',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 3,
+          productId: 1,
+          name: 'Lechuga',
+          description: 'Lechuga fresca',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 4,
+          productId: 1,
+          name: 'Tomate',
+          description: 'Tomate en rodajas',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 2,
@@ -93,6 +131,44 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 5,
+          productId: 2,
+          name: 'Pan de hamburguesa',
+          description: 'Pan artesanal',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 6,
+          productId: 2,
+          name: 'Carne de res',
+          description: 'Carne 100% de res, 150g',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 7,
+          productId: 2,
+          name: 'Queso cheddar',
+          description: 'Queso cheddar derretido',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 8,
+          productId: 2,
+          name: 'Pepinillos',
+          description: 'Pepinillos en láminas',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 3,
@@ -109,6 +185,44 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 9,
+          productId: 3,
+          name: 'Pan de hamburguesa',
+          description: 'Pan artesanal',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 10,
+          productId: 3,
+          name: 'Carne de res (x2)',
+          description: 'Doble porción de carne, 300g',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 11,
+          productId: 3,
+          name: 'Queso americano',
+          description: 'Queso americano derretido',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 12,
+          productId: 3,
+          name: 'Tocino',
+          description: 'Tocino crujiente',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 4,
@@ -125,6 +239,36 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      piecesOfChicken: 4,
+      productIngredientDetail: [
+        {
+          id: 13,
+          productId: 4,
+          name: 'Pollo',
+          description: 'Pollo fresco marinado',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 14,
+          productId: 4,
+          name: 'Harina de trigo',
+          description: 'Harina especial para empanizado',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 15,
+          productId: 4,
+          name: 'Especias secretas',
+          description: 'Mezcla de especias de la casa',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 5,
@@ -141,6 +285,27 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      piecesOfChicken: 6,
+      productIngredientDetail: [
+        {
+          id: 16,
+          productId: 5,
+          name: 'Alitas de pollo',
+          description: '6 alitas de pollo frescas',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 17,
+          productId: 5,
+          name: 'Salsa BBQ',
+          description: 'Salsa BBQ casera',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 6,
@@ -157,6 +322,35 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 18,
+          productId: 6,
+          name: 'Papa',
+          description: 'Papa blanca seleccionada',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 19,
+          productId: 6,
+          name: 'Aceite vegetal',
+          description: 'Aceite 100% vegetal',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 20,
+          productId: 6,
+          name: 'Sal',
+          description: 'Sal de mesa',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 7,
@@ -173,6 +367,26 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 21,
+          productId: 7,
+          name: 'Cebolla',
+          description: 'Cebolla blanca cortada en aros',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 22,
+          productId: 7,
+          name: 'Harina de trigo',
+          description: 'Harina para empanizado',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 8,
@@ -189,6 +403,35 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
+      productIngredientDetail: [
+        {
+          id: 23,
+          productId: 8,
+          name: 'Agua carbonatada',
+          description: 'Agua con gas',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 24,
+          productId: 8,
+          name: 'Azúcar',
+          description: 'Azúcar refinada',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 25,
+          productId: 8,
+          name: 'Extracto de cola',
+          description: 'Saborizante natural',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
     },
     {
       productId: 9,
@@ -205,7 +448,27 @@ if (existingProducts.length === 0) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       state: true,
-    },
+      productIngredientDetail: [
+        {
+          id: 26,
+          productId: 9,
+          name: 'Naranja',
+          description: 'Naranja natural exprimida',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        },
+        {
+          id: 27,
+          productId: 9,
+          name: 'Agua',
+          description: 'Agua purificada',
+          createdAt: new Date().toISOString(),
+          createdBy: 'system',
+          state: true
+        }
+      ]
+    }
   ];
   storage.setCollection(PRODUCTS_KEY, defaultProducts);
 }

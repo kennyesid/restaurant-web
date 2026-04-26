@@ -16,8 +16,6 @@ const responderFalla = <T>(mensaje: string, codigo = 400): RespuestaGenericaDto<
   contenido: null
 });
 
-// --- CRUD DE VENTAS ---
-
 export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
     const data = storage.getCollection<Sale>(SALES_KEY);

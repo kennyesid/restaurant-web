@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import { getProducts, getCategories } from "@/services/productsSservice";
 import { Product, Category } from "@/types/index";
-import { ProductGrid } from "@/components/product-grid";
-import { ShoppingCart } from "@/components/cart/shopping-cart";
-import { Button } from "@/components/ui/button";
+import { ProductGrid } from "@/components/cart/Product-grid";
+import { ShoppingCart } from "@/components/cart/Shopping-cart";
 import { Loader2 } from "lucide-react";
-import ButtonGeneric from "@/components/common/Button/ButtonGeneric";
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 
-export default function POSPage() {
+export default function CartPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
