@@ -1,6 +1,7 @@
 export interface User {
   id: number;
   username: string;
+  lastname?: string;
   password: string;
   fullName: string;
   document: string;
@@ -10,7 +11,7 @@ export interface User {
   email: string;
   branchId?: number;
   avatarUrl?: string;
-  tenantId: string;
+  tenantId?: number;
   roleId: number;
   createdAt: string;
   updatedAt: string;

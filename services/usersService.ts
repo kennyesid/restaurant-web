@@ -1,5 +1,5 @@
-import { storage } from '@/lib/storage';
-import { User, Role } from '@/types/user/user';
+import { storage } from "@/lib/storage";
+import { User, Role } from "@/types/user/user";
 // import { v4 as uuidv4 } from 'crypto-js';
 
 // Simulate UUID generation
@@ -7,9 +7,9 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-const USERS_KEY = 'users';
-const ROLES_KEY = 'roles';
-const DEFAULT_TENANT_ID = 'tenant-1';
+const USERS_KEY = "users";
+const ROLES_KEY = "roles";
+const DEFAULT_TENANT_ID = "tenant-1";
 
 // Initialize default data if not exists
 function initializeDefaults() {
@@ -18,16 +18,16 @@ function initializeDefaults() {
     const defaultUsers: User[] = [
       {
         id: 0,
-        username: 'S/N',
-        password: 'S/N', // In production, this would be hashed
-        fullName: 'S/N',
-        document: 'S/N',
-        phone: 'S/N', 
-        address: 'S/N',
-        email: 'S/N',
+        username: "S/N",
+        password: "S/N", // In production, this would be hashed
+        fullName: "S/N",
+        document: "S/N",
+        phone: "S/N",
+        address: "S/N",
+        email: "S/N",
         branchId: 0,
-        avatarUrl: '',
-        tenantId: DEFAULT_TENANT_ID,
+        avatarUrl: "",
+        // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
         state: true,
         createdAt: new Date().toISOString(),
@@ -35,16 +35,16 @@ function initializeDefaults() {
       },
       {
         id: 1,
-        username: 'admin',
-        password: 'admin', // In production, this would be hashed
-        fullName: 'Administrator',
-        document: '12345678',
-        phone: '123456789', 
-        address: '123 Main St',
-        email: 'admin@yesid.com',
+        username: "admin",
+        password: "admin", // In production, this would be hashed
+        fullName: "Administrator",
+        document: "12345678",
+        phone: "123456789",
+        address: "123 Main St",
+        email: "admin@yesid.com",
         branchId: 1,
-        avatarUrl: '',
-        tenantId: DEFAULT_TENANT_ID,
+        avatarUrl: "",
+        // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
         state: true,
         createdAt: new Date().toISOString(),
@@ -52,16 +52,16 @@ function initializeDefaults() {
       },
       {
         id: 2,
-        username: 'cashier',
-        password: 'cashier123',
-        fullName: 'Cajero Principal',
-        document: '12345678',
-        phone: '123456789',
-        address: '123 Main St',
-        email: 'cashier@yesid.com',
+        username: "cashier",
+        password: "cashier123",
+        fullName: "Cajero Principal",
+        document: "12345678",
+        phone: "123456789",
+        address: "123 Main St",
+        email: "cashier@yesid.com",
         branchId: 1,
-        avatarUrl: '',
-        tenantId: DEFAULT_TENANT_ID,
+        avatarUrl: "",
+        // tenantId: DEFAULT_TENANT_ID,
         roleId: 2,
         state: true,
         createdAt: new Date().toISOString(),
@@ -76,20 +76,20 @@ function initializeDefaults() {
     const defaultRoles: Role[] = [
       {
         id: 1,
-        name: 'Administrador',
-        description: 'Acceso total al sistema',
+        name: "Administrador",
+        description: "Acceso total al sistema",
         tenantId: DEFAULT_TENANT_ID,
       },
       {
         id: 2,
-        name: 'Cajero',
-        description: 'Acceso a POS y reportes básicos',
+        name: "Cajero",
+        description: "Acceso a POS y reportes básicos",
         tenantId: DEFAULT_TENANT_ID,
       },
       {
         id: 3,
-        name: 'Gerente',
-        description: 'Acceso a reportes y análisis',
+        name: "Gerente",
+        description: "Acceso a reportes y análisis",
         tenantId: DEFAULT_TENANT_ID,
       },
     ];
@@ -98,7 +98,7 @@ function initializeDefaults() {
 }
 
 // Initialize on module load
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   initializeDefaults();
 }
 
@@ -108,15 +108,15 @@ export async function getUsers(): Promise<User[]> {
 }
 
 export async function getUserById(id: number): Promise<User | null> {
-  return storage.getFromCollection<User>(USERS_KEY, id, 'id');
+  return storage.getFromCollection<User>(USERS_KEY, id, "id");
 }
 
-export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-
+export async function createUser(
+  user: Omit<User, "id" | "createdAt" | "updatedAt">,
+): Promise<User> {
   const existingUsers = storage.getCollection<User>(USERS_KEY);
-  const lastId = existingUsers.length > 0
-    ? Math.max(...existingUsers.map(u => u.id))
-    : 1;
+  const lastId =
+    existingUsers.length > 0 ? Math.max(...existingUsers.map((u) => u.id)) : 1;
 
   const newUser: User = {
     ...user,
@@ -124,11 +124,14 @@ export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedA
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  storage.addToCollection(USERS_KEY, newUser, 'id');
+  storage.addToCollection(USERS_KEY, newUser, "id");
   return newUser;
 }
 
-export async function updateUser(id: string, updates: Partial<User>): Promise<User | null> {
+export async function updateUser(
+  id: string,
+  updates: Partial<User>,
+): Promise<User | null> {
   const success = storage.updateInCollection(
     USERS_KEY,
     id,
@@ -136,13 +139,13 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
       ...updates,
       updatedAt: new Date().toISOString(),
     },
-    'id'
+    "id",
   );
-  return success ? storage.getFromCollection<User>(USERS_KEY, id, 'id') : null;
+  return success ? storage.getFromCollection<User>(USERS_KEY, id, "id") : null;
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
-  return storage.removeFromCollection(USERS_KEY, id, 'id');
+  return storage.removeFromCollection(USERS_KEY, id, "id");
 }
 
 // Role CRUD operations
@@ -151,30 +154,40 @@ export async function getRoles(): Promise<Role[]> {
 }
 
 export async function getRoleById(id: string): Promise<Role | null> {
-  return storage.getFromCollection<Role>(ROLES_KEY, id, 'id_role');
+  return storage.getFromCollection<Role>(ROLES_KEY, id, "id_role");
 }
 
-export async function createRole(role: Omit<Role, 'id_role'>): Promise<Role> {
+export async function createRole(role: Omit<Role, "id_role">): Promise<Role> {
   const newRole: Role = {
     ...role,
     id: 0,
   };
-  storage.addToCollection(ROLES_KEY, newRole, 'id_role');
+  storage.addToCollection(ROLES_KEY, newRole, "id_role");
   return newRole;
 }
 
-export async function updateRole(id: string, updates: Partial<Role>): Promise<Role | null> {
-  const success = storage.updateInCollection(ROLES_KEY, id, updates, 'id_role');
-  return success ? storage.getFromCollection<Role>(ROLES_KEY, id, 'id_role') : null;
+export async function updateRole(
+  id: string,
+  updates: Partial<Role>,
+): Promise<Role | null> {
+  const success = storage.updateInCollection(ROLES_KEY, id, updates, "id_role");
+  return success
+    ? storage.getFromCollection<Role>(ROLES_KEY, id, "id_role")
+    : null;
 }
 
 export async function deleteRole(id: string): Promise<boolean> {
-  return storage.removeFromCollection(ROLES_KEY, id, 'id_role');
+  return storage.removeFromCollection(ROLES_KEY, id, "id_role");
 }
 
 // Authentication
-export async function authenticateUser(username: string, password: string): Promise<User | null> {
+export async function authenticateUser(
+  username: string,
+  password: string,
+): Promise<User | null> {
   const users = await getUsers();
-  const user = users.find(u => u.username === username && u.password === password);
+  const user = users.find(
+    (u) => u.username === username && u.password === password,
+  );
   return user || null;
 }

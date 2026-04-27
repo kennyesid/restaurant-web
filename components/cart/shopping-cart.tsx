@@ -22,6 +22,7 @@ import ButtonGeneric from "../common/button/ButtonGeneric";
 import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
 import { User } from "@/types/";
+import { createUser } from "@/services/usersService";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -38,7 +39,6 @@ export function ShoppingCart() {
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [customNit, setCustomNit] = useState(""); // Para que sea modificable
 
-
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -52,6 +52,7 @@ export function ShoppingCart() {
   };
 
   const handleCheckout = async () => {
+    let userSendId = 0;
     if (items.length === 0) {
       toast.error("El carrito está vacío");
       return;
@@ -67,18 +68,37 @@ export function ShoppingCart() {
         categoryId: item.categoryId,
       }));
 
+      if (selectedClient) {
+        const selectedClientResponse = await createUser({
+          username: selectedClient.username,
+          password: selectedClient.password,
+          fullName: `${selectedClient.username} ${selectedClient.fullName || ""}`,
+          address: "S/N",
+          document: selectedClient.document || "S/N",
+          email: selectedClient.email || "S/N",
+          phone: selectedClient.phone || "S/N",
+          roleId: 1,
+          state: true,
+          nit: selectedClient.nit,
+          tenantId: "1",
+          avatarUrl: "S/N",
+          branchId: 1,
+        });
+        userSendId = selectedClientResponse.id;
+      }
+      // setSelectedClient
+
       const response = await createSale({
         detail: saleItems,
         paymentType: paymentType as any,
         userId: 1,
-        userCustomerId: 0,
+        userCustomerId: userSendId,
         orderNumber: 1,
         orderStatus: OrderStatusEnum.EN_COCINA,
         tenantId: 1,
         state: true,
         total,
         shift: getCurrentShift(),
-
 
         // userCustomerId: needsInvoice && selectedClient ? selectedClient.id : 0,
         // invoiceNit: needsInvoice ? customNit : null,
@@ -88,11 +108,13 @@ export function ShoppingCart() {
       const currentToastBody = {
         type: isSuccess ? ToastType.Successfully : ToastType.Fail,
         message: isSuccess ? "Exito" : "Error",
-        description: isSuccess ? "Venta realizada satisfactoriamente." : response.mensaje,
-        image: null
+        description: isSuccess
+          ? "Venta realizada satisfactoriamente."
+          : response.mensaje,
+        image: null,
       };
 
-      toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
+      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
 
       if (!isSuccess) {
         return;
@@ -114,11 +136,11 @@ export function ShoppingCart() {
   return (
     <>
       <Card className="h-full flex flex-col overflow-hidden rounded-none">
-        <div className={`p-4 flex justify-between items-center text-white/80 ${STYLE_INTERNAL.headerModalPrimary} `}>
+        <div
+          className={`p-4 flex justify-between items-center text-white/80 ${STYLE_INTERNAL.headerModalPrimary} `}
+        >
           <h3 className=" text-lg tracking-wide">Carrito</h3>
-          <p className="text-sm tracking-wide">
-            {items.length} artículos
-          </p>
+          <p className="text-sm tracking-wide">{items.length} artículos</p>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-[#052A3D]/20 to-transparent">
           {items.length === 0 ? (
@@ -232,10 +254,11 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
-                      ? "bg-[#facc15]  text-rest-primary"
-                      : "bg-muted text-foreground hover:bg-muted/80"
-                      }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
+                      paymentType === method
+                        ? "bg-[#facc15]  text-rest-primary"
+                        : "bg-muted text-foreground hover:bg-muted/80"
+                    }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -250,9 +273,7 @@ export function ShoppingCart() {
             <div className="space-y-2 pt-2">
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
                 <span className="text-rest-primary">Total:</span>
-                <span className="text-rest-primary">
-                  Bs {total.toString()}
-                </span>
+                <span className="text-rest-primary">Bs {total.toString()}</span>
               </div>
             </div>
 
@@ -277,9 +298,7 @@ export function ShoppingCart() {
           </div>
         )}
       </Card>
-
-// En ShoppingCart.tsx (al final, donde invocas el modal)
-
+      // En ShoppingCart.tsx (al final, donde invocas el modal)
       <GenericModal
         isOpen={showSummary}
         onClose={() => setShowSummary(false)}
@@ -299,7 +318,6 @@ export function ShoppingCart() {
           console.log("Abrir modal de nuevo cliente");
         }}
       />
-
       {/* <GenericModal
         isOpen={showSummary}
         onClose={() => setShowSummary(false)}

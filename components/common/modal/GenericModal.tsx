@@ -49,10 +49,8 @@ export function GenericModal({
   setSelectedClient,
   customNit,
   setCustomNit,
-  onOpenCreateClientModal
+  onOpenCreateClientModal,
 }: SaleModalProps) {
-
-
   const [isNewClient, setIsNewClient] = useState(false);
 
   const handleSearchClient = (query: string) => {
@@ -62,35 +60,46 @@ export function GenericModal({
       return;
     }
 
-    const users = storage.getCollection<any>('users') ?? [];
+    const users = storage.getCollection<any>("users") ?? [];
 
     const search = query.toLowerCase();
 
-    const found = users.find((u: any) =>
-      (u.full_name ?? "").toLowerCase().includes(search) ||
-      (u.email ?? "").toLowerCase().includes(search)
-    );
+    const found = users.find((u: any) => {
+      // Convertimos todo a string por si vienen números del storage
+      const fullName = (u.full_name || u.fullName || "")
+        .toString()
+        .toLowerCase();
+      const email = (u.email || "").toString().toLowerCase();
+      const document = (u.document || u.nit || u.ci || "")
+        .toString()
+        .toLowerCase();
+
+      return (
+        fullName.includes(search) ||
+        email.includes(search) ||
+        document.includes(search)
+      );
+    });
 
     if (found) {
       setSelectedClient({
         id: found.id_user,
-        username: "asdsa",
-        password: "asdasd",
-        address: "asdasd",
-        phone: "asdasd",
-        nit: "asdasd",
-        avatarUrl: "asdasd",
-        tenantId: "asdasd",
+        username: "S/N",
+        password: "S/N",
+        address: "S/N",
+        phone: "S/N",
+        nit: found.nit === null || undefined ? "S/N" : found.nit,
+        avatarUrl: "S/N",
         roleId: 1,
-        createdAt: "asdasd",
-        updatedAt: "asdasd",
+        createdAt: Date.now().toString(),
+        updatedAt: Date.now().toString(),
         state: true,
         fullName: found.full_name,
         document: "",
         email: found.email,
       });
 
-      setCustomNit("");
+      // setCustomNit("");
       setIsNewClient(false);
     } else {
       setSelectedClient(null);
@@ -119,7 +128,6 @@ export function GenericModal({
             variant="confirmModalPrimary"
             disabled={isProcessing}
           >
-
             {isProcessing ? "Procesando..." : "Confirmar"}
             <Save size={16} />
           </ButtonGeneric>
@@ -138,8 +146,8 @@ export function GenericModal({
           </thead>
           <tbody>
             {items.map((item) => (
-              // className="border-t" 
-              <tr key={item.productId} >
+              // className="border-t"
+              <tr key={item.productId}>
                 <td className="p-2 font-medium">{item.name}</td>
                 <td className="p-2 text-center">
                   <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
@@ -158,20 +166,31 @@ export function GenericModal({
       <div className="p-4 border-t space-y-4 bg-gray-50/50">
         {/* Switch Elegante */}
         <div className="flex items-center justify-between">
-          <label className="text-sm font-semibold text-gray-700">¿Requiere Factura?</label>
+          <label className="text-sm font-semibold text-gray-700">
+            ¿Requiere Factura?
+          </label>
           <button
             onClick={() => setNeedsInvoice(!needsInvoice)}
-            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${needsInvoice ? 'bg-green-500' : 'bg-gray-300'}`}
+            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${needsInvoice ? "bg-green-500" : "bg-gray-300"}`}
           >
-            <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${needsInvoice ? 'translate-x-6' : 'translate-x-0'}`} />
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${needsInvoice ? "translate-x-6" : "translate-x-0"}`}
+            />
           </button>
         </div>
 
         {needsInvoice && (
           <div className="space-y-3 animate-in fade-in duration-300">
-            <div className="flex items-center gap-2 w-full"> {/* Aseguramos que la fila ocupe todo el ancho */}
-              <div className="relative grow min-w-0"> {/* Este div crecerá para ocupar el espacio sobrante */}
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+            <div className="flex items-center gap-2 w-full">
+              {" "}
+              {/* Aseguramos que la fila ocupe todo el ancho */}
+              <div className="relative grow min-w-0">
+                {" "}
+                {/* Este div crecerá para ocupar el espacio sobrante */}
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  size={16}
+                />
                 <input
                   type="text"
                   placeholder="Buscar cliente..."
@@ -179,12 +198,18 @@ export function GenericModal({
                   onChange={(e) => handleSearchClient(e.target.value)}
                 />
               </div>
-
               <div className="shrink-0 px-3 h-10 flex items-center justify-center">
                 <ButtonGeneric
                   variant="primaryRed"
                   onClick={() => {
-                    setSelectedClient(null);
+                    setSelectedClient({
+                      id: 0,
+                      username: "",
+                      fullName: "", // Aquí guardaremos el nombre que escribas
+                      email: "",
+                      document: "",
+                    } as any);
+                    setCustomNit("");
                     setIsNewClient(true);
                   }}
                 >
@@ -193,16 +218,22 @@ export function GenericModal({
               </div>
             </div>
 
-            {selectedClient && !isNewClient && (
+            {/* {selectedClient && !isNewClient && (
               <div className="p-3 bg-white border rounded-md border-blue-100 space-y-2">
-                <p className="text-xs font-bold text-blue-800 uppercase">Datos de Facturación</p>
+                <p className="text-xs font-bold text-blue-800 uppercase">
+                  Datos de Facturación
+                </p>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <label className="text-[10px] text-muted-foreground uppercase">Razón Social</label>
+                    <label className="text-[10px] text-muted-foreground uppercase">
+                      Razón Social
+                    </label>
                     <p className="font-medium">{selectedClient.fullName}</p>
                   </div>
                   <div>
-                    <label className="text-[10px] text-muted-foreground uppercase">NIT/CI</label>
+                    <label className="text-[10px] text-muted-foreground uppercase">
+                      NIT/CI
+                    </label>
                     <input
                       value={customNit}
                       onChange={(e) => setCustomNit(e.target.value)}
@@ -211,40 +242,51 @@ export function GenericModal({
                   </div>
                 </div>
               </div>
-            )}
-            {isNewClient && (
-              <div className="p-3 bg-yellow-50 border rounded-md border-yellow-200 space-y-3">
-                <p className="text-xs font-bold text-yellow-800 uppercase">
-                  Nuevo Cliente
-                </p>
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-
-                  <div>
-                    <label className="text-[10px] text-muted-foreground uppercase">
-                      Nombre / Razón Social
-                    </label>
-                    <input
-                      className="w-full border-b outline-none font-medium"
-                      placeholder="Nombre cliente"
-                    />
+            )} */}
+            {isNewClient ||
+              (selectedClient && (
+                <div className="p-3 bg-yellow-50 border rounded-md border-yellow-200 space-y-3">
+                  <p className="text-xs font-bold text-yellow-800 uppercase">
+                    Nuevo Cliente
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground uppercase">
+                        Nombre / Razón Social
+                      </label>
+                      <input
+                        value={selectedClient.fullName}
+                        onChange={(e) =>
+                          setSelectedClient({
+                            ...selectedClient,
+                            fullName: e.target.value,
+                          })
+                        }
+                        className="w-full border-b bg-transparent outline-none font-medium border-yellow-300 focus:border-yellow-600"
+                        placeholder="Nombre cliente"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground uppercase">
+                        NIT / CI
+                      </label>
+                      <input
+                        // value={customNit}
+                        value={selectedClient.nit}
+                        // onChange={(e) => setCustomNit(e.target.value)}
+                        onChange={(e) =>
+                          setSelectedClient({
+                            ...selectedClient,
+                            nit: e.target.value,
+                          })
+                        }
+                        className="w-full border-b bg-transparent outline-none font-medium border-yellow-300 focus:border-yellow-600"
+                        placeholder="1234567"
+                      />
+                    </div>
                   </div>
-
-                  <div>
-                    <label className="text-[10px] text-muted-foreground uppercase">
-                      NIT / CI
-                    </label>
-                    <input
-                      value={customNit}
-                      onChange={(e) => setCustomNit(e.target.value)}
-                      className="w-full border-b outline-none font-medium"
-                      placeholder="1234567"
-                    />
-                  </div>
-
                 </div>
-              </div>
-            )}
+              ))}
           </div>
         )}
       </div>
