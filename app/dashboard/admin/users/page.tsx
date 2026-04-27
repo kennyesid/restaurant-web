@@ -142,9 +142,8 @@ export default function UsersPage() {
                   <td className="px-6 py-4 text-sm">{user.full_name}</td>
                   <td className="px-6 py-4 text-sm">{getRoleName(user.id_role)}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {user.is_active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>

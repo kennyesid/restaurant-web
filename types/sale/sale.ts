@@ -1,15 +1,21 @@
 import { CartItem } from "@/types/cart/cartItem";
+import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
+import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
+import { User } from "../user/user";
 
 export interface Sale {
   saleId: number;
   detail: CartItem[]; 
-  userId: number;
+  userId?: number;
+  user?: User;
   userCustomerId?: number;
+  userCustomer?: User;
   orderNumber: number; 
-  orderStatus: string; 
+  orderStatus: OrderStatusEnum; 
+  payInvoice?: boolean;
   tenantId: number;
   total: number;
-  paymentType: "cash" | "qr" | "mixed";
+  paymentType: PaymentTypeEnum;
   shift: string;
   createdAt: Date;
   updatedAt: Date;

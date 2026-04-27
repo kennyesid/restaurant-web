@@ -54,7 +54,7 @@ export default function SalesPage() {
 
       const userMatch =
         filterUser === "all" ||
-        sale.userId.toString() === filterUser;
+        sale.userId?.toString() === filterUser;
 
       const paymentMatch =
         filterPaymentType === "all" ||
@@ -105,6 +105,30 @@ export default function SalesPage() {
 
   if (loading) return <div className="p-6 text-center font-medium text-[#052A3D]">Cargando historial...</div>;
 
+  const getOrderStatusBadge = (status: number) => {
+    const styles: Record<number, string> = {
+      1: "bg-emerald-100 text-emerald-700",
+      2: "bg-orange-100 text-orange-700",
+      3: "bg-blue-100 text-blue-700",
+      4: "bg-gray-200 text-gray-800",
+      5: "bg-red-100 text-red-700",
+    };
+
+    const labels: Record<number, string> = {
+      1: "Pagado",
+      2: "En cocina",
+      3: "Listo",
+      4: "Entregado",
+      5: "Cancelado",
+    };
+
+    return (
+      <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${styles[status]}`}>
+        {labels[status]}
+      </span>
+    );
+  };
+
   return (
     <div className='space-y-4'>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -121,45 +145,82 @@ export default function SalesPage() {
       <div className='grid grid-cols-1 lg:grid-cols-4 gap-4 bg-muted/40 backdrop-blur-sm p-4 rounded-xl border'>
 
         {/* segunda parte */}
-        <div className="lg:col-span-1 bg-white border rounded-xl p-4 shadow-sm">
+        <div className="lg:col-span-1">
 
-          <h3 className="font-semibold text-sm mb-3 text-[#052A3D]">
-            📊 Resumen
-          </h3>
+          <div className="
+    relative overflow-hidden
+    rounded-2xl
+    p-5
+    text-white
+    shadow-lg
+    bg-gradient-to-br
+    from-[#052A3D]
+    via-[#0b3f5c]
+    to-[#052A3D]
+  ">
 
-          <div className="grid grid-cols-4 gap-2 text-center">
+            {/* decoración fondo */}
+            <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
 
-            <div className="bg-[#052A3D]/5 rounded-lg p-2">
-              <p className="text-[10px] text-muted-foreground">Total</p>
-              <p className="font-bold text-[#052A3D]">
+            {/* HEADER */}
+            <div className="relative z-10 mb-2 flex flex-col items-center">
+              <p className="text-xs uppercase tracking-wider opacity-80">
+                Resumen de Ventas
+              </p>
+
+              <h2 className="text-3xl font-black text-[#facc15]">
                 Bs {totalSales.toLocaleString()}
-              </p>
+              </h2>
+              {/* 
+              <p className="text-xs opacity-70">
+                Total acumulado del día
+              </p> */}
             </div>
 
-            <div className="bg-green-50 rounded-lg p-2">
-              <p className="text-[10px]">💵</p>
-              <p className="font-bold text-green-700">
-                {cashSales.length}
-              </p>
-            </div>
+            {/* DIVIDER */}
+            {/* <div className="border-t border-white/20 my-4"></div> */}
 
-            <div className="bg-blue-50 rounded-lg p-2">
-              <p className="text-[10px]">📱</p>
-              <p className="font-bold text-blue-700">
-                {qrSales.length}
-              </p>
-            </div>
+            {/* STATS */}
+            <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
 
-            <div className="bg-purple-50 rounded-lg p-2">
-              <p className="text-[10px]">🔀</p>
-              <p className="font-bold text-purple-700">
-                {mixedSales.length}
-              </p>
-            </div>
+              {/* EFECTIVO */}
+              <div>
+                <p className="text-[10px] uppercase opacity-70">
+                  Efectivo
+                </p>
 
+                <p className="text-lg font-bold text-[#facc15]">
+                  {cashSales.length}
+                </p>
+              </div>
+
+              {/* QR */}
+              <div>
+                <p className="text-[10px] uppercase opacity-70">
+                  QR
+                </p>
+
+                <p className="text-lg font-bold">
+                  {qrSales.length}
+                </p>
+              </div>
+
+              {/* MIXTO */}
+              <div>
+                <p className="text-[10px] uppercase opacity-70">
+                  Mixto
+                </p>
+
+                <p className="text-lg font-bold">
+                  {mixedSales.length}
+                </p>
+              </div>
+            </div>
           </div>
-
         </div>
+
+
         <div className="lg:col-span-3 space-y-4">
           {/* FILTROS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -237,81 +298,160 @@ export default function SalesPage() {
             <thead className="bg-[#052A3D] text-white text-xs uppercase tracking-wider">
               <tr>
                 <th className="px-4 py-4"></th>
-                <th className="px-6 py-4 font-semibold">ID</th>
+                <th className="px-6 py-4 font-semibold">Pedido</th>
+                <th className="px-6 py-4 font-semibold">Estado</th>
                 <th className="px-6 py-4 font-semibold">Fecha</th>
                 <th className="px-6 py-4 font-semibold">Usuario</th>
                 <th className="px-6 py-4 font-semibold">Pago</th>
                 <th className="px-6 py-4 font-semibold text-right">Total</th>
-                <th className="px-6 py-4 font-semibold text-center">Acciones</th>
+                <th className="px-6 py-4 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {filteredSales.map((sale) => (
-                <tr key={sale.saleId} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4">
-                    <button
-                      onClick={() =>
-                        setExpandedRow(
-                          expandedRow === sale.saleId ? null : sale.saleId
-                        )
-                      }
-                      className="p-1 hover:bg-muted rounded"
-                    >
-                      {expandedRow === sale.saleId ? "▲" : "▼"}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 font-mono text-xs text-gray-500">#{sale.saleId}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-medium text-gray-900">
-                        {new Date(sale.createdAt).toLocaleDateString()}
-                      </span>
-                      <span className="text-[10px] text-gray-400">
-                        {new Date(sale.createdAt).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      ID: {sale.userId}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase ${sale.paymentType === 'cash' ? 'bg-green-100 text-green-700' :
-                      sale.paymentType === 'qr' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                      }`}>
-                      {getPaymentTypeLabel(sale.paymentType)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right font-bold text-[#052A3D]">
-                    Bs {sale.total.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center gap-2">
+                <>
+                  <tr key={sale.saleId} className="hover:bg-muted/40 transition-colors">
+                    <td className="px-4 py-4">
                       <button
-                        onClick={() => { setSelectedSale(sale); setIsDialogOpen(true); }}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                        title="Ver detalles"
+                        onClick={() =>
+                          setExpandedRow(
+                            expandedRow === sale.saleId ? null : sale.saleId
+                          )
+                        }
+                        className="p-1 rounded hover:bg-muted transition"
                       >
-                        <Eye size={18} />
+                        {expandedRow === sale.saleId ? "▾" : "▸"}
                       </button>
-                      <button
-                        className="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
-                        title="Editar venta"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => deleteSale(sale.saleId).then(loadSales)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                        title="Eliminar"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-[#052A3D]">
+                          #{sale.orderNumber}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">
+                          Venta #{sale.saleId}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {getOrderStatusBadge(sale.orderStatus)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {new Date(sale.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(sale.createdAt).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold">
+                          Usuario #{sale.userId}
+                        </span>
 
+                        {sale.userCustomerId && (
+                          <span className="text-[10px] text-muted-foreground">
+                            Cliente #{sale.userCustomerId}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
+                        ? "bg-green-100 text-green-700"
+                        : sale.paymentType === "qr"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-purple-100 text-purple-700"
+                        }`}>
+                        {getPaymentTypeLabel(sale.paymentType)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <span className="font-bold text-lg text-[#052A3D]">
+                        Bs {sale.total.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-2">
+                        {/* <button
+                          onClick={() => { setSelectedSale(sale); setIsDialogOpen(true); }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                          title="Ver detalles"
+                        >
+                          <Eye size={18} />
+                        </button> */}
+                        <button
+                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
+                          title="Editar venta"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => deleteSale(sale.saleId).then(loadSales)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {expandedRow === sale.saleId && (
+                    <tr className="bg-muted/30">
+                      <td colSpan={8} className="px-6 py-6">
+
+                        <div className="rounded-lg border bg-white p-4 shadow-sm">
+
+                          {/* Header detalle */}
+                          <div className="flex justify-between mb-4">
+                            <div>
+                              <p className="font-semibold text-[#052A3D]">
+                                Detalle del Pedido #{sale.orderNumber}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {sale.detail.length} productos
+                              </p>
+                            </div>
+
+                            <span className="font-bold text-lg">
+                              Bs {sale.total.toLocaleString()}
+                            </span>
+                          </div>
+
+                          {/* Items */}
+                          <div className="divide-y">
+
+                            {sale.detail.map(item => (
+                              <div
+                                key={item.productId}
+                                className="flex justify-between items-center py-2"
+                              >
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Bs {item.price} x {item.quantity}
+                                  </span>
+                                </div>
+
+                                <span className="font-semibold">
+                                  Bs {(item.price * item.quantity).toLocaleString()}
+                                </span>
+                              </div>
+                            ))}
+
+                          </div>
+
+                        </div>
+
+                      </td>
+                    </tr>
+                  )}
+                </>
               ))}
             </tbody>
           </table>

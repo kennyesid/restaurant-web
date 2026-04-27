@@ -1,9 +1,19 @@
 import { BaseModal } from "@/components/ui/Modal/BaseModal";
-import { CartItem } from "@/types";
+import { CartItem, User } from "@/types";
 import { ButtonGeneric } from "@/components/common/button/ButtonGeneric";
-import { Save, X } from "lucide-react";
+import { Save, Search, UserPlus, X } from "lucide-react";
 import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
+import { storage } from "@/lib/storage";
+import { useState } from "react";
 
+// interface SaleModalProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   items: CartItem[];
+//   total: number;
+//   onConfirm: () => void;
+//   isProcessing: boolean;
+// }
 interface SaleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,16 +21,82 @@ interface SaleModalProps {
   total: number;
   onConfirm: () => void;
   isProcessing: boolean;
+  needsInvoice: boolean;
+  setNeedsInvoice: (val: boolean) => void;
+  selectedClient: User | null;
+  setSelectedClient: (user: User | null) => void;
+  customNit: string;
+  setCustomNit: (val: string) => void;
+  onOpenCreateClientModal: () => void; // Para el botón de nuevo usuario
 }
 
 export function GenericModal({
+  // isOpen,
+  // onClose,
+  // items,
+  // total,
+  // onConfirm,
+  // isProcessing,
   isOpen,
   onClose,
   items,
   total,
   onConfirm,
   isProcessing,
+  needsInvoice,
+  setNeedsInvoice,
+  selectedClient,
+  setSelectedClient,
+  customNit,
+  setCustomNit,
+  onOpenCreateClientModal
 }: SaleModalProps) {
+
+
+  const [isNewClient, setIsNewClient] = useState(false);
+
+  const handleSearchClient = (query: string) => {
+    if (!query || query.length < 3) {
+      setSelectedClient(null);
+      setIsNewClient(false);
+      return;
+    }
+
+    const users = storage.getCollection<any>('users') ?? [];
+
+    const search = query.toLowerCase();
+
+    const found = users.find((u: any) =>
+      (u.full_name ?? "").toLowerCase().includes(search) ||
+      (u.email ?? "").toLowerCase().includes(search)
+    );
+
+    if (found) {
+      setSelectedClient({
+        id: found.id_user,
+        username: "asdsa",
+        password: "asdasd",
+        address: "asdasd",
+        phone: "asdasd",
+        nit: "asdasd",
+        avatarUrl: "asdasd",
+        tenantId: "asdasd",
+        roleId: 1,
+        createdAt: "asdasd",
+        updatedAt: "asdasd",
+        state: true,
+        fullName: found.full_name,
+        document: "",
+        email: found.email,
+      });
+
+      setCustomNit("");
+      setIsNewClient(false);
+    } else {
+      setSelectedClient(null);
+    }
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
@@ -43,7 +119,7 @@ export function GenericModal({
             variant="confirmModalPrimary"
             disabled={isProcessing}
           >
-            
+
             {isProcessing ? "Procesando..." : "Confirmar"}
             <Save size={16} />
           </ButtonGeneric>
@@ -77,6 +153,100 @@ export function GenericModal({
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="p-4 border-t space-y-4 bg-gray-50/50">
+        {/* Switch Elegante */}
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-semibold text-gray-700">¿Requiere Factura?</label>
+          <button
+            onClick={() => setNeedsInvoice(!needsInvoice)}
+            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${needsInvoice ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${needsInvoice ? 'translate-x-6' : 'translate-x-0'}`} />
+          </button>
+        </div>
+
+        {needsInvoice && (
+          <div className="space-y-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 w-full"> {/* Aseguramos que la fila ocupe todo el ancho */}
+              <div className="relative grow min-w-0"> {/* Este div crecerá para ocupar el espacio sobrante */}
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <input
+                  type="text"
+                  placeholder="Buscar cliente..."
+                  className="w-full pl-10 pr-4 py-2 border rounded-md text-sm focus:ring-1 focus:ring-blue-500 outline-none"
+                  onChange={(e) => handleSearchClient(e.target.value)}
+                />
+              </div>
+
+              <div className="shrink-0 px-3 h-10 flex items-center justify-center">
+                <ButtonGeneric
+                  variant="primaryRed"
+                  onClick={() => {
+                    setSelectedClient(null);
+                    setIsNewClient(true);
+                  }}
+                >
+                  <UserPlus size={18} />
+                </ButtonGeneric>
+              </div>
+            </div>
+
+            {selectedClient && !isNewClient && (
+              <div className="p-3 bg-white border rounded-md border-blue-100 space-y-2">
+                <p className="text-xs font-bold text-blue-800 uppercase">Datos de Facturación</p>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <label className="text-[10px] text-muted-foreground uppercase">Razón Social</label>
+                    <p className="font-medium">{selectedClient.fullName}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted-foreground uppercase">NIT/CI</label>
+                    <input
+                      value={customNit}
+                      onChange={(e) => setCustomNit(e.target.value)}
+                      className="w-full border-b focus:border-blue-500 outline-none font-medium"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            {isNewClient && (
+              <div className="p-3 bg-yellow-50 border rounded-md border-yellow-200 space-y-3">
+                <p className="text-xs font-bold text-yellow-800 uppercase">
+                  Nuevo Cliente
+                </p>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+
+                  <div>
+                    <label className="text-[10px] text-muted-foreground uppercase">
+                      Nombre / Razón Social
+                    </label>
+                    <input
+                      className="w-full border-b outline-none font-medium"
+                      placeholder="Nombre cliente"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-muted-foreground uppercase">
+                      NIT / CI
+                    </label>
+                    <input
+                      value={customNit}
+                      onChange={(e) => setCustomNit(e.target.value)}
+                      className="w-full border-b outline-none font-medium"
+                      placeholder="1234567"
+                    />
+                  </div>
+
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex justify-between items-center px-2">
         <span className="text-lg font-bold">Total a pagar:</span>

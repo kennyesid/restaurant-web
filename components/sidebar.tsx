@@ -47,20 +47,16 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-4 left-4 z-40 lg:hidden p-2 rounded-lg bg-[#052A3D] text-white border border-white/10"
       >
         <Menu size={20} />
       </button>
-
-      {/* Sidebar Principal */}
       <aside
         className={cn(
           'fixed left-0 top-0 z-30 h-screen w-64 bg-[#052A3D] text-white transition-transform duration-300 flex flex-col',
-          // ESTA CLASE AGREGA LA SOMBRA AL LADO DERECHO
-          'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]', 
+          'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]',
           !isOpen && '-translate-x-full lg:translate-x-0'
         )}
       >
@@ -77,12 +73,15 @@ export function Sidebar() {
           </div>
         </div>
 
+        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="absolute -top-10  -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
         {/* Navegación Principal */}
         <nav className="flex-1  space-y-2 overflow-y-auto">
           <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">
             Navegación
           </p>
-          
+
           {mainMenuItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -91,11 +90,11 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    'flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative',
-                    isActive 
-                      ? 'bg-[#FACC15] text-[#052A3D] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  )}
+                  'flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative',
+                  isActive
+                    ? 'bg-[#FACC15] text-[#052A3D] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                )}
               >
                 <Icon size={20} className={cn(isActive ? 'text-[#052A3D]' : 'group-hover:scale-110 transition-transform')} />
                 <span className="text-sm tracking-wide">{item.label}</span>
@@ -105,7 +104,7 @@ export function Sidebar() {
 
           {/* Sección de Administración (Dropdown) */}
           <div className="pt-4 mt-2 border-t border-white/5">
-             <button
+            <button
               onClick={() => setAdminOpen(!adminOpen)}
               className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-colors group"
             >
@@ -122,8 +121,8 @@ export function Sidebar() {
                     href={item.href}
                     className={cn(
                       'flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs transition-all',
-                      pathname === item.href 
-                        ? 'bg-white/10 text-[#FACC15] font-bold border-l-2 border-[#FACC15]' 
+                      pathname === item.href
+                        ? 'bg-white/10 text-[#FACC15] font-bold border-l-2 border-[#FACC15]'
                         : 'text-slate-500 hover:text-slate-200'
                     )}
                   >
@@ -147,9 +146,9 @@ export function Sidebar() {
 
       {/* Overlay para móviles */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden transition-opacity" 
-          onClick={() => setIsOpen(false)} 
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 lg:hidden transition-opacity"
+          onClick={() => setIsOpen(false)}
         />
       )}
     </>

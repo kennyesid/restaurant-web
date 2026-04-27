@@ -30,6 +30,27 @@ export interface RolePermission {
   id_permission: string;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Product Management
 // export interface Category {
 //   categoryId: number;

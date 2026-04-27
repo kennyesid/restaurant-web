@@ -1,6 +1,6 @@
 import { storage } from '@/lib/storage';
-import { User, Role } from '@/lib/types';
-import { v4 as uuidv4 } from 'crypto-js';
+import { User, Role } from '@/types/user/user';
+// import { v4 as uuidv4 } from 'crypto-js';
 
 // Simulate UUID generation
 function generateId(): string {
@@ -17,28 +17,55 @@ function initializeDefaults() {
   if (existingUsers.length === 0) {
     const defaultUsers: User[] = [
       {
-        id_user: 'user-1',
-        username: 'admin',
-        password: 'admin', // In production, this would be hashed
-        email: 'admin@yesid.com',
-        full_name: 'Administrator',
-        id_tenant: DEFAULT_TENANT_ID,
-        id_role: 'role-1',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        id: 0,
+        username: 'S/N',
+        password: 'S/N', // In production, this would be hashed
+        fullName: 'S/N',
+        document: 'S/N',
+        phone: 'S/N', 
+        address: 'S/N',
+        email: 'S/N',
+        branchId: 0,
+        avatarUrl: '',
+        tenantId: DEFAULT_TENANT_ID,
+        roleId: 1,
+        state: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
-        id_user: 'user-2',
+        id: 1,
+        username: 'admin',
+        password: 'admin', // In production, this would be hashed
+        fullName: 'Administrator',
+        document: '12345678',
+        phone: '123456789', 
+        address: '123 Main St',
+        email: 'admin@yesid.com',
+        branchId: 1,
+        avatarUrl: '',
+        tenantId: DEFAULT_TENANT_ID,
+        roleId: 1,
+        state: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
         username: 'cashier',
         password: 'cashier123',
+        fullName: 'Cajero Principal',
+        document: '12345678',
+        phone: '123456789',
+        address: '123 Main St',
         email: 'cashier@yesid.com',
-        full_name: 'Cajero Principal',
-        id_tenant: DEFAULT_TENANT_ID,
-        id_role: 'role-2',
-        is_active: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        branchId: 1,
+        avatarUrl: '',
+        tenantId: DEFAULT_TENANT_ID,
+        roleId: 2,
+        state: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ];
     storage.setCollection(USERS_KEY, defaultUsers);
@@ -48,22 +75,22 @@ function initializeDefaults() {
   if (existingRoles.length === 0) {
     const defaultRoles: Role[] = [
       {
-        id_role: 'role-1',
+        id: 1,
         name: 'Administrador',
         description: 'Acceso total al sistema',
-        id_tenant: DEFAULT_TENANT_ID,
+        tenantId: DEFAULT_TENANT_ID,
       },
       {
-        id_role: 'role-2',
+        id: 2,
         name: 'Cajero',
         description: 'Acceso a POS y reportes básicos',
-        id_tenant: DEFAULT_TENANT_ID,
+        tenantId: DEFAULT_TENANT_ID,
       },
       {
-        id_role: 'role-3',
+        id: 3,
         name: 'Gerente',
         description: 'Acceso a reportes y análisis',
-        id_tenant: DEFAULT_TENANT_ID,
+        tenantId: DEFAULT_TENANT_ID,
       },
     ];
     storage.setCollection(ROLES_KEY, defaultRoles);
@@ -80,18 +107,24 @@ export async function getUsers(): Promise<User[]> {
   return storage.getCollection<User>(USERS_KEY);
 }
 
-export async function getUserById(id: string): Promise<User | null> {
-  return storage.getFromCollection<User>(USERS_KEY, id, 'id_user');
+export async function getUserById(id: number): Promise<User | null> {
+  return storage.getFromCollection<User>(USERS_KEY, id, 'id');
 }
 
-export async function createUser(user: Omit<User, 'id_user' | 'created_at' | 'updated_at'>): Promise<User> {
+export async function createUser(user: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
+
+  const existingUsers = storage.getCollection<User>(USERS_KEY);
+  const lastId = existingUsers.length > 0
+    ? Math.max(...existingUsers.map(u => u.id))
+    : 1;
+
   const newUser: User = {
     ...user,
-    id_user: generateId(),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    id: lastId + 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
-  storage.addToCollection(USERS_KEY, newUser, 'id_user');
+  storage.addToCollection(USERS_KEY, newUser, 'id');
   return newUser;
 }
 
@@ -101,15 +134,15 @@ export async function updateUser(id: string, updates: Partial<User>): Promise<Us
     id,
     {
       ...updates,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
-    'id_user'
+    'id'
   );
-  return success ? storage.getFromCollection<User>(USERS_KEY, id, 'id_user') : null;
+  return success ? storage.getFromCollection<User>(USERS_KEY, id, 'id') : null;
 }
 
 export async function deleteUser(id: string): Promise<boolean> {
-  return storage.removeFromCollection(USERS_KEY, id, 'id_user');
+  return storage.removeFromCollection(USERS_KEY, id, 'id');
 }
 
 // Role CRUD operations
@@ -124,7 +157,7 @@ export async function getRoleById(id: string): Promise<Role | null> {
 export async function createRole(role: Omit<Role, 'id_role'>): Promise<Role> {
   const newRole: Role = {
     ...role,
-    id_role: generateId(),
+    id: 0,
   };
   storage.addToCollection(ROLES_KEY, newRole, 'id_role');
   return newRole;

@@ -18,26 +18,26 @@ import { CustomNotification } from "@/components/common/toast/CustomNotification
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
 import { GenericModal } from "@/components/common/modal/GenericModal";
-import { ToastBody } from "@/types/generic/toastBody";
 import ButtonGeneric from "../common/button/ButtonGeneric";
 import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
+import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
+import { User } from "@/types/";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
 
   const [showSummary, setShowSummary] = useState(false);
-  const [toastBody, setToastBody] = useState<ToastBody>({
-    type: ToastType.Successfully,
-    message: "Registro Completado",
-    description: "Registro Guardado Exitosamente.",
-    image: null
-  });
 
   const { items, paymentType } = useAppSelector((state) => state.cart) as {
     items: CartItem[];
     paymentType: string;
   };
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [needsInvoice, setNeedsInvoice] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<User | null>(null);
+  const [customNit, setCustomNit] = useState(""); // Para que sea modificable
+
 
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -71,10 +71,18 @@ export function ShoppingCart() {
         detail: saleItems,
         paymentType: paymentType as any,
         userId: 1,
+        userCustomerId: 0,
+        orderNumber: 1,
+        orderStatus: OrderStatusEnum.EN_COCINA,
         tenantId: 1,
         state: true,
         total,
         shift: getCurrentShift(),
+
+
+        // userCustomerId: needsInvoice && selectedClient ? selectedClient.id : 0,
+        // invoiceNit: needsInvoice ? customNit : null,
+        // requiresInvoice: needsInvoice,
       });
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
@@ -112,8 +120,6 @@ export function ShoppingCart() {
             {items.length} artículos
           </p>
         </div>
-
-        {/* Items List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-[#052A3D]/20 to-transparent">
           {items.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -129,8 +135,6 @@ export function ShoppingCart() {
                 className="border bg-white border-border rounded-lg p-2"
               >
                 <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
-
-                  {/* COLUMN 1 — Imagen + Info */}
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
                       <img
@@ -149,9 +153,8 @@ export function ShoppingCart() {
                       </p>
                     </div>
                   </div>
-
-                  {/* COLUMN 2 — Cantidad */}
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center bg-muted rounded-full border border-border overflow-hidden">
+                    {/* MINUS */}
                     <button
                       onClick={() =>
                         dispatch(
@@ -161,11 +164,12 @@ export function ShoppingCart() {
                           }),
                         )
                       }
-                      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+                      className="px-2 py-1 hover:bg-background/60 transition-colors cursor-pointer"
                     >
-                      <Minus size={12} />
+                      <Minus size={14} />
                     </button>
 
+                    {/* INPUT */}
                     <input
                       type="number"
                       value={item.quantity}
@@ -177,9 +181,16 @@ export function ShoppingCart() {
                           }),
                         )
                       }
-                      className="w-10 text-center text-xs border border-border rounded"
+                      className="
+                        w-10 text-center text-sm
+                        bg-transparent
+                        outline-none
+                        border-0
+                        [-moz-appearance:textfield]
+                      "
                     />
 
+                    {/* PLUS */}
                     <button
                       onClick={() =>
                         dispatch(
@@ -189,13 +200,11 @@ export function ShoppingCart() {
                           }),
                         )
                       }
-                      className="cursor-pointer p-1 border border-border rounded hover:bg-muted"
+                      className="px-2 py-1 hover:bg-background/60 transition-colors cursor-pointer"
                     >
-                      <Plus size={12} />
+                      <Plus size={14} />
                     </button>
                   </div>
-
-                  {/* COLUMN 3 — Delete + Total */}
                   <div className="flex flex-col items-end">
                     <button
                       onClick={() => dispatch(removeFromCart(item.productId))}
@@ -203,12 +212,10 @@ export function ShoppingCart() {
                     >
                       <Trash2 size={14} />
                     </button>
-
                     <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
                       Bs {(item.price * item.quantity).toString()}
                     </p>
                   </div>
-
                 </div>
               </div>
             ))
@@ -250,8 +257,6 @@ export function ShoppingCart() {
             </div>
 
             <ButtonGeneric
-              // className="w-full rounded-none cursor-pointer"
-              // size="lg"
               variant="confirmModalPrimary"
               onClick={handlePreCheckout}
               disabled={isProcessing || items.length === 0}
@@ -273,6 +278,8 @@ export function ShoppingCart() {
         )}
       </Card>
 
+// En ShoppingCart.tsx (al final, donde invocas el modal)
+
       <GenericModal
         isOpen={showSummary}
         onClose={() => setShowSummary(false)}
@@ -280,7 +287,27 @@ export function ShoppingCart() {
         total={total}
         onConfirm={handleCheckout}
         isProcessing={isProcessing}
+        // PASA LAS NUEVAS PROPS:
+        needsInvoice={needsInvoice}
+        setNeedsInvoice={setNeedsInvoice}
+        selectedClient={selectedClient}
+        setSelectedClient={setSelectedClient}
+        customNit={customNit}
+        setCustomNit={setCustomNit}
+        onOpenCreateClientModal={() => {
+          // Aquí abrirías el modal de creación de cliente
+          console.log("Abrir modal de nuevo cliente");
+        }}
       />
+
+      {/* <GenericModal
+        isOpen={showSummary}
+        onClose={() => setShowSummary(false)}
+        items={items}
+        total={total}
+        onConfirm={handleCheckout}
+        isProcessing={isProcessing}
+      /> */}
     </>
   );
 }

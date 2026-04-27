@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Role } from '@/lib/types';
-import { getRoles, createRole, updateRole, deleteRole } from '@/services/users';
+import { getRoles, createRole, updateRole, deleteRole } from '@/services/usersService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
