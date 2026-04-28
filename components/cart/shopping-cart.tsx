@@ -6,6 +6,7 @@ import {
   updateQuantity,
   clearCart,
   setPaymentType,
+  updateCartItems,
 } from "@/lib/slices/cartSlice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export function ShoppingCart() {
   const dispatch = useAppDispatch();
 
   const [showSummary, setShowSummary] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const { items, paymentType } = useAppSelector((state) => state.cart) as {
     items: CartItem[];
@@ -39,8 +41,13 @@ export function ShoppingCart() {
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [customNit, setCustomNit] = useState(""); // Para que sea modificable
 
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+  // const total = items.reduce(
+  //   (sum, item) => sum + item.price * item.quantity,
+  //   0,
+  // );
+
+  let total = items.reduce(
+    (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
     0,
   );
 
@@ -69,22 +76,25 @@ export function ShoppingCart() {
       }));
 
       if (selectedClient) {
-        const selectedClientResponse = await createUser({
-          username: selectedClient.username,
-          password: selectedClient.password,
-          fullName: `${selectedClient.username} ${selectedClient.fullName || ""}`,
-          address: "S/N",
-          document: selectedClient.document || "S/N",
-          email: selectedClient.email || "S/N",
-          phone: selectedClient.phone || "S/N",
-          roleId: 1,
-          state: true,
-          nit: selectedClient.nit,
-          tenantId: "1",
-          avatarUrl: "S/N",
-          branchId: 1,
-        });
-        userSendId = selectedClientResponse.id;
+        if (selectedClient.id === 0) {
+          const selectedClientResponse = await createUser({
+            username: selectedClient.username,
+            password: selectedClient.password,
+            fullName: `${selectedClient.username} ${selectedClient.fullName || ""}`,
+            address: "S/N",
+            document: selectedClient.document || "S/N",
+            email: selectedClient.email || "S/N",
+            phone: selectedClient.phone || "S/N",
+            roleId: 1,
+            state: true,
+            nit: selectedClient.nit,
+            avatarUrl: "S/N",
+            branchId: 1,
+          });
+          userSendId = selectedClientResponse.id;
+        } else {
+          userSendId = selectedClient.id;
+        }
       }
       // setSelectedClient
 
@@ -131,6 +141,17 @@ export function ShoppingCart() {
   const handlePreCheckout = () => {
     if (items.length === 0) return toast.error("Carrito vacío");
     setShowSummary(true);
+  };
+
+  const handleChangeSubTotal = (newItems: CartItem[]) => {
+    // const haisdhijashd = items;
+    // const asdasdsss = newItems;
+    dispatch(updateCartItems(newItems));
+    total = items.reduce(
+      (sum, item) =>
+        sum + (item.modifiedSubtotal ?? item.price * item.quantity),
+      0,
+    );
   };
 
   return (
@@ -301,7 +322,11 @@ export function ShoppingCart() {
       // En ShoppingCart.tsx (al final, donde invocas el modal)
       <GenericModal
         isOpen={showSummary}
-        onClose={() => setShowSummary(false)}
+        // onClose={() => setShowSummary(false)}
+        onClose={() => {
+          setShowSummary(false); // Cierra el modal
+          setSelectedClient(null); // Resetea el cliente seleccionado
+        }}
         items={items}
         total={total}
         onConfirm={handleCheckout}
@@ -311,21 +336,14 @@ export function ShoppingCart() {
         setNeedsInvoice={setNeedsInvoice}
         selectedClient={selectedClient}
         setSelectedClient={setSelectedClient}
-        customNit={customNit}
-        setCustomNit={setCustomNit}
         onOpenCreateClientModal={() => {
-          // Aquí abrirías el modal de creación de cliente
+          // Aquí abrirías el modal de creación de cliente=
           console.log("Abrir modal de nuevo cliente");
         }}
+        changeSubTotal={handleChangeSubTotal}
+        isEditMode={isEditMode}
+        setIsEditMode={setIsEditMode}
       />
-      {/* <GenericModal
-        isOpen={showSummary}
-        onClose={() => setShowSummary(false)}
-        items={items}
-        total={total}
-        onConfirm={handleCheckout}
-        isProcessing={isProcessing}
-      /> */}
     </>
   );
 }

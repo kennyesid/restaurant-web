@@ -5,7 +5,7 @@ export interface StorageConfig {
   version?: number;
 }
 
-const DEFAULT_PREFIX = 'yesid_';
+const DEFAULT_PREFIX = "admin_";
 const DEFAULT_VERSION = 1;
 
 class StorageManager {
@@ -25,7 +25,7 @@ class StorageManager {
    * Get a single item from storage
    */
   getItem<T>(key: string, defaultValue?: T): T | null {
-    if (typeof window === 'undefined') return defaultValue || null;
+    if (typeof window === "undefined") return defaultValue || null;
 
     try {
       const item = localStorage.getItem(this.getKey(key));
@@ -40,7 +40,7 @@ class StorageManager {
    * Set a single item in storage
    */
   setItem<T>(key: string, value: T): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     try {
       localStorage.setItem(this.getKey(key), JSON.stringify(value));
@@ -70,10 +70,10 @@ class StorageManager {
   addToCollection<T extends { [key: string]: any }>(
     key: string,
     item: T,
-    idField: string = 'id'
+    idField: string = "id",
   ): void {
     const items = this.getCollection<T>(key);
-    const exists = items.some(i => i[idField] === item[idField]);
+    const exists = items.some((i) => i[idField] === item[idField]);
     if (!exists) {
       items.push(item);
       this.setCollection(key, items);
@@ -87,10 +87,10 @@ class StorageManager {
     key: string,
     id: string | number,
     updates: Partial<T>,
-    idField: string = 'id'
+    idField: string = "id",
   ): boolean {
     const items = this.getCollection<T>(key);
-    const index = items.findIndex(i => String(i[idField]) === String(id));
+    const index = items.findIndex((i) => String(i[idField]) === String(id));
     if (index !== -1) {
       items[index] = { ...items[index], ...updates };
       this.setCollection(key, items);
@@ -105,10 +105,10 @@ class StorageManager {
   removeFromCollection<T extends { [key: string]: any }>(
     key: string,
     id: string | number,
-    idField: string = 'id'
+    idField: string = "id",
   ): boolean {
     const items = this.getCollection<T>(key);
-    const filtered = items.filter(i => String(i[idField]) !== String(id));
+    const filtered = items.filter((i) => String(i[idField]) !== String(id));
     if (filtered.length !== items.length) {
       this.setCollection(key, filtered);
       return true;
@@ -122,21 +122,21 @@ class StorageManager {
   getFromCollection<T extends { [key: string]: any }>(
     key: string,
     id: string | number,
-    idField: string = 'id'
+    idField: string = "id",
   ): T | null {
     const items = this.getCollection<T>(key);
-    return items.find(i => String(i[idField]) === String(id)) || null;
+    return items.find((i) => String(i[idField]) === String(id)) || null;
   }
 
   /**
    * Clear all items with a specific prefix
    */
   clear(prefix?: string): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const keyPrefix = prefix ? `${this.prefix}${prefix}` : this.prefix;
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(keyPrefix)) {
         localStorage.removeItem(key);
       }
@@ -147,7 +147,7 @@ class StorageManager {
    * Remove a specific key
    */
   removeItem(key: string): void {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     localStorage.removeItem(this.getKey(key));
   }

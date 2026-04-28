@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { getSales, deleteSale } from '@/services/salesService';
-import { Button } from '@/components/ui/button';
-import { Sale } from '@/types';
-import { Card } from '@/components/ui/card';
-import { Trash2, Eye, Edit } from 'lucide-react';
-import { handleResponse } from '@/utils/api-helpers';
+import { useEffect, useState } from "react";
+import { getSales, deleteSale } from "@/services/salesService";
+import { Button } from "@/components/ui/button";
+import { Sale } from "@/types";
+import { Card } from "@/components/ui/card";
+import { Trash2, Eye, Edit } from "lucide-react";
+import { handleResponse } from "@/utils/api-helpers";
 
 // const today = new Date().toISOString().split('T')[0];
 
 export default function SalesPage() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,8 +22,8 @@ export default function SalesPage() {
   // Estados de Filtros
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
-  const [filterUser, setFilterUser] = useState('all');
-  const [filterPaymentType, setFilterPaymentType] = useState('all');
+  const [filterUser, setFilterUser] = useState("all");
+  const [filterPaymentType, setFilterPaymentType] = useState("all");
 
   useEffect(() => {
     loadSales();
@@ -35,7 +35,7 @@ export default function SalesPage() {
       const data = await getSales();
       handleResponse(data, setSales);
     } catch (error) {
-      console.error('Error loading sales:', error);
+      console.error("Error loading sales:", error);
     } finally {
       setLoading(false);
     }
@@ -53,19 +53,16 @@ export default function SalesPage() {
         (!endDate || saleDate <= endDate);
 
       const userMatch =
-        filterUser === "all" ||
-        sale.userId?.toString() === filterUser;
+        filterUser === "all" || sale.userId?.toString() === filterUser;
 
       const paymentMatch =
-        filterPaymentType === "all" ||
-        sale.paymentType === filterPaymentType;
+        filterPaymentType === "all" || sale.paymentType === filterPaymentType;
 
       return dateMatch && userMatch && paymentMatch;
     })
     .sort(
       (a, b) =>
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime()
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
   // const filteredSales = sales.filter(sale => {
@@ -85,25 +82,30 @@ export default function SalesPage() {
   //   return dateMatch && userMatch && paymentMatch;
   // });
 
-  const uniqueUsers = Array.from(new Set(sales.map(s => s.userId)));
+  const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
   const uniquePaymentTypes = ["cash", "qr", "mixed"];
 
+  const qrSales = sales.filter((s) => s.paymentType === "qr");
+  const cashSales = sales.filter((s) => s.paymentType === "cash");
+  const mixedSales = sales.filter((s) => s.paymentType === "mixed");
 
-  const qrSales = sales.filter(s => s.paymentType === "qr");
-  const cashSales = sales.filter(s => s.paymentType === "cash");
-  const mixedSales = sales.filter(s => s.paymentType === "mixed");
-
-  const totalSales = filteredSales.reduce(
-    (acc, sale) => acc + sale.total,
-    0
-  );
+  const totalSales = filteredSales.reduce((acc, sale) => acc + sale.total, 0);
 
   const getPaymentTypeLabel = (type: string) => {
-    const labels: Record<string, string> = { cash: 'Efectivo', qr: 'QR', mixed: 'Mixto' };
+    const labels: Record<string, string> = {
+      cash: "Efectivo",
+      qr: "QR",
+      mixed: "Mixto",
+    };
     return labels[type] || type;
   };
 
-  if (loading) return <div className="p-6 text-center font-medium text-[#052A3D]">Cargando historial...</div>;
+  if (loading)
+    return (
+      <div className="p-6 text-center font-medium text-[#052A3D]">
+        Cargando historial...
+      </div>
+    );
 
   const getOrderStatusBadge = (status: number) => {
     const styles: Record<number, string> = {
@@ -123,31 +125,38 @@ export default function SalesPage() {
     };
 
     return (
-      <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${styles[status]}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-[10px] font-bold ${styles[status]}`}
+      >
         {labels[status]}
       </span>
     );
   };
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-[#052A3D] tracking-tight">CONTROL DE VENTAS</h1>
-          <p className="text-sm text-muted-foreground">Gestiona y audita las transacciones del sistema</p>
+          <h1 className="text-2xl font-black text-[#052A3D] tracking-tight">
+            CONTROL DE VENTAS
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Gestiona y audita las transacciones del sistema
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={loadSales} variant="outline" size="sm">Actualizar Datos</Button>
+          <Button onClick={loadSales} variant="outline" size="sm">
+            Actualizar Datos
+          </Button>
         </div>
       </div>
 
       {/* TOOLBAR DE FILTROS */}
-      <div className='grid grid-cols-1 lg:grid-cols-4 gap-4 bg-muted/40 backdrop-blur-sm p-4 rounded-xl border'>
-
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 bg-muted/40 backdrop-blur-sm p-4 rounded-xl border">
         {/* segunda parte */}
         <div className="lg:col-span-1">
-
-          <div className="
+          <div
+            className="
     relative overflow-hidden
     rounded-2xl
     p-5
@@ -157,8 +166,8 @@ export default function SalesPage() {
     from-[#052A3D]
     via-[#0b3f5c]
     to-[#052A3D]
-  ">
-
+  "
+          >
             {/* decoración fondo */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
@@ -183,12 +192,9 @@ export default function SalesPage() {
 
             {/* STATS */}
             <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
-
               {/* EFECTIVO */}
               <div>
-                <p className="text-[10px] uppercase opacity-70">
-                  Efectivo
-                </p>
+                <p className="text-[10px] uppercase opacity-70">Efectivo</p>
 
                 <p className="text-lg font-bold text-[#facc15]">
                   {cashSales.length}
@@ -197,34 +203,24 @@ export default function SalesPage() {
 
               {/* QR */}
               <div>
-                <p className="text-[10px] uppercase opacity-70">
-                  QR
-                </p>
+                <p className="text-[10px] uppercase opacity-70">QR</p>
 
-                <p className="text-lg font-bold">
-                  {qrSales.length}
-                </p>
+                <p className="text-lg font-bold">{qrSales.length}</p>
               </div>
 
               {/* MIXTO */}
               <div>
-                <p className="text-[10px] uppercase opacity-70">
-                  Mixto
-                </p>
+                <p className="text-[10px] uppercase opacity-70">Mixto</p>
 
-                <p className="text-lg font-bold">
-                  {mixedSales.length}
-                </p>
+                <p className="text-lg font-bold">{mixedSales.length}</p>
               </div>
             </div>
           </div>
         </div>
 
-
         <div className="lg:col-span-3 space-y-4">
           {/* FILTROS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
             {/* Usuario */}
             <div>
               <label className="text-sm font-medium">Usuario</label>
@@ -234,7 +230,7 @@ export default function SalesPage() {
                 className="w-full border rounded-md p-2"
               >
                 <option value="all">Todos</option>
-                {uniqueUsers.map(user => (
+                {uniqueUsers.map((user) => (
                   <option key={user} value={user}>
                     Usuario {user}
                   </option>
@@ -251,7 +247,7 @@ export default function SalesPage() {
                 className="w-full border rounded-md p-2"
               >
                 <option value="all">Todos</option>
-                {uniquePaymentTypes.map(type => (
+                {uniquePaymentTypes.map((type) => (
                   <option key={type} value={type}>
                     {getPaymentTypeLabel(type)}
                   </option>
@@ -308,14 +304,17 @@ export default function SalesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
-              {filteredSales.map((sale) => (
+              {filteredSales.map((sale, index) => (
                 <>
-                  <tr key={sale.saleId} className="hover:bg-muted/40 transition-colors">
+                  <tr
+                    key={sale.saleId}
+                    className="hover:bg-muted/40 transition-colors"
+                  >
                     <td className="px-4 py-4">
                       <button
                         onClick={() =>
                           setExpandedRow(
-                            expandedRow === sale.saleId ? null : sale.saleId
+                            expandedRow === sale.saleId ? null : sale.saleId,
                           )
                         }
                         className="p-1 rounded hover:bg-muted transition"
@@ -360,12 +359,15 @@ export default function SalesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
-                        ? "bg-green-100 text-green-700"
-                        : sale.paymentType === "qr"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-purple-100 text-purple-700"
-                        }`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                          sale.paymentType === "cash"
+                            ? "bg-green-100 text-green-700"
+                            : sale.paymentType === "qr"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-purple-100 text-purple-700"
+                        }`}
+                      >
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
                     </td>
@@ -390,7 +392,9 @@ export default function SalesPage() {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => deleteSale(sale.saleId).then(loadSales)}
+                          onClick={() =>
+                            deleteSale(sale.saleId).then(loadSales)
+                          }
                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                           title="Eliminar"
                         >
@@ -402,9 +406,7 @@ export default function SalesPage() {
                   {expandedRow === sale.saleId && (
                     <tr className="bg-muted/30">
                       <td colSpan={8} className="px-6 py-6">
-
                         <div className="rounded-lg border bg-white p-4 shadow-sm">
-
                           {/* Header detalle */}
                           <div className="flex justify-between mb-4">
                             <div>
@@ -423,8 +425,7 @@ export default function SalesPage() {
 
                           {/* Items */}
                           <div className="divide-y">
-
-                            {sale.detail.map(item => (
+                            {sale.detail.map((item) => (
                               <div
                                 key={item.productId}
                                 className="flex justify-between items-center py-2"
@@ -439,15 +440,15 @@ export default function SalesPage() {
                                 </div>
 
                                 <span className="font-semibold">
-                                  Bs {(item.price * item.quantity).toLocaleString()}
+                                  Bs{" "}
+                                  {(
+                                    item.price * item.quantity
+                                  ).toLocaleString()}
                                 </span>
                               </div>
                             ))}
-
                           </div>
-
                         </div>
-
                       </td>
                     </tr>
                   )}
@@ -466,7 +467,6 @@ export default function SalesPage() {
   );
 }
 
-
 // 'use client';
 
 // import { useEffect, useState } from 'react';
@@ -482,7 +482,6 @@ export default function SalesPage() {
 //   DialogTitle,
 //   DialogDescription,
 // } from '@/components/ui/dialog';
-
 
 // export default function SalesPage() {
 //   const [sales, setSales] = useState<Sale[]>([]);

@@ -4,5 +4,8 @@ export interface CartItem {
   price: number;
   categoryId: number; // Añadido
   quantity: number;
+  modified?: boolean;
+  modifiedSubtotal?: number;
+  reasonModification?: string;
   imageUrl?: string;
 }
