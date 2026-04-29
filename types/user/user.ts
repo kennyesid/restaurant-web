@@ -13,6 +13,7 @@ export interface User {
   avatarUrl?: string;
   tenantId?: number;
   roleId: number;
+  role?: string;
   createdAt: string;
   updatedAt: string;
   state: boolean;

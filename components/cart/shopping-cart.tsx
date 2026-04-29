@@ -1,13 +1,13 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/store/hooks";
 import {
   removeFromCart,
   updateQuantity,
   clearCart,
   setPaymentType,
   updateCartItems,
-} from "@/lib/slices/cartSlice";
+} from "@/store/store/slices/cartSlice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trash2, Minus, Plus } from "lucide-react";

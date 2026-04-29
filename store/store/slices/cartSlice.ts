@@ -1,23 +1,6 @@
 import { CartItem, CartState } from "@/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// export interface CartItem {
-//   productId: number;
-//   name: string;
-//   price: number;
-//   quantity: number;
-//   category: string;
-// }
-
-// interface CartState {
-//   items: CartItem[];
-//   paymentType: 'cash' | 'qr' | 'mixed';
-//   mixedPayment?: {
-//     cash: number;
-//     qr: number;
-//   };
-// }
-
 const initialState: CartState = {
   items: [],
   paymentType: "cash",

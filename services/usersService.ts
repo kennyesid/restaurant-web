@@ -1,8 +1,6 @@
 import { storage } from "@/lib/storage";
 import { User, Role } from "@/types/user/user";
-// import { v4 as uuidv4 } from 'crypto-js';
 
-// Simulate UUID generation
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
@@ -11,7 +9,6 @@ const USERS_KEY = "users";
 const ROLES_KEY = "roles";
 const DEFAULT_TENANT_ID = "tenant-1";
 
-// Initialize default data if not exists
 function initializeDefaults() {
   const existingUsers = storage.getCollection<User>(USERS_KEY);
   if (existingUsers.length === 0) {
@@ -19,7 +16,7 @@ function initializeDefaults() {
       {
         id: 0,
         username: "S/N",
-        password: "S/N", // In production, this would be hashed
+        password: "S/N",
         fullName: "S/N",
         document: "S/N",
         phone: "S/N",
@@ -29,6 +26,8 @@ function initializeDefaults() {
         avatarUrl: "",
         // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
+        role: "CHEF",
+        nit: "56213",
         state: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -41,11 +40,13 @@ function initializeDefaults() {
         document: "12345678",
         phone: "123456789",
         address: "123 Main St",
-        email: "admin@yesid.com",
+        email: "admin@gmail.com",
         branchId: 1,
         avatarUrl: "",
         // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
+        role: "ADMIN",
+        nit: "789456123",
         state: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -53,16 +54,18 @@ function initializeDefaults() {
       {
         id: 2,
         username: "cashier",
-        password: "cashier123",
+        password: "sales_manager",
         fullName: "Cajero Principal",
         document: "12345678",
         phone: "123456789",
         address: "123 Main St",
-        email: "cashier@yesid.com",
+        email: "sales_manager@gmail.com",
         branchId: 1,
         avatarUrl: "",
         // tenantId: DEFAULT_TENANT_ID,
         roleId: 2,
+        role: "SALES_MANAGER",
+        nit: "12345",
         state: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -97,12 +100,10 @@ function initializeDefaults() {
   }
 }
 
-// Initialize on module load
 if (typeof window !== "undefined") {
   initializeDefaults();
 }
 
-// User CRUD operations
 export async function getUsers(): Promise<User[]> {
   return storage.getCollection<User>(USERS_KEY);
 }
@@ -148,7 +149,6 @@ export async function deleteUser(id: string): Promise<boolean> {
   return storage.removeFromCollection(USERS_KEY, id, "id");
 }
 
-// Role CRUD operations
 export async function getRoles(): Promise<Role[]> {
   return storage.getCollection<Role>(ROLES_KEY);
 }
@@ -182,12 +182,10 @@ export async function deleteRole(id: string): Promise<boolean> {
 
 // Authentication
 export async function authenticateUser(
-  username: string,
+  email: string,
   password: string,
 ): Promise<User | null> {
   const users = await getUsers();
-  const user = users.find(
-    (u) => u.username === username && u.password === password,
-  );
+  const user = users.find((u) => u.email === email && u.password === password);
   return user || null;
 }

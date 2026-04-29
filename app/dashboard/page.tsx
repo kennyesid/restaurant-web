@@ -1,16 +1,31 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { getTotalSalesByShift, getTopProducts, getTotalRevenue } from '@/services/salesService';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
-import { handleResponse } from '@/utils/api-helpers';
-import ButtonGeneric from '@/components/common/button/ButtonGeneric';
-import { EnvConfig } from '@/config/env.config';
-import { ToastType } from '@/types';
-import { toast } from 'sonner';
-import { CustomNotification } from '@/components/common/toast/CustomNotification';
+import { useEffect, useState } from "react";
+import { Card } from "@/components/ui/card";
+import {
+  getTotalSalesByShift,
+  getTopProducts,
+  getTotalRevenue,
+} from "@/services/salesService";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from "recharts";
+import { DollarSign, ShoppingCart, TrendingUp } from "lucide-react";
+import { handleResponse } from "@/utils/api-helpers";
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
+import { EnvConfig } from "@/config/env.config";
+import { ToastType } from "@/types";
+import { toast } from "sonner";
+import { CustomNotification } from "@/components/common/toast/CustomNotification";
 
 export default function DashboardPage() {
   // const [salesByShift, setSalesByShift] = useState({ morning: 0, afternoon: 0, night: 0 });
@@ -18,7 +33,6 @@ export default function DashboardPage() {
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-
 
   useEffect(() => {
     const loadData = async () => {
@@ -33,8 +47,8 @@ export default function DashboardPage() {
         const [resShift, resProducts, resRevenue] = await Promise.all([
           getTotalSalesByShift(),
           getTopProducts(),
-          getTotalRevenue()
-        ]); 
+          getTotalRevenue(),
+        ]);
 
         handleResponse(resShift, setSalesByShift);
         handleResponse(resProducts, setTopProducts);
@@ -55,7 +69,6 @@ export default function DashboardPage() {
         // if (resRevenue.codigo === 200 && resRevenue.contenido !== null) {
         //   setTotalRevenue(resRevenue.contenido);
         // }
-
       } finally {
         setIsLoading(false);
       }
@@ -65,9 +78,9 @@ export default function DashboardPage() {
   }, []);
 
   const chartData = [
-    { name: 'Mañana', ventas: salesByShift.morning },
-    { name: 'Tarde', ventas: salesByShift.afternoon },
-    { name: 'Noche', ventas: salesByShift.night },
+    { name: "Mañana", ventas: salesByShift.morning },
+    { name: "Tarde", ventas: salesByShift.afternoon },
+    { name: "Noche", ventas: salesByShift.night },
   ];
 
   if (isLoading) {
@@ -78,17 +91,16 @@ export default function DashboardPage() {
     );
   }
 
-const handleTestToas = () => {
-  const currentToastBody = {
-        type: ToastType.Successfully,
-        message: "Venta Completada",
-        description: "Venta realizada satisfactoriamente.",
-        image: null
-      };
+  const handleTestToas = () => {
+    const currentToastBody = {
+      type: ToastType.Successfully,
+      message: "Venta Completada",
+      description: "Venta realizada satisfactoriamente.",
+      image: null,
+    };
 
-toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
-}
-
+    toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+  };
 
   return (
     <div className="space-y-8">
@@ -98,7 +110,9 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Ingresos Totales</p>
-              <h3 className="text-2xl font-bold mt-2">${totalRevenue.toLocaleString('es-CO')}</h3>
+              <h3 className="text-2xl font-bold mt-2">
+                ${totalRevenue.toLocaleString("es-CO")}
+              </h3>
             </div>
             <div className="p-3 bg-primary/10 rounded-lg">
               <DollarSign className="text-primary" size={24} />
@@ -109,7 +123,9 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-muted-foreground">Órdenes Procesadas</p>
+              <p className="text-sm text-muted-foreground">
+                Órdenes Procesadas
+              </p>
               <h3 className="text-2xl font-bold mt-2">3</h3>
             </div>
             <div className="p-3 bg-secondary/10 rounded-lg">
@@ -122,7 +138,9 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Ticket Promedio</p>
-              <h3 className="text-2xl font-bold mt-2">${Math.round(totalRevenue / 3).toLocaleString('es-CO')}</h3>
+              <h3 className="text-2xl font-bold mt-2">
+                ${Math.round(totalRevenue / 3).toLocaleString("es-CO")}
+              </h3>
             </div>
             <div className="p-3 bg-accent/10 rounded-lg">
               <TrendingUp className="text-accent" size={24} />
@@ -134,14 +152,13 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sales by Shift */}
-            <ButtonGeneric
+        {/* <ButtonGeneric
                 variant="primaryRed"
                 onClick={handleTestToas}
                 className=" w-1/2 "
             >
-                {/* <Plus size={20} /> */}
                 Nuevo Producto
-            </ButtonGeneric>
+            </ButtonGeneric> */}
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">Ventas por Turno</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -151,12 +168,16 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
               <YAxis stroke="var(--muted-foreground)" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px',
+                  backgroundColor: "var(--card)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
                 }}
               />
-              <Bar dataKey="ventas" fill="var(--chart-1)" radius={[8, 8, 0, 0]} />
+              <Bar
+                dataKey="ventas"
+                fill="var(--chart-1)"
+                radius={[8, 8, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -169,9 +190,13 @@ toast.custom((t) => (<CustomNotification t={t} body={currentToastBody} />));
               <div key={index} className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="font-medium">{product.name}</p>
-                  <p className="text-sm text-muted-foreground">{product.quantity} unidades vendidas</p>
+                  <p className="text-sm text-muted-foreground">
+                    {product.quantity} unidades vendidas
+                  </p>
                 </div>
-                <p className="font-semibold">${product.revenue.toLocaleString('es-CO')}</p>
+                <p className="font-semibold">
+                  ${product.revenue.toLocaleString("es-CO")}
+                </p>
               </div>
             ))}
           </div>

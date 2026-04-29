@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -78,6 +78,7 @@
   /* --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback'; */
 
+  --font-nunito: var(--font-nunito);
   --font-caveat: var(--font-caveat);
   --font-sans: var(--font-caveat), ui-sans-serif, system-ui, sans-serif;
 
@@ -118,19 +119,19 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --color-rest-primary: #052A3D;
-  --color-rest-primary-up: #0A3D57;
-  --color-rest-primary-down: #031C28;
+  --color-rest-primary: #052a3d;
+  --color-rest-primary-up: #0a3d57;
+  --color-rest-primary-down: #031c28;
   --color-rest-secondary: #facc15;
   --color-rest-yellow: #facc15;
   --color-rest-gray: #e8ebecaf;
   --color-rest-slate: #90a1b9;
   --color-rest-red: #cd301c;
-  --color-rest-red-up: #E14A36;
-  --color-rest-red-down: #8F1F12;
-  --color-rest-gray-down: #1a1a1a;      
-  --color-rest-gray-middle: #2d2d2d;    
-  --color-rest-gray-up: #3d3d3d; 
+  --color-rest-red-up: #e14a36;
+  --color-rest-red-down: #8f1f12;
+  --color-rest-gray-down: #1a1a1a;
+  --color-rest-gray-middle: #2d2d2d;
+  --color-rest-gray-up: #3d3d3d;
   /* --color-sidebar-ring: var(--sidebar-ring); */
 }
 

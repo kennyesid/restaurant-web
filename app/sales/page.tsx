@@ -5,7 +5,7 @@ import { getSales, deleteSale } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale } from "@/types";
 import { Card } from "@/components/ui/card";
-import { Trash2, Eye, Edit } from "lucide-react";
+import { Trash2, Eye, Edit, Key } from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
 
 // const today = new Date().toISOString().split('T')[0];
@@ -305,11 +305,8 @@ export default function SalesPage() {
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {filteredSales.map((sale, index) => (
-                <>
-                  <tr
-                    key={sale.saleId}
-                    className="hover:bg-muted/40 transition-colors"
-                  >
+                <div key={index}>
+                  <tr className="hover:bg-muted/40 transition-colors">
                     <td className="px-4 py-4">
                       <button
                         onClick={() =>
@@ -452,7 +449,7 @@ export default function SalesPage() {
                       </td>
                     </tr>
                   )}
-                </>
+                </div>
               ))}
             </tbody>
           </table>

@@ -9,5 +9,7 @@ export type { CartState } from "@/types/cart/cartState";
 export type { Sale } from "@/types/sale/sale";
 export type { RespuestaGenericaDto } from "@/types/generic/respuestaGenericaDto";
 export type { User } from "@/types/user/user";
+export type { AuthState } from "@/types/user/authState";
+export type { RoleType } from "@/types/user/rolType";
 
 export { ToastType } from "@/types/enum/toasType";

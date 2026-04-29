@@ -1,55 +1,34 @@
 // User Management
-export interface User {
-  id_user: string;
-  username: string;
-  password: string;
-  email: string;
-  full_name: string;
-  id_tenant: string;
-  id_role: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+// export interface User {
+//   id_user: string;
+//   username: string;
+//   password: string;
+//   email: string;
+//   full_name: string;
+//   id_tenant: string;
+//   id_role: string;
+//   is_active: boolean;
+//   created_at: string;
+//   updated_at: string;
+// }
 
-export interface Role {
-  id_role: string;
-  name: string;
-  description: string;
-  id_tenant: string;
-}
+// export interface Role {
+//   id_role: string;
+//   name: string;
+//   description: string;
+//   id_tenant: string;
+// }
 
-export interface Permission {
-  id_permission: string;
-  name: string;
-  description: string;
-}
+// export interface Permission {
+//   id_permission: string;
+//   name: string;
+//   description: string;
+// }
 
-export interface RolePermission {
-  id_role: string;
-  id_permission: string;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// export interface RolePermission {
+//   id_role: string;
+//   id_permission: string;
+// }
 
 // Product Management
 // export interface Category {

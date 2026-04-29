@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   BarChart3,
   ShoppingCart,
@@ -19,31 +20,55 @@ import {
   Clock,
   Calendar,
   ChevronDown,
-} from 'lucide-react';
+} from "lucide-react";
+import { useAppSelector } from "@/store/store/hooks";
+import { MENU_BY_ROL, MenuConfig } from "@/lib/constants/menuByRol";
+import { RoleType } from "@/types";
 
 export function Sidebar() {
+  const { user } = useAppSelector((state) => state.auth);
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
+    MENU_BY_ROL["SALES_MANAGER"],
+  );
   const pathname = usePathname();
 
-  const mainMenuItems = [
-    { label: 'Dashboard', icon: BarChart3, href: '/dashboard' },
-    { label: 'Carrito de Compras', icon: ShoppingCart, href: '/cart' },
-    { label: 'Ventas', icon: Beef, href: '/sales' },
-    { label: 'Productos', icon: Package, href: '/product' },
-    { label: 'Ingredientes', icon: Beef, href: '/dashboard/ingredients' },
-  ];
+  // const mainMenuItems = [
+  //   { label: "Dashboard", icon: BarChart3, href: "/dashboard" },
+  //   { label: "Carrito de Compras", icon: ShoppingCart, href: "/cart" },
+  //   { label: "Ventas", icon: Beef, href: "/sales" },
+  //   { label: "Productos", icon: Package, href: "/product" },
+  //   { label: "Ingredientes", icon: Beef, href: "/dashboard/ingredients" },
+  // ];
 
-  const adminMenuItems = [
-    { label: 'Usuarios', icon: Users, href: '/dashboard/admin/users' },
-    { label: 'Roles', icon: Settings, href: '/dashboard/admin/roles' },
-    { label: 'Categorías', icon: Tag, href: '/dashboard/admin/categories' },
-    { label: 'Promociones', icon: Gift, href: '/dashboard/admin/promotions' },
-    { label: 'Turnos', icon: Clock, href: '/dashboard/admin/shifts' },
-  ];
+  // const adminMenuItems = [
+  //   { label: "Usuarios", icon: Users, href: "/dashboard/admin/users" },
+  //   { label: "Roles", icon: Settings, href: "/dashboard/admin/roles" },
+  //   { label: "Categorías", icon: Tag, href: "/dashboard/admin/categories" },
+  //   { label: "Promociones", icon: Gift, href: "/dashboard/admin/promotions" },
+  //   { label: "Turnos", icon: Clock, href: "/dashboard/admin/shifts" },
+  // ];
 
   // Función simple para manejar clases sin librerías externas
-  const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');
+  const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
+
+  const handleLogout = () => {
+    // 1. Limpiar los datos de sesión
+    sessionStorage.removeItem("isAuthenticated");
+    sessionStorage.removeItem("username");
+    sessionStorage.removeItem("userId");
+    toast.success("Sesión cerrada correctamente");
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    const role = user?.role?.toUpperCase() as RoleType;
+    const getPermissions = MENU_BY_ROL[role];
+    setMenuPermissions(getPermissions);
+  }, []);
 
   return (
     <>
@@ -55,9 +80,9 @@ export function Sidebar() {
       </button>
       <aside
         className={cn(
-          'fixed left-0 top-0 z-30 h-screen w-64 bg-[#052A3D] text-white transition-transform duration-300 flex flex-col',
-          'shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]',
-          !isOpen && '-translate-x-full lg:translate-x-0'
+          "fixed left-0 top-0 z-30 h-screen w-64 bg-[#052A3D] text-white transition-transform duration-300 flex flex-col",
+          "shadow-[10px_0_30px_-15px_rgba(0,0,0,1)]",
+          !isOpen && "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Header / Logo Section */}
@@ -67,8 +92,12 @@ export function Sidebar() {
               <span className="text-xl font-black text-[#052A3D]">Y</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight text-white">YesiD REST</h1>
-              <p className="text-[10px] text-yellow-500/80 font-bold uppercase tracking-widest">Sucursal 1</p>
+              <h1 className="text-lg font-bold tracking-tight text-white">
+                YesiD REST
+              </h1>
+              <p className="text-[10px] text-yellow-500/80 font-bold uppercase tracking-widest">
+                Sucursal 1
+              </p>
             </div>
           </div>
         </div>
@@ -82,7 +111,8 @@ export function Sidebar() {
             Navegación
           </p>
 
-          {mainMenuItems.map((item) => {
+          {/* {mainMenuItems.map((item) => { */}
+          {menuPermissions?.first.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
             return (
@@ -90,55 +120,81 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative',
+                  "flex items-center gap-3 w-full px-6 py-4 transition-all duration-200 group relative",
                   isActive
-                    ? 'bg-[#FACC15] text-[#052A3D] font-bold shadow-none' // Quitamos shadow-lg si quieres algo más plano
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    ? "bg-[#FACC15] text-[#052A3D] font-bold shadow-none" // Quitamos shadow-lg si quieres algo más plano
+                    : "text-slate-400 hover:text-white hover:bg-white/5",
                 )}
               >
-                <Icon size={20} className={cn(isActive ? 'text-[#052A3D]' : 'group-hover:scale-110 transition-transform')} />
+                <Icon
+                  size={20}
+                  className={cn(
+                    isActive
+                      ? "text-[#052A3D]"
+                      : "group-hover:scale-110 transition-transform",
+                  )}
+                />
                 <span className="text-sm tracking-wide">{item.label}</span>
               </Link>
             );
           })}
 
           {/* Sección de Administración (Dropdown) */}
-          <div className="pt-4 mt-2 border-t border-white/5">
-            <button
-              onClick={() => setAdminOpen(!adminOpen)}
-              className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-colors group"
-            >
-              <Settings size={20} className="group-hover:rotate-90 transition-transform duration-500" />
-              <span className="flex-1 text-left text-sm font-medium">Administración</span>
-              <ChevronDown size={16} className={cn('transition-transform duration-300', adminOpen && 'rotate-180')} />
-            </button>
+          {user?.role === "ADMIN" && (
+            <div className="pt-4 mt-2 border-t border-white/5">
+              <button
+                onClick={() => setAdminOpen(!adminOpen)}
+                className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white rounded-xl transition-colors group"
+              >
+                <Settings
+                  size={20}
+                  className="group-hover:rotate-90 transition-transform duration-500"
+                />
+                <span className="flex-1 text-left text-sm font-medium">
+                  Administración
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={cn(
+                    "transition-transform duration-300",
+                    adminOpen && "rotate-180",
+                  )}
+                />
+              </button>
 
-            {adminOpen && (
-              <div className="mt-2 space-y-1 pl-6">
-                {adminMenuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs transition-all',
-                      pathname === item.href
-                        ? 'bg-white/10 text-[#FACC15] font-bold border-l-2 border-[#FACC15]'
-                        : 'text-slate-500 hover:text-slate-200'
-                    )}
-                  >
-                    <item.icon size={14} />
-                    <span>{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+              {adminOpen && (
+                <div className="mt-2 space-y-1 pl-6">
+                  {menuPermissions.second.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs transition-all",
+                        pathname === item.href
+                          ? "bg-white/10 text-[#FACC15] font-bold border-l-2 border-[#FACC15]"
+                          : "text-slate-500 hover:text-slate-200",
+                      )}
+                    >
+                      <item.icon size={14} />
+                      <span>{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </nav>
 
         {/* Footer / Botón Cerrar Sesión */}
         <div className="p-6">
-          <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 group">
-            <LogOut size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all duration-300 group"
+          >
+            <LogOut
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform"
+            />
             <span className="text-sm font-bold">Cerrar Sesión</span>
           </button>
         </div>
@@ -154,7 +210,6 @@ export function Sidebar() {
     </>
   );
 }
-
 
 // 'use client';
 

@@ -1,21 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Product, Category } from '@/types/index';
-import { getProducts, createProduct, updateProduct, deleteProduct, getCategories } from '@/services/productsSservice';
-import { DraggableFeaturedProducts } from '@/components/draggable-featured-products';
-import ButtonGeneric from '@/components/common/button/ButtonGeneric';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { ImageUpload } from '@/components/image-upload';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { ProductCard } from '@/components/cart/Product-card';
-import { useAppDispatch } from '@/lib/hooks';
+import { useEffect, useState } from "react";
+import { Product, Category } from "@/types/index";
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getCategories,
+} from "@/services/productsSservice";
+import { DraggableFeaturedProducts } from "@/components/draggable-featured-products";
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/image-upload";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ProductCard } from "@/components/cart/Product-card";
+import { useAppDispatch } from "@/store/store/hooks";
 
 export default function ProductsPage() {
-
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,11 +38,11 @@ const dispatch = useAppDispatch();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     price: 0,
-    imageUrl: '',
-    CategoryId: 0, 
+    imageUrl: "",
+    CategoryId: 0,
   });
 
   useEffect(() => {
@@ -47,33 +59,44 @@ const dispatch = useAppDispatch();
       setProducts(productsData);
       setCategories(categoriesData);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   // Ajustado para filtrar usando p.CategoryId (number) comparado con la categoría seleccionada
-  const filteredProducts = selectedCategory !== null
-    ? products.filter(p => p.categoryId === selectedCategory || p.categoryId === Number(selectedCategory))
-    : products;
+  const filteredProducts =
+    selectedCategory !== null
+      ? products.filter(
+          (p) =>
+            p.categoryId === selectedCategory ||
+            p.categoryId === Number(selectedCategory),
+        )
+      : products;
 
   const handleCategoryFilter = (categoryId: number | null) => {
     setSelectedCategory(categoryId);
   };
 
   const handleToggleFeatured = (product: Product) => {
-    const isCurrentlyFeatured = featuredProducts.some(p => p.productId === product.productId);
-    
+    const isCurrentlyFeatured = featuredProducts.some(
+      (p) => p.productId === product.productId,
+    );
+
     if (isCurrentlyFeatured) {
-      setFeaturedProducts(featuredProducts.filter(p => p.productId !== product.productId));
+      setFeaturedProducts(
+        featuredProducts.filter((p) => p.productId !== product.productId),
+      );
     } else {
       setFeaturedProducts([...featuredProducts, product]);
     }
   };
 
   const handleRemoveFeatured = (productId: number) => {
-    setFeaturedProducts(featuredProducts.filter(p => p.productId !== productId));
+    setFeaturedProducts(
+      featuredProducts.filter((p) => p.productId !== productId),
+    );
   };
 
   const handleReorderFeatured = (reorderedProducts: Product[]) => {
@@ -93,10 +116,10 @@ const dispatch = useAppDispatch();
     } else {
       setEditingProduct(null);
       setFormData({
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         price: 0,
-        imageUrl: '',
+        imageUrl: "",
         CategoryId: 0,
       });
     }
@@ -108,12 +131,12 @@ const dispatch = useAppDispatch();
       if (editingProduct) {
         await updateProduct(editingProduct.productId, {
           ...formData,
-          categoryId: formData.CategoryId, 
+          categoryId: formData.CategoryId,
           isPromotion: editingProduct.isPromotion,
           isFeatured: editingProduct.isFeatured,
           displayOrder: editingProduct.displayOrder,
           state: editingProduct.state,
-          isAvailable: true, 
+          isAvailable: true,
         });
       } else {
         await createProduct({
@@ -121,36 +144,36 @@ const dispatch = useAppDispatch();
           description: formData.description,
           price: formData.price,
           imageUrl: formData.imageUrl,
-          categoryId: formData.CategoryId, 
-          legend: '',
-          isPromotion: false, 
-          isFeatured: false, 
+          categoryId: formData.CategoryId,
+          legend: "",
+          isPromotion: false,
+          isFeatured: false,
           displayOrder: 0,
           state: true,
-          isAvailable: true, 
-          productId: 0, 
-      });
+          isAvailable: true,
+          productId: 0,
+        });
       }
       await loadData();
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Error saving product:', error);
+      console.error("Error saving product:", error);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+    if (confirm("¿Estás seguro de que deseas eliminar este producto?")) {
       try {
         await deleteProduct(id);
         await loadData();
       } catch (error) {
-        console.error('Error deleting product:', error);
+        console.error("Error deleting product:", error);
       }
     }
   };
 
   const getCategoryName = (categoryId: number) => {
-    return categories.find(c => c.categoryId === categoryId)?.name || 'N/A';
+    return categories.find((c) => c.categoryId === categoryId)?.name || "N/A";
   };
 
   if (loading) {
@@ -160,9 +183,11 @@ const dispatch = useAppDispatch();
   return (
     <div className="space-y-6">
       <div className="flex justify-center">
-        <div className='flex flex-col justify-center '>
+        <div className="flex flex-col justify-center ">
           <h1 className="text-3xl text-rest-primary font-bold">Productos</h1>
-          <p className="text-muted-foreground">Selecciona y ordena productos destacados</p>
+          <p className="text-muted-foreground">
+            Selecciona y ordena productos destacados
+          </p>
         </div>
         {/* <Button onClick={() => handleOpenDialog()}>
           <Plus className="w-4 h-4 mr-2" />
@@ -182,7 +207,7 @@ const dispatch = useAppDispatch();
         <div className="lg:col-span-2 space-y-4">
           <div className="flex flex-row gap-2">
             <ButtonGeneric
-              variant={selectedCategory === null ? 'red' : 'primaryRed'}
+              variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
             >
               Todos
@@ -190,7 +215,11 @@ const dispatch = useAppDispatch();
             {categories.map((category) => (
               <ButtonGeneric
                 key={category.categoryId}
-                variant={selectedCategory === category.categoryId ? 'red' : 'primaryRed'}
+                variant={
+                  selectedCategory === category.categoryId
+                    ? "red"
+                    : "primaryRed"
+                }
                 onClick={() => handleCategoryFilter(category.categoryId)}
               >
                 {category.name}
@@ -200,9 +229,11 @@ const dispatch = useAppDispatch();
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredProducts.map((product, index) => {
-              const isFeatured = featuredProducts.some(p => p.productId === product.productId);
+              const isFeatured = featuredProducts.some(
+                (p) => p.productId === product.productId,
+              );
               return (
-                <ProductCard 
+                <ProductCard
                   key={index}
                   product={product}
                   onEdit={(p) => handleOpenDialog(p)}
@@ -215,19 +246,21 @@ const dispatch = useAppDispatch();
         </div>
 
         <div className="space-y-4">
-          <div className=' flex justify-end w-full'>
+          <div className=" flex justify-end w-full">
             <ButtonGeneric
-                variant="primaryRed"
-                onClick={() => handleOpenDialog()}
-                className=" w-1/2 "
+              variant="primaryRed"
+              onClick={() => handleOpenDialog()}
+              className=" w-1/2 "
             >
-                {/* <Plus size={20} /> */}
-                Nuevo Producto
+              {/* <Plus size={20} /> */}
+              Nuevo Producto
             </ButtonGeneric>
           </div>
           <Card className="p-4">
-            <div className='flex flex-row justify-between'>
-              <h2 className="font-semibold">Destacados ({featuredProducts.length})</h2>
+            <div className="flex flex-row justify-between">
+              <h2 className="font-semibold">
+                Destacados ({featuredProducts.length})
+              </h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Arrastra para reordenar
               </p>
@@ -244,9 +277,13 @@ const dispatch = useAppDispatch();
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</DialogTitle>
+            <DialogTitle>
+              {editingProduct ? "Editar Producto" : "Nuevo Producto"}
+            </DialogTitle>
             <DialogDescription>
-              {editingProduct ? 'Modifica los datos del producto' : 'Crea un nuevo producto en el catálogo'}
+              {editingProduct
+                ? "Modifica los datos del producto"
+                : "Crea un nuevo producto en el catálogo"}
             </DialogDescription>
           </DialogHeader>
 
@@ -255,7 +292,9 @@ const dispatch = useAppDispatch();
               <label className="text-sm font-medium">Nombre</label>
               <Input
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nombre del producto"
               />
             </div>
@@ -263,7 +302,9 @@ const dispatch = useAppDispatch();
               <label className="text-sm font-medium">Descripción</label>
               <Input
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Descripción"
               />
             </div>
@@ -272,7 +313,9 @@ const dispatch = useAppDispatch();
               <Input
                 type="number"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: Number(e.target.value) })
+                }
                 placeholder="0"
               />
             </div>
@@ -280,7 +323,12 @@ const dispatch = useAppDispatch();
               <label className="text-sm font-medium">Categoría</label>
               <select
                 value={formData.CategoryId}
-                onChange={(e) => setFormData({ ...formData, CategoryId: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    CategoryId: Number(e.target.value),
+                  })
+                }
                 className="w-full border border-input rounded-lg px-3 py-2 text-sm"
               >
                 <option value={0}>Selecciona una categoría</option>
@@ -305,7 +353,7 @@ const dispatch = useAppDispatch();
               Cancelar
             </Button>
             <Button onClick={handleSave}>
-              {editingProduct ? 'Guardar cambios' : 'Crear producto'}
+              {editingProduct ? "Guardar cambios" : "Crear producto"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -313,7 +361,6 @@ const dispatch = useAppDispatch();
     </div>
   );
 }
-
 
 // 'use client';
 
@@ -360,7 +407,7 @@ const dispatch = useAppDispatch();
 
 //   const handleDelete = async (product: Product) => {
 //     if (!confirm(`¿Estás seguro que deseas eliminar ${product.name}?`)) return;
-    
+
 //     try {
 //       await deleteProduct(product.id);
 //       setProducts(products.filter(p => p.id !== product.id));

@@ -20,7 +20,8 @@ interface SaleModalProps {
   onOpenCreateClientModal: () => void;
   changeSubTotal: (newItem: CartItem[]) => void;
   isEditMode: boolean;
-  setIsEditMode: (isEditMode: boolean) => void;
+  setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
+  // setIsEditMode: (isEditMode: boolean) => void;
 }
 
 export function GenericModal({
@@ -42,6 +43,7 @@ export function GenericModal({
   const [isNewClient, setIsNewClient] = useState(false);
   // const [isEditMode, setIsEditMode] = useState(false);
   const [editableItems, setEditableItems] = useState<CartItem[]>(items);
+  const [isLocked, setIsLocked] = useState(false);
 
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
@@ -116,12 +118,7 @@ export function GenericModal({
         sum + (item.modifiedSubtotal ?? item.price * item.quantity),
       0,
     );
-    console.log("Items modificados:", normalizedItems);
-    console.log("Nuevo total:", newTotal);
-    // 🔥 IMPORTANTE:
-    // Aquí deberías subir esto al padre (te explico abajo)
-    // setItems(normalizedItems)
-    // setTotal(newTotal)
+    setIsLocked(true);
     changeSubTotal(normalizedItems);
     setEditableItems(normalizedItems);
     setIsEditMode(false);
@@ -133,7 +130,12 @@ export function GenericModal({
   // );
 
   useEffect(() => {
-    setEditableItems(items);
+    setEditableItems(
+      items.map((item) => ({
+        ...item,
+        modified: false,
+      })),
+    );
   }, [items]);
 
   return (
@@ -153,10 +155,12 @@ export function GenericModal({
             Cancelar
             <X size={16} />
           </ButtonGeneric>
+
           <ButtonGeneric
             onClick={onConfirm}
             variant="confirmModalPrimary"
-            disabled={isProcessing}
+            disabled={isEditMode}
+            // disabled={isProcessing}
           >
             {isProcessing ? "Procesando..." : "Confirmar"}
             <Save size={16} />
@@ -164,37 +168,47 @@ export function GenericModal({
         </>
       }
     >
-      <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-sm">
-        <div className="flex items-center justify-between mb-2 px-2">
-          <span className="text-sm font-medium">Modificar subtotales</span>
+      <div className="flex items-center justify-between mb-2 px-1">
+        {/* <div className="flex items-center justify-between mb-2 px-2"> */}
+        <span className="text-sm font-medium">Modificar subtotales</span>
 
-          <div className="flex items-center gap-2">
-            {/* Toggle */}
-            <button
-              onClick={() => setIsEditMode(!isEditMode)}
-              className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
-                isEditMode ? "bg-blue-500" : "bg-gray-300"
+        <div className="flex items-center gap-2">
+          {/* Toggle */}
+          <button
+            onClick={() => {
+              if (isLocked) return;
+              setIsEditMode(!isEditMode); // 👈 ya que ahora es prop boolean
+            }}
+            disabled={isLocked}
+            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
+              isLocked
+                ? "bg-gray-200 cursor-not-allowed"
+                : isEditMode
+                  ? "bg-green-500" // 👈 aquí el color activo
+                  : "bg-gray-300"
+            }`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
+                isEditMode ? "translate-x-6" : "translate-x-0"
               }`}
-            >
-              <div
-                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                  isEditMode ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </button>
+            />
+          </button>
 
-            {/* Guardar */}
-            {isEditMode && (
-              <button
-                onClick={handleSaveModifications}
-                className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors shadow-sm hover:scale-105 active:scale-95"
-                title="Guardar modificaciones"
-              >
-                <Save size={16} />
-              </button>
-            )}
-          </div>
+          {/* Guardar */}
+          {isEditMode && (
+            <button
+              onClick={handleSaveModifications}
+              className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors shadow-sm hover:scale-105 active:scale-95"
+              title="Guardar modificaciones"
+            >
+              <Save size={16} />
+            </button>
+          )}
         </div>
+      </div>
+      {/* </div> */}
+      <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-sm">
         <table className="w-full text-sm text-left">
           {/* <thead className={`sticky text-white ${STYLE_INTERNAL.headerModalPrimary}`} > */}
           <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm text-gray-800 border-b shadow-sm">
@@ -286,7 +300,6 @@ export function GenericModal({
           </tbody>
         </table>
       </div>
-
       <div className=" border-t space-y-4 bg-gray-50/50 pb-2">
         {/* Switch Elegante */}
         <div className="flex items-center justify-between">

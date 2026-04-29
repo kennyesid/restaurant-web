@@ -15,6 +15,12 @@ const caveatBrush = localFont({
   display: "swap",
 });
 
+const nunito = localFont({
+  src: "./fonts/Nunito-VariableFont_wght.ttf",
+  variable: "--font-nunito", // Nombre de la variable CSS
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "p.dev - Restaurante",
   description: "Admin dashboard for restaurant management",
@@ -50,11 +56,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${caveatBrush.variable}`}
+      className={`${nunito.variable} ${caveatBrush.variable}`}
       suppressHydrationWarning
     >
       {/* <body className="font-sans antialiased"> */}
-      <body className="font-caveat" suppressHydrationWarning>
+      {/* <body className="font-caveat" suppressHydrationWarning> */}
+      <body className="font-nunito" suppressHydrationWarning>
         <ReduxProvider>
           <div>
             {children}

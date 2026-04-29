@@ -1,24 +1,38 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Ingredient } from '@/lib/types';
-import { getIngredients, createIngredient, updateIngredient, deleteIngredient } from '@/services/ingredients';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Plus, Trash2, Edit2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { useEffect, useState } from "react";
+import { Ingredient } from "@/lib/types";
+import {
+  getIngredients,
+  createIngredient,
+  updateIngredient,
+  deleteIngredient,
+} from "@/services/ingredients";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Plus, Trash2, Edit2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function IngredientsPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
+  const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(
+    null,
+  );
   const [formData, setFormData] = useState({
-    name: '',
+    name: "",
     quantity: 0,
-    unit: '',
-    supplier: '',
+    unit: "",
+    supplier: "",
     cost: 0,
   });
 
@@ -32,7 +46,7 @@ export default function IngredientsPage() {
       const data = await getIngredients();
       setIngredients(data);
     } catch (error) {
-      console.error('Error loading ingredients:', error);
+      console.error("Error loading ingredients:", error);
     } finally {
       setLoading(false);
     }
@@ -51,10 +65,10 @@ export default function IngredientsPage() {
     } else {
       setEditingIngredient(null);
       setFormData({
-        name: '',
+        name: "",
         quantity: 0,
-        unit: '',
-        supplier: '',
+        unit: "",
+        supplier: "",
         cost: 0,
       });
     }
@@ -71,23 +85,23 @@ export default function IngredientsPage() {
       } else {
         await createIngredient({
           ...formData,
-          id_tenant: 'tenant-1',
+          id_tenant: "tenant-1",
         });
       }
       await loadData();
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Error saving ingredient:', error);
+      console.error("Error saving ingredient:", error);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('¿Estás seguro de que deseas eliminar este ingrediente?')) {
+    if (confirm("¿Estás seguro de que deseas eliminar este ingrediente?")) {
       try {
         await deleteIngredient(id);
         await loadData();
       } catch (error) {
-        console.error('Error deleting ingredient:', error);
+        console.error("Error deleting ingredient:", error);
       }
     }
   };
@@ -101,7 +115,9 @@ export default function IngredientsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Ingredientes</h1>
-          <p className="text-muted-foreground">Administra el inventario de ingredientes</p>
+          <p className="text-muted-foreground">
+            Administra el inventario de ingredientes
+          </p>
         </div>
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="w-4 h-4 mr-2" />
@@ -118,7 +134,9 @@ export default function IngredientsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
                   <div>
                     <p className="text-muted-foreground">Cantidad</p>
-                    <p className="font-medium">{ingredient.quantity} {ingredient.unit}</p>
+                    <p className="font-medium">
+                      {ingredient.quantity} {ingredient.unit}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Proveedor</p>
@@ -126,11 +144,16 @@ export default function IngredientsPage() {
                   </div>
                   <div>
                     <p className="text-muted-foreground">Costo Unitario</p>
-                    <p className="font-medium">${ingredient.cost.toLocaleString()}</p>
+                    <p className="font-medium">
+                      ${ingredient.cost.toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Costo Total</p>
-                    <p className="font-medium">${(ingredient.cost * ingredient.quantity).toLocaleString()}</p>
+                    <p className="font-medium">
+                      $
+                      {(ingredient.cost * ingredient.quantity).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -160,9 +183,13 @@ export default function IngredientsPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editingIngredient ? 'Editar Ingrediente' : 'Nuevo Ingrediente'}</DialogTitle>
+            <DialogTitle>
+              {editingIngredient ? "Editar Ingrediente" : "Nuevo Ingrediente"}
+            </DialogTitle>
             <DialogDescription>
-              {editingIngredient ? 'Modifica los datos del ingrediente' : 'Crea un nuevo ingrediente en el inventario'}
+              {editingIngredient
+                ? "Modifica los datos del ingrediente"
+                : "Crea un nuevo ingrediente en el inventario"}
             </DialogDescription>
           </DialogHeader>
 
@@ -171,7 +198,9 @@ export default function IngredientsPage() {
               <label className="text-sm font-medium">Nombre</label>
               <Input
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="Nombre del ingrediente"
               />
             </div>
@@ -181,7 +210,12 @@ export default function IngredientsPage() {
                 <Input
                   type="number"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      quantity: Number(e.target.value),
+                    })
+                  }
                   placeholder="0"
                 />
               </div>
@@ -189,7 +223,9 @@ export default function IngredientsPage() {
                 <label className="text-sm font-medium">Unidad</label>
                 <Input
                   value={formData.unit}
-                  onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, unit: e.target.value })
+                  }
                   placeholder="kg, L, units"
                 />
               </div>
@@ -198,7 +234,9 @@ export default function IngredientsPage() {
               <label className="text-sm font-medium">Proveedor</label>
               <Input
                 value={formData.supplier}
-                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, supplier: e.target.value })
+                }
                 placeholder="Nombre del proveedor"
               />
             </div>
@@ -207,7 +245,9 @@ export default function IngredientsPage() {
               <Input
                 type="number"
                 value={formData.cost}
-                onChange={(e) => setFormData({ ...formData, cost: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({ ...formData, cost: Number(e.target.value) })
+                }
                 placeholder="0"
               />
             </div>
@@ -218,7 +258,7 @@ export default function IngredientsPage() {
               Cancelar
             </Button>
             <Button onClick={handleSave}>
-              {editingIngredient ? 'Guardar cambios' : 'Crear ingrediente'}
+              {editingIngredient ? "Guardar cambios" : "Crear ingrediente"}
             </Button>
           </DialogFooter>
         </DialogContent>
