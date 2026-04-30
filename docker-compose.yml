@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  nextjs-app:
+    build: .
+    container_name: mi-app-nextjs
+    ports:
+      - "4000:3000"
+    env_file:
+      - .env
+    # Reiniciar automáticamente si la PC se apaga o la app falla
+    restart: unless-stopped
+    # Limitar recursos (opcional, pero recomendado)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'

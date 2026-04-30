@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, Role } from '@/lib/types';
-import { getUsers, createUser, updateUser, deleteUser, getRoles } from '@/services/users';
+import { User, Role } from '@/types/user/user';
+import { getUsers, createUser, updateUser, deleteUser, getRoles } from '@/services/usersService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,10 +18,10 @@ export default function UsersPage() {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    full_name: '',
+    fullName: '',
     password: '',
-    id_role: '',
-    is_active: true,
+    roleId: 0,
+    state: true,
   });
 
   useEffect(() => {
@@ -50,20 +50,20 @@ export default function UsersPage() {
       setFormData({
         username: user.username,
         email: user.email,
-        full_name: user.full_name,
+        fullName: user.fullName,
         password: user.password,
-        id_role: user.id_role,
-        is_active: user.is_active,
+        roleId: user.roleId,
+        state: user.state,
       });
     } else {
       setEditingUser(null);
       setFormData({
         username: '',
         email: '',
-        full_name: '',
+        fullName: '',
         password: '',
-        id_role: '',
-        is_active: true,
+        roleId: 0,
+        state: true,
       });
     }
     setIsDialogOpen(true);
@@ -72,14 +72,20 @@ export default function UsersPage() {
   const handleSave = async () => {
     try {
       if (editingUser) {
-        await updateUser(editingUser.id_user, {
+        await updateUser(editingUser.id, {
           ...formData,
-          id_tenant: editingUser.id_tenant,
+          tenantId: editingUser.tenantId,
         });
       } else {
         await createUser({
           ...formData,
-          id_tenant: 'tenant-1',
+          tenantId: 1,
+          address: '',
+          phone: '',
+          document: '',
+          nit: '',
+          branchId: 0,
+          avatarUrl: '',
         });
       }
       await loadData();
@@ -89,7 +95,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
       try {
         await deleteUser(id);
@@ -100,8 +106,8 @@ export default function UsersPage() {
     }
   };
 
-  const getRoleName = (roleId: string) => {
-    return roles.find(r => r.id_role === roleId)?.name || 'N/A';
+  const getRoleName = (roleId: number) => {
+    return roles.find(r => r.id === roleId)?.name || 'N/A';
   };
 
   if (loading) {
@@ -136,15 +142,15 @@ export default function UsersPage() {
             </thead>
             <tbody className="divide-y">
               {users.map((user) => (
-                <tr key={user.id_user} className="hover:bg-muted/50">
+                <tr key={user.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4 text-sm font-medium">{user.username}</td>
                   <td className="px-6 py-4 text-sm">{user.email}</td>
-                  <td className="px-6 py-4 text-sm">{user.full_name}</td>
-                  <td className="px-6 py-4 text-sm">{getRoleName(user.id_role)}</td>
+                  <td className="px-6 py-4 text-sm">{user.fullName}</td>
+                  <td className="px-6 py-4 text-sm">{getRoleName(user.roleId)}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.state ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                       }`}>
-                      {user.is_active ? 'Activo' : 'Inactivo'}
+                      {user.state ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-right space-x-2">
@@ -159,7 +165,7 @@ export default function UsersPage() {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(user.id_user)}
+                      onClick={() => handleDelete(user.id)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -201,8 +207,8 @@ export default function UsersPage() {
             <div>
               <label className="text-sm font-medium">Nombre Completo</label>
               <Input
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 placeholder="Nombre Completo"
               />
             </div>
@@ -218,13 +224,13 @@ export default function UsersPage() {
             <div>
               <label className="text-sm font-medium">Rol</label>
               <select
-                value={formData.id_role}
-                onChange={(e) => setFormData({ ...formData, id_role: e.target.value })}
+                value={formData.roleId}
+                onChange={(e) => setFormData({ ...formData, roleId: parseInt(e.target.value) })}
                 className="w-full border border-input rounded-lg px-3 py-2 text-sm"
               >
                 <option value="">Selecciona un rol</option>
                 {roles.map((role) => (
-                  <option key={role.id_role} value={role.id_role}>
+                  <option key={role.id} value={role.id}>
                     {role.name}
                   </option>
                 ))}
@@ -234,8 +240,8 @@ export default function UsersPage() {
               <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                  checked={formData.state}
+                  onChange={(e) => setFormData({ ...formData, state: e.target.checked })}
                 />
                 Activo
               </label>

@@ -133,9 +133,8 @@ export default function PromotionsPage() {
                   <td className="px-6 py-4 text-sm">{new Date(promotion.start_date).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-sm">{new Date(promotion.end_date).toLocaleDateString()}</td>
                   <td className="px-6 py-4 text-sm">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                      promotion.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${promotion.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {promotion.is_active ? 'Activa' : 'Inactiva'}
                     </span>
                   </td>

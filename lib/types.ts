@@ -1,4 +1,4 @@
-// User Management
+// // User Management
 // export interface User {
 //   id_user: string;
 //   username: string;
@@ -29,6 +29,27 @@
 //   id_role: string;
 //   id_permission: string;
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Product Management
 // export interface Category {

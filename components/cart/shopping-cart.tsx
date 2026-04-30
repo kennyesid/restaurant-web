@@ -275,11 +275,10 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
-                      paymentType === method
-                        ? "bg-[#facc15]  text-rest-primary"
-                        : "bg-muted text-foreground hover:bg-muted/80"
-                    }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
+                      ? "bg-[#facc15]  text-rest-primary"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                      }`}
                   >
                     {method === "cash"
                       ? "Efectivo"

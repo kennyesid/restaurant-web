@@ -130,7 +130,7 @@ export async function createUser(
 }
 
 export async function updateUser(
-  id: string,
+  id: number,
   updates: Partial<User>,
 ): Promise<User | null> {
   const success = storage.updateInCollection(
@@ -145,7 +145,7 @@ export async function updateUser(
   return success ? storage.getFromCollection<User>(USERS_KEY, id, "id") : null;
 }
 
-export async function deleteUser(id: string): Promise<boolean> {
+export async function deleteUser(id: number): Promise<boolean> {
   return storage.removeFromCollection(USERS_KEY, id, "id");
 }
 
@@ -153,31 +153,31 @@ export async function getRoles(): Promise<Role[]> {
   return storage.getCollection<Role>(ROLES_KEY);
 }
 
-export async function getRoleById(id: string): Promise<Role | null> {
-  return storage.getFromCollection<Role>(ROLES_KEY, id, "id_role");
+export async function getRoleById(id: number): Promise<Role | null> {
+  return storage.getFromCollection<Role>(ROLES_KEY, id, "id");
 }
 
-export async function createRole(role: Omit<Role, "id_role">): Promise<Role> {
+export async function createRole(role: Omit<Role, "id">): Promise<Role> {
   const newRole: Role = {
     ...role,
     id: 0,
   };
-  storage.addToCollection(ROLES_KEY, newRole, "id_role");
+  storage.addToCollection(ROLES_KEY, newRole, "id");
   return newRole;
 }
 
 export async function updateRole(
-  id: string,
+  id: number,
   updates: Partial<Role>,
 ): Promise<Role | null> {
-  const success = storage.updateInCollection(ROLES_KEY, id, updates, "id_role");
+  const success = storage.updateInCollection(ROLES_KEY, id, updates, "id");
   return success
-    ? storage.getFromCollection<Role>(ROLES_KEY, id, "id_role")
+    ? storage.getFromCollection<Role>(ROLES_KEY, id, "id")
     : null;
 }
 
-export async function deleteRole(id: string): Promise<boolean> {
-  return storage.removeFromCollection(ROLES_KEY, id, "id_role");
+export async function deleteRole(id: number): Promise<boolean> {
+  return storage.removeFromCollection(ROLES_KEY, id, "id");
 }
 
 // Authentication

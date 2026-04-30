@@ -23,7 +23,7 @@ function initializeDefaults() {
   if (existingCategories.length === 0) {
     const defaultCategories: Category[] = [
       {
-  categoryId: 1,
+  id: 1,
   name: 'Sopas',
   description: 'Sopas tradicionales y cremas',
   createdAt: new Date().toISOString(),
@@ -31,7 +31,7 @@ function initializeDefaults() {
   state: true,
 },
 {
-  categoryId: 2,
+  id: 2,
   name: 'Segundos',
   description: 'Platos de fondo, carnes, pastas y más',
   createdAt: new Date().toISOString(),
@@ -39,7 +39,7 @@ function initializeDefaults() {
   state: true,
 },
 {
-  categoryId: 3,
+  id: 3,
   name: 'Segundos Extras',
   description: 'Platos especiales o combinaciones adicionales',
   createdAt: new Date().toISOString(),
@@ -47,7 +47,7 @@ function initializeDefaults() {
   state: true,
 },
 {
-  categoryId: 4,
+  id: 4,
   name: 'Refrescos',
   description: 'Bebidas refrescantes naturales y artificiales',
   createdAt: new Date().toISOString(),
@@ -55,7 +55,7 @@ function initializeDefaults() {
   state: true,
 },
 {
-  categoryId: 5,
+  id: 5,
   name: 'Gaseosas',
   description: 'Gaseosas nacionales e importadas',
   createdAt: new Date().toISOString(),
@@ -63,7 +63,7 @@ function initializeDefaults() {
   state: true,
 },
 {
-  categoryId: 6,
+  id: 6,
   name: 'Jugos',
   description: 'Jugos naturales de frutas',
   createdAt: new Date().toISOString(),
@@ -542,28 +542,28 @@ export async function getCategories(): Promise<Category[]> {
   return storage.getCollection<Category>(CATEGORIES_KEY);
 }
 
-export async function getCategoryById(id: string): Promise<Category | null> {
-  return storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id_category');
+export async function getCategoryById(id: number): Promise<Category | null> {
+  return storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id');
 }
 
-export async function createCategory(category: Omit<Category, 'id_category'>): Promise<Category> {
+export async function createCategory(category: Omit<Category, 'id'>): Promise<Category> {
   const currentCategories = storage.getCollection<Category>(CATEGORIES_KEY);
   const nextId = currentCategories.length > 0 
-    ? Math.max(...currentCategories.map(c => Number(c.categoryId))) + 1 
+    ? Math.max(...currentCategories.map(c => Number(c.id))) + 1 
     : 1;
   const newCategory: Category = {
     ...category,
-    categoryId: nextId,
+    id: nextId,
   };
-  storage.addToCollection(CATEGORIES_KEY, newCategory, 'id_category');
+  storage.addToCollection(CATEGORIES_KEY, newCategory, 'id');
   return newCategory;
 }
 
-export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
-  const success = storage.updateInCollection(CATEGORIES_KEY, id, updates, 'id_category');
-  return success ? storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id_category') : null;
+export async function updateCategory(id: number, updates: Partial<Category>): Promise<Category | null> {
+  const success = storage.updateInCollection(CATEGORIES_KEY, id, updates, 'id');
+  return success ? storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id') : null;
 }
 
-export async function deleteCategory(id: string): Promise<boolean> {
-  return storage.removeFromCollection(CATEGORIES_KEY, id, 'id_category');
+export async function deleteCategory(id: number): Promise<boolean> {
+  return storage.removeFromCollection(CATEGORIES_KEY, id, 'id');
 }

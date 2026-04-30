@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Category } from '@/lib/types';
+import { Category } from '@/types/category/category';
 import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/productsSservice';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -55,14 +55,15 @@ export default function CategoriesPage() {
   const handleSave = async () => {
     try {
       if (editingCategory) {
-        await updateCategory(editingCategory.id_category, {
+        await updateCategory(editingCategory.id, {
           ...formData,
-          id_tenant: editingCategory.id_tenant,
         });
       } else {
         await createCategory({
           ...formData,
-          id_tenant: 'tenant-1',
+          state: true,               // Valor por defecto para nuevas categorías
+          createdAt: new Date().toISOString(), // Fecha actual
+          updatedAt: new Date().toISOString(), // Fecha actual
         });
       }
       await loadData();
@@ -72,7 +73,7 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
       try {
         await deleteCategory(id);
@@ -112,7 +113,7 @@ export default function CategoriesPage() {
             </thead>
             <tbody className="divide-y">
               {categories.map((category) => (
-                <tr key={category.id_category} className="hover:bg-muted/50">
+                <tr key={category.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4 text-sm font-medium">{category.name}</td>
                   <td className="px-6 py-4 text-sm">{category.description}</td>
                   <td className="px-6 py-4 text-sm text-right space-x-2">
@@ -127,7 +128,7 @@ export default function CategoriesPage() {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(category.id_category)}
+                      onClick={() => handleDelete(category.id)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Role } from '@/lib/types';
+import { Role } from '@/types/user/user';
 import { getRoles, createRole, updateRole, deleteRole } from '@/services/usersService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -55,14 +55,14 @@ export default function RolesPage() {
   const handleSave = async () => {
     try {
       if (editingRole) {
-        await updateRole(editingRole.id_role, {
+        await updateRole(editingRole.id, {
           ...formData,
-          id_tenant: editingRole.id_tenant,
+          tenantId: editingRole.tenantId,
         });
       } else {
         await createRole({
           ...formData,
-          id_tenant: 'tenant-1',
+          tenantId: 'tenant-1',
         });
       }
       await loadData();
@@ -72,7 +72,7 @@ export default function RolesPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('¿Estás seguro de que deseas eliminar este rol?')) {
       try {
         await deleteRole(id);
@@ -112,7 +112,7 @@ export default function RolesPage() {
             </thead>
             <tbody className="divide-y">
               {roles.map((role) => (
-                <tr key={role.id_role} className="hover:bg-muted/50">
+                <tr key={role.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4 text-sm font-medium">{role.name}</td>
                   <td className="px-6 py-4 text-sm">{role.description}</td>
                   <td className="px-6 py-4 text-sm text-right space-x-2">
@@ -127,7 +127,7 @@ export default function RolesPage() {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:bg-destructive/10"
-                      onClick={() => handleDelete(role.id_role)}
+                      onClick={() => handleDelete(role.id)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
