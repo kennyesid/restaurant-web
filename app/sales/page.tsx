@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getSales, deleteSale } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale } from "@/types";
 import { Card } from "@/components/ui/card";
 import { Trash2, Eye, Edit, Key } from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 
 // const today = new Date().toISOString().split('T')[0];
 
@@ -24,6 +25,16 @@ export default function SalesPage() {
   const [endDate, setEndDate] = useState(today);
   const [filterUser, setFilterUser] = useState("all");
   const [filterPaymentType, setFilterPaymentType] = useState("all");
+
+  const [appliedFilters, setAppliedFilters] = useState({
+    startDate: today,
+    endDate: today,
+    filterUser: "all",
+    filterPaymentType: "all",
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     loadSales();
@@ -48,10 +59,12 @@ export default function SalesPage() {
       const dateObject = new Date(sale.createdAt);
       const saleDate = dateObject.toISOString().split("T")[0];
 
+      // Usamos appliedFilters para las fechas
       const dateMatch =
-        (!startDate || saleDate >= startDate) &&
-        (!endDate || saleDate <= endDate);
+        (!appliedFilters.startDate || saleDate >= appliedFilters.startDate) &&
+        (!appliedFilters.endDate || saleDate <= appliedFilters.endDate);
 
+      // Usamos los filtros directos para los dropdowns (así filtran al instante si se cambian después)
       const userMatch =
         filterUser === "all" || sale.userId?.toString() === filterUser;
 
@@ -64,6 +77,38 @@ export default function SalesPage() {
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
+
+  // === AQUÍ COLOCAS LAS NUEVAS CONSTANTES ===
+  const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
+
+  const paginatedSales = filteredSales.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // const filteredSales = sales
+  //   .filter((sale) => {
+  //     if (!sale.createdAt) return false;
+
+  //     const dateObject = new Date(sale.createdAt);
+  //     const saleDate = dateObject.toISOString().split("T")[0];
+
+  //     const dateMatch =
+  //       (!startDate || saleDate >= startDate) &&
+  //       (!endDate || saleDate <= endDate);
+
+  //     const userMatch =
+  //       filterUser === "all" || sale.userId?.toString() === filterUser;
+
+  //     const paymentMatch =
+  //       filterPaymentType === "all" || sale.paymentType === filterPaymentType;
+
+  //     return dateMatch && userMatch && paymentMatch;
+  //   })
+  //   .sort(
+  //     (a, b) =>
+  //       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  //   );
 
   // const filteredSales = sales.filter(sale => {
   //   if (!sale.createdAt) return false;
@@ -152,21 +197,21 @@ export default function SalesPage() {
       </div>
 
       {/* TOOLBAR DE FILTROS */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 bg-muted/40 backdrop-blur-sm p-4 rounded-xl border">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
         {/* segunda parte */}
         <div className="lg:col-span-1">
           <div
             className="
-    relative overflow-hidden
-    rounded-2xl
-    p-5
-    text-white
-    shadow-lg
-    bg-gradient-to-br
-    from-[#052A3D]
-    via-[#0b3f5c]
-    to-[#052A3D]
-  "
+                        relative overflow-hidden
+                        rounded-lg
+                        p-5
+                        text-white
+                        shadow-lg
+                        bg-gradient-to-br
+                        from-[#052A3D]
+                        via-[#0b3f5c]
+                        to-[#052A3D]
+                      "
           >
             {/* decoración fondo */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
@@ -278,36 +323,61 @@ export default function SalesPage() {
               />
             </div>
             {/* Botón buscar */}
-            <button
+            {/* <button
               onClick={() => setSales([...sales])}
               className="h-10 bg-primary text-white rounded-md hover:opacity-90"
             >
               Buscar
-            </button>
+            </button> */}
+            {/* <ButtonGeneric
+              variant="primaryRed"
+              onClick={() => setSales([...sales])}
+            >
+              Buscar
+            </ButtonGeneric> */}
+            <ButtonGeneric
+              variant="primaryRed"
+              onClick={() => {
+                // 1. Reseteamos los selectores visuales a "Todos"
+                setFilterUser("all");
+                setFilterPaymentType("all");
+                setCurrentPage(1);
+
+                // 2. Aplicamos los filtros usando las fechas actuales y reseteando los selectores a "all"
+                setAppliedFilters({
+                  startDate: startDate,
+                  endDate: endDate,
+                  filterUser: "all",
+                  filterPaymentType: "all",
+                });
+              }}
+            >
+              Buscar
+            </ButtonGeneric>
           </div>
         </div>
       </div>
       {/* DATA TABLE */}
-      <Card className="overflow-hidden border-none shadow-sm">
+      <Card className="overflow-hidden border-none rounded-md shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-[#052A3D] text-white text-xs uppercase tracking-wider">
               <tr>
-                <th className="px-4 py-4"></th>
-                <th className="px-6 py-4 font-semibold">Pedido</th>
-                <th className="px-6 py-4 font-semibold">Estado</th>
-                <th className="px-6 py-4 font-semibold">Fecha</th>
-                <th className="px-6 py-4 font-semibold">Usuario</th>
-                <th className="px-6 py-4 font-semibold">Pago</th>
-                <th className="px-6 py-4 font-semibold text-right">Total</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
+                <th className="px-4 py-3"></th>
+                <th className="px-6 py-3 font-semibold">Pedido</th>
+                <th className="px-6 py-3 font-semibold">Estado</th>
+                <th className="px-6 py-3 font-semibold">Fecha</th>
+                <th className="px-6 py-3 font-semibold">Usuario</th>
+                <th className="px-6 py-3 font-semibold">Pago</th>
+                <th className="px-6 py-3 font-semibold text-right">Total</th>
+                <th className="px-6 py-3 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
-              {filteredSales.map((sale, index) => (
-                <div key={index}>
+              {paginatedSales.map((sale, index) => (
+                <Fragment key={index}>
                   <tr className="hover:bg-muted/40 transition-colors">
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-2">
                       <button
                         onClick={() =>
                           setExpandedRow(
@@ -319,7 +389,7 @@ export default function SalesPage() {
                         {expandedRow === sale.saleId ? "▾" : "▸"}
                       </button>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex flex-col">
                         <span className="font-bold text-[#052A3D]">
                           #{sale.orderNumber}
@@ -329,10 +399,10 @@ export default function SalesPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       {getOrderStatusBadge(sale.orderStatus)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex flex-col">
                         <span className="font-medium">
                           {new Date(sale.createdAt).toLocaleDateString()}
@@ -342,12 +412,11 @@ export default function SalesPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex flex-col">
                         <span className="text-xs font-semibold">
                           Usuario #{sale.userId}
                         </span>
-
                         {sale.userCustomerId && (
                           <span className="text-[10px] text-muted-foreground">
                             Cliente #{sale.userCustomerId}
@@ -355,33 +424,25 @@ export default function SalesPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                          sale.paymentType === "cash"
-                            ? "bg-green-100 text-green-700"
-                            : sale.paymentType === "qr"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-purple-100 text-purple-700"
-                        }`}
+                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
+                          ? "bg-green-100 text-green-700"
+                          : sale.paymentType === "qr"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-purple-100 text-purple-700"
+                          }`}
                       >
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-2 text-right">
                       <span className="font-bold text-lg text-[#052A3D]">
                         Bs {sale.total.toLocaleString()}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-2">
                       <div className="flex justify-center gap-2">
-                        {/* <button
-                          onClick={() => { setSelectedSale(sale); setIsDialogOpen(true); }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                          title="Ver detalles"
-                        >
-                          <Eye size={18} />
-                        </button> */}
                         <button
                           className="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
                           title="Editar venta"
@@ -449,7 +510,7 @@ export default function SalesPage() {
                       </td>
                     </tr>
                   )}
-                </div>
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -459,6 +520,38 @@ export default function SalesPage() {
             </div>
           )}
         </div>
+        {/* CONTROLES DE PAGINACIÓN */}
+        {filteredSales.length > 0 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-700">
+            <div>
+              Mostrando <span className="font-bold">{paginatedSales.length}</span> de{" "}
+              <span className="font-bold">{filteredSales.length}</span> ventas
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className="h-8 px-3"
+              >
+                Anterior
+              </Button>
+              <div className="flex items-center px-2 text-sm font-semibold text-[#052A3D]">
+                Página {currentPage} de {totalPages || 1}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                className="h-8 px-3"
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

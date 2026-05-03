@@ -12,7 +12,7 @@ export interface Product {
   isPromotion: boolean;
   imageUrl: string; // base64 or image URL
   isFeatured: boolean;
-  displayOrder: number;
+  displayOrder?: number;
   isAvailable: boolean;
   piecesOfChicken?: number;
   created_at: string;

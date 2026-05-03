@@ -41,6 +41,7 @@ export function ProductCard({
           <Card className="h-full w-full border-none rounded-xs overflow-hidden relative">
             <Image
               src={getImageUrl(product.imageUrl)}
+              // src={'./images/default-01.avif'}
               alt={product.name}
               fill
               className="w-full h-full object-cover"
@@ -73,13 +74,9 @@ export function ProductCard({
             {/* CONTENEDOR DE TEXTO - Se adapta al tamaño de la card */}
             <div className="flex-1 flex flex-col justify-start">
               {/* 1. NOMBRE - Bold y directo */}
-              <h3 className="text-gray-900 text-lg font-black tracking-tighter ">
+              <h3 className="text-gray-900 text-lg font-black tracking-tighter leading-none mb-1">
                 {product.name}
               </h3>
-
-              {/* Línea divisora simple */}
-              {/* <div className="h-0.5 w-10 bg-gray-900 mb-4" /> */}
-
               {/* 2. DESCRIPCIÓN - Texto compacto */}
               <p className="text-gray-900 text-xs font-bold opacity-80  leading-tight">
                 {product.description || "Descripción del producto"}

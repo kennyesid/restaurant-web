@@ -78,414 +78,1842 @@ function initializeDefaults() {
 const existingProducts = storage.getCollection<Product>(PRODUCTS_KEY);
 if (existingProducts.length === 0) {
   const defaultProducts: Product[] = [
-    {
-      productId: 1,
-      categoryId: 1,
-      name: 'Hamburguesa',
-      description: 'Hamburguesa clásica',
-      legend: '',
-      price: 28,
-      isPromotion: false,
-      imageUrl: IMAGE_URL,
-      isFeatured: true,
-      displayOrder: 1,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 1,
-          productId: 1,
-          name: 'Pan de hamburguesa',
-          description: 'Pan artesanal con sésamo',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 2,
-          productId: 1,
-          name: 'Carne de res',
-          description: 'Carne 100% de res, 180g',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 3,
-          productId: 1,
-          name: 'Lechuga',
-          description: 'Lechuga fresca',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 4,
-          productId: 1,
-          name: 'Tomate',
-          description: 'Tomate en rodajas',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 2,
-      categoryId: 1,
-      name: 'Cheeseburger',
-      description: 'Hamburguesa con queso',
-      legend: '',
-      price: 26,
-      isPromotion: false,
-      imageUrl: IMAGE_URL,
-      isFeatured: true,
-      displayOrder: 2,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 5,
-          productId: 2,
-          name: 'Pan de hamburguesa',
-          description: 'Pan artesanal',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 6,
-          productId: 2,
-          name: 'Carne de res',
-          description: 'Carne 100% de res, 150g',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 7,
-          productId: 2,
-          name: 'Queso cheddar',
-          description: 'Queso cheddar derretido',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 8,
-          productId: 2,
-          name: 'Pepinillos',
-          description: 'Pepinillos en láminas',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 3,
-      categoryId: 1,
-      name: 'Double Burger',
-      description: 'Doble carne',
-      legend: '',
-      price: 35,
-      isPromotion: false,
-      imageUrl: IMAGE_URL,
-      isFeatured: true,
-      displayOrder: 3,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 9,
-          productId: 3,
-          name: 'Pan de hamburguesa',
-          description: 'Pan artesanal',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 10,
-          productId: 3,
-          name: 'Carne de res (x2)',
-          description: 'Doble porción de carne, 300g',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 11,
-          productId: 3,
-          name: 'Queso americano',
-          description: 'Queso americano derretido',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 12,
-          productId: 3,
-          name: 'Tocino',
-          description: 'Tocino crujiente',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 4,
-      categoryId: 2,
-      name: 'Pollo Frito',
-      description: 'Pollo crujiente',
-      legend: '',
-      price: 22,
-      isPromotion: false,
-      imageUrl: IMAGE_URL,
-      isFeatured: true,
-      displayOrder: 4,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      piecesOfChicken: 4,
-      productIngredientDetail: [
-        {
-          id: 13,
-          productId: 4,
-          name: 'Pollo',
-          description: 'Pollo fresco marinado',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 14,
-          productId: 4,
-          name: 'Harina de trigo',
-          description: 'Harina especial para empanizado',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 15,
-          productId: 4,
-          name: 'Especias secretas',
-          description: 'Mezcla de especias de la casa',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 5,
-      categoryId: 2,
-      name: 'Alitas BBQ',
-      description: 'Alitas con salsa BBQ',
-      legend: '',
-      price: 20,
-      isPromotion: false,
-      imageUrl: '',
-      isFeatured: false,
-      displayOrder: 5,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      piecesOfChicken: 6,
-      productIngredientDetail: [
-        {
-          id: 16,
-          productId: 5,
-          name: 'Alitas de pollo',
-          description: '6 alitas de pollo frescas',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 17,
-          productId: 5,
-          name: 'Salsa BBQ',
-          description: 'Salsa BBQ casera',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 6,
-      categoryId: 3,
-      name: 'Papas Fritas',
-      description: 'Papas crujientes',
-      legend: '',
-      price: 19.5,
-      isPromotion: false,
-      imageUrl: '',
-      isFeatured: false,
-      displayOrder: 6,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 18,
-          productId: 6,
-          name: 'Papa',
-          description: 'Papa blanca seleccionada',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 19,
-          productId: 6,
-          name: 'Aceite vegetal',
-          description: 'Aceite 100% vegetal',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 20,
-          productId: 6,
-          name: 'Sal',
-          description: 'Sal de mesa',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 7,
-      categoryId: 3,
-      name: 'Aros de Cebolla',
-      description: 'Aros crujientes',
-      legend: '',
-      price: 19,
-      isPromotion: false,
-      imageUrl: '',
-      isFeatured: false,
-      displayOrder: 7,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 21,
-          productId: 7,
-          name: 'Cebolla',
-          description: 'Cebolla blanca cortada en aros',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 22,
-          productId: 7,
-          name: 'Harina de trigo',
-          description: 'Harina para empanizado',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 8,
-      categoryId: 4,
-      name: 'Coca-Cola',
-      description: 'Bebida gaseosa',
-      legend: '',
-      price: 14,
-      isPromotion: false,
-      imageUrl: '',
-      isFeatured: false,
-      displayOrder: 8,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 23,
-          productId: 8,
-          name: 'Agua carbonatada',
-          description: 'Agua con gas',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 24,
-          productId: 8,
-          name: 'Azúcar',
-          description: 'Azúcar refinada',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 25,
-          productId: 8,
-          name: 'Extracto de cola',
-          description: 'Saborizante natural',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    },
-    {
-      productId: 9,
-      categoryId: 4,
-      name: 'Jugo Natural',
-      description: 'Jugo fresco',
-      legend: '',
-      price: 12,
-      isPromotion: false,
-      imageUrl: '',
-      isFeatured: false,
-      displayOrder: 9,
-      isAvailable: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      state: true,
-      productIngredientDetail: [
-        {
-          id: 26,
-          productId: 9,
-          name: 'Naranja',
-          description: 'Naranja natural exprimida',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        },
-        {
-          id: 27,
-          productId: 9,
-          name: 'Agua',
-          description: 'Agua purificada',
-          createdAt: new Date().toISOString(),
-          createdBy: 'system',
-          state: true
-        }
-      ]
-    }
-  ];
+  {
+    productId: 1,
+    categoryId: 1,
+    name: 'Corbatitas',
+    description: 'Sopa tradicional con fideos en forma de corbata',
+    legend: 'Un clásico reconfortante para el almuerzo',
+    price: 25,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/corbatitas.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 1, productId: 1, name: 'Fideo corbatita', description: 'Fideo de trigo en forma de lazo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 2, productId: 1, name: 'Carne de res', description: 'Carne picada en cubos pequeños', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 3, productId: 1, name: 'Papa imilla', description: 'Papa suave para espesar el caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 4, productId: 1, name: 'Zanahoria', description: 'Zanahoria fresca rallada', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 2,
+    categoryId: 1,
+    name: 'Choclo',
+    description: 'Plato a base de maíz tierno hervido con queso',
+    legend: 'Sabor andino directo a tu mesa',
+    price: 20,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/choclo.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 5, productId: 2, name: 'Choclo tierno', description: 'Maíz fresco en mazorca hervida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 6, productId: 2, name: 'Queso criollo', description: 'Queso fresco salado artesanal', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 7, productId: 2, name: 'Anís', description: 'Semillas para dar aroma al agua de cocción', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 3,
+    categoryId: 1,
+    name: 'Yuca',
+    description: 'Yuca cocida o frita acompañada de queso o carne',
+    legend: 'Acompañamiento perfecto o plato principal',
+    price: 18,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/yuca.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 8, productId: 3, name: 'Yuca fresca', description: 'Yuca de la región cocida a la perfección', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 9, productId: 3, name: 'Sal marina', description: 'Sal para realzar su sabor natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 4,
+    categoryId: 1,
+    name: 'Letras',
+    description: 'Sopa de fideos de letras para toda la familia',
+    legend: 'La sopa favorita de los más pequeños',
+    price: 22,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/letras.jpeg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 10, productId: 4, name: 'Fideo de letras', description: 'Fideo pequeño de sémola', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 11, productId: 4, name: 'Pollo desmenuzado', description: 'Pechuga de pollo cocida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 12, productId: 4, name: 'Arvejas y zanahorias', description: 'Verduras frescas picadas en cubos', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 5,
+    categoryId: 1,
+    name: 'Cabello de Angel',
+    description: 'Sopa ligera con fideos cabello de ángel y verduras',
+    legend: 'Ligera, suave y deliciosa',
+    price: 24,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/cabello-de-angel.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 13, productId: 5, name: 'Fideo cabello de ángel', description: 'Fideo extra fino de trigo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 14, productId: 5, name: 'Caldo de ave', description: 'Caldo concentrado de pollo y hierbas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 15, productId: 5, name: 'Apio y perejil', description: 'Hierbas frescas finamente picadas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 6,
+    categoryId: 1,
+    name: 'Mani',
+    description: 'Tradicional sopa de maní cremosa con papitas fritas',
+    legend: 'La joya de la gastronomía nacional',
+    price: 30,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/mani.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 16, productId: 6, name: 'Maní blanco crudo', description: 'Maní molido para la base cremosa del caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 17, productId: 6, name: 'Carne de res con hueso', description: 'Corte con hueso para dar sustancia', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 18, productId: 6, name: 'Papas fritas al hilo', description: 'Acompañamiento crujiente al servir', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 19, productId: 6, name: 'Arvejas y zanahoria', description: 'Complemento vegetal esencial', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 7,
+    categoryId: 1,
+    name: 'Fideo',
+    description: 'Sopa de fideo tostado y verduras frescas',
+    legend: 'Sabor casero en cada cucharada',
+    price: 22,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/fideo.jpg',
+    isFeatured: true,
+      
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 20, productId: 7, name: 'Fideo entrefino tostado', description: 'Fideo previamente dorado para más sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 21, productId: 7, name: 'Carne molida de res', description: 'Proteína salteada con ajo y cebolla', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 22, productId: 7, name: 'Papa picada en cubos', description: 'Papa imilla para dar textura', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 8,
+    categoryId: 1,
+    name: 'Zapallo',
+    description: 'Crema espesa de zapallo fresco con crutones',
+    legend: 'Reconfortante y llena de vitaminas',
+    price: 25,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/zapallo.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 23, productId: 8, name: 'Zapallo criollo', description: 'Zapallo fresco triturado para la crema', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 24, productId: 8, name: 'Crema de leche', description: 'Para aportar suavidad y textura sedosa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 25, productId: 8, name: 'Queso rallado', description: 'Queso fundido sobre la crema caliente', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 9,
+    categoryId: 1,
+    name: 'Arroz',
+    description: 'Sopa ligera de arroz con pechuga de pollo',
+    legend: 'Perfecta para equilibrar el día',
+    price: 24,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/arroz.jpg',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 26, productId: 9, name: 'Arroz de grano largo', description: 'Arroz blanco cocido en el caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 27, productId: 9, name: 'Pollo desmenuzado', description: 'Pollo tierno hervido', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 28, productId: 9, name: 'Zanahoria y pimentón', description: 'Vegetales que dan color y sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 10,
+    categoryId: 1,
+    name: 'Chairo',
+    description: 'Sopa tradicional andina con chuño y carne de cordero',
+    legend: 'Toda la tradición en un plato',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/chairo.webp',
+    isFeatured: true,
+    
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 29, productId: 10, name: 'Chuño martajado', description: 'Chuño remojado y molido a mano', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 30, productId: 10, name: 'Chalona de cordero', description: 'Carne de cordero seca y salada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 31, productId: 10, name: 'Trigo y maíz mote', description: 'Granos andinos cocidos', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 32, productId: 10, name: 'Hierbabuena fresca', description: 'Hierba aromática que define su olor', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 11,
+    categoryId: 1,
+    name: 'Macarron',
+    description: 'Sopa de fideos macarrón grueso en caldo de res',
+    legend: 'Un plato consistente y delicioso',
+    price: 26,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/macarron.jpg',
+    isFeatured: true,
+      
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 33, productId: 11, name: 'Fideo macarrón grueso', description: 'Pasta de trigo consistente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 34, productId: 11, name: 'Carne de res con hueso', description: 'Corte jugoso para enriquecer el caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 35, productId: 11, name: 'Hierbas aromáticas', description: 'Orégano y perejil frescos', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 12,
+    categoryId: 1,
+    name: 'Trigo',
+    description: 'Sopa nutritiva de granos de trigo pelado y verduras',
+    legend: 'Altamente nutritiva y sabrosa',
+    price: 24,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/trigo.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 36, productId: 12, name: 'Trigo pelado cocido', description: 'Granos de trigo previamente remojados', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 37, productId: 12, name: 'Carne de res picada', description: 'Para complementar el caldo nutritivo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 38, productId: 12, name: 'Zanahorias y habas', description: 'Vegetales frescos de temporada', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 13,
+    categoryId: 1,
+    name: 'Avena',
+    description: 'Sopa de avena en grano con trozos de pollo y verduras',
+    legend: 'Saludable, cremosa y deliciosa',
+    price: 22,
+    isPromotion: false,
+    imageUrl: './images/product/sopas/avena.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 39, productId: 13, name: 'Avena en hojuelas', description: 'Avena integral para espesar el caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 40, productId: 13, name: 'Pollo desmenuzado', description: 'Pechuga de pollo ligera', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 41, productId: 13, name: 'Cebolla y pimentón', description: 'Base aromática salteada', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  }
+  
+  ,{
+    productId: 14,
+    categoryId: 2,
+    name: 'Majadito Tostado con Charque',
+    description: 'Arroz tostado con charque desmenuzado, plátano y huevo frito',
+    legend: 'Un clásico del oriente boliviano',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/majadito-tostado-con-charque.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 42, productId: 14, name: 'Charque de res', description: 'Carne deshidratada y salada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 43, productId: 14, name: 'Arroz grano largo', description: 'Arroz tostado antes de la cocción', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 44, productId: 14, name: 'Plátano de freír', description: 'Plátano maduro frito en rodajas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 45, productId: 14, name: 'Huevo', description: 'Huevo frito para acompañar', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 15,
+    categoryId: 2,
+    name: 'Pollo a la Mostaza',
+    description: 'Pechuga de pollo jugosa bañada en salsa de mostaza',
+    legend: 'Sabor intenso y textura cremosa',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-mostaza.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 46, productId: 15, name: 'Pechuga de pollo', description: 'Filetes de pechuga tierna', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 47, productId: 15, name: 'Mostaza dijon', description: 'Mostaza para la base de la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 48, productId: 15, name: 'Crema de leche', description: 'Para dar cuerpo y suavidad a la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 16,
+    categoryId: 2,
+    name: 'Rapi al Jugo',
+    description: 'Corte de rapi cocido lentamente en su propio jugo',
+    legend: 'Carne extremadamente suave y jugosa',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/rapi-al-jugo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 49, productId: 16, name: 'Carne rapi de res', description: 'Corte con textura ideal para cocción larga', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 50, productId: 16, name: 'Cebolla y pimentón', description: 'Base para el ahogado aromático', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 51, productId: 16, name: 'Yuca cocida', description: 'Acompañamiento tradicional', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 17,
+    categoryId: 2,
+    name: 'Milanesa de Pollo',
+    description: 'Filete de pollo apanado y frito, crujiente por fuera',
+    legend: 'El favorito de grandes y chicos',
+    price: 30,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/milanesa-de-pollo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 52, productId: 17, name: 'Filete de pechuga', description: 'Pollo sazonado con ajo y limón', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 53, productId: 17, name: 'Pan molido y huevo', description: 'Para el rebozado crujiente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 54, productId: 17, name: 'Papas fritas', description: 'Guarnición clásica de papas crujientes', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 18,
+    categoryId: 2,
+    name: 'Feiojada',
+    description: 'Guiso tradicional de porotos negros con variedad de carnes',
+    legend: 'Un plato contundente y lleno de sabor',
+    price: 40,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/feiojada.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 55, productId: 18, name: 'Porotos negros', description: 'Frijoles negros cocidos a fuego lento', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 56, productId: 18, name: 'Carne de cerdo', description: 'Cortes seleccionados de cerdo y chorizo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 57, productId: 18, name: 'Arroz blanco y naranja', description: 'Guarniciones para balancear el plato', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 19,
+    categoryId: 2,
+    name: 'Tallarin de Pollo',
+    description: 'Tallarines con salsa de tomate casera y presas de pollo',
+    legend: 'Pasta casera con sabor a hogar',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/tallarin-de-pollo.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 58, productId: 19, name: 'Fideo tallarín', description: 'Pasta de sémola de trigo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 59, productId: 19, name: 'Pollo en presas', description: 'Pollo cocido lentamente en la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 60, productId: 19, name: 'Salsa de tomate casera', description: 'Tomates frescos, cebolla y hojas de laurel', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 20,
+    categoryId: 2,
+    name: 'Majadito Batido',
+    description: 'Arroz húmedo con charque desmenuzado, huevo y plátano frito',
+    legend: 'Tradición cruceña en su versión más cremosa',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/majadito-batido.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 61, productId: 20, name: 'Charque de res', description: 'Carne salada hervida y deshilachada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 62, productId: 20, name: 'Arroz popular', description: 'Arroz cocido con caldo de charque para dar humedad', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 63, productId: 20, name: 'Huevo y plátano maduro', description: 'Acompañantes fritos tradicionales', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 21,
+    categoryId: 2,
+    name: 'Pollo a la salsa BBQ',
+    description: 'Pollo asado bañado en una deliciosa y ahumada salsa barbacoa',
+    legend: 'Dulce, ahumado y jugoso',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-salsa-bbq.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 64, productId: 21, name: 'Muslos de pollo', description: 'Presas de pollo jugosas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 65, productId: 21, name: 'Salsa BBQ casera', description: 'Salsa agridulce con un toque ahumado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 66, productId: 21, name: 'Papas doradas', description: 'Papas hervidas y luego salteadas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 22,
+    categoryId: 2,
+    name: 'Picante de Pollo',
+    description: 'Pollo tierno cocido en salsa de ají colorado con papa y arroz',
+    legend: 'Tradición picante con sabor inigualable',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/picante-de-pollo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 67, productId: 22, name: 'Pollo criollo', description: 'Presas de pollo cocidas en el ahogado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 68, productId: 22, name: 'Ají colorado molido', description: 'Ají seco despepitado y molido', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 69, productId: 22, name: 'Tunta con queso', description: 'Acompañamiento tradicional con maní', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 23,
+    categoryId: 2,
+    name: 'Pique',
+    description: 'Trozos de carne de res, salchichas, papas fritas y rodajas de huevo',
+    legend: 'Para compartir y disfrutar',
+    price: 45,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pique.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 70, productId: 23, name: 'Carne de res suave', description: 'Lomo picado en cubos jugosos', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 71, productId: 23, name: 'Salchichas viena', description: 'Cortadas en rodajas y fritas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 72, productId: 23, name: 'Papas fritas y huevo', description: 'Base del plato con huevo duro en rodajas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 24,
+    categoryId: 2,
+    name: 'Pollo a la Plancha',
+    description: 'Filete de pechuga sazonado y cocido a la plancha',
+    legend: 'Una opción ligera y saludable',
+    price: 30,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-plancha.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 73, productId: 24, name: 'Pechuga de pollo', description: 'Carne magra sazonada con finas hierbas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 74, productId: 24, name: 'Ensalada fresca', description: 'Lechuga, tomate y pepino', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 75, productId: 24, name: 'Arroz con queso', description: 'Arroz cremoso para acompañar', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 25,
+    categoryId: 2,
+    name: 'Asado en Olla',
+    description: 'Carne de res dorada y guisada en una olla con sus propios jugos',
+    legend: 'Carne tierna con sabor concentrado',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/asado-en-olla.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 76, productId: 25, name: 'Pulpa de res', description: 'Corte de carne tierno sellado en aceite', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 77, productId: 25, name: 'Cebolla y ajo', description: 'Para crear el fondo de cocción aromático', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 78, productId: 25, name: 'Arroz y puré de papas', description: 'Los acompañamientos perfectos para el jugo', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 26,
+    categoryId: 2,
+    name: 'Salpicon de Pollo',
+    description: 'Ensalada fría de pollo desmenuzado, verduras, papa y mayonesa',
+    legend: 'Fresco, nutritivo y delicioso',
+    price: 28,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/salpicon-de-pollo.avif',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 79, productId: 26, name: 'Pechuga desmenuzada', description: 'Pollo hervido y deshilachado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 80, productId: 26, name: 'Papas en cubos', description: 'Papas cocidas frías', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 81, productId: 26, name: 'Verduras y mayonesa', description: 'Arvejas, zanahorias y mayonesa casera', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 27,
+    categoryId: 2,
+    name: 'Pollo al Horno',
+    description: 'Presas de pollo marinadas con especias y asadas al horno',
+    legend: 'Piel dorada y carne jugosa',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-al-horno.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 82, productId: 27, name: 'Pollo entero troceado', description: 'Muslos y pechugas con piel', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 83, productId: 27, name: 'Especias de la casa', description: 'Ajo, comino, pimentón dulce y limón', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 84, productId: 27, name: 'Papas y camotes', description: 'Horneados junto al pollo', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 28,
+    categoryId: 2,
+    name: 'Revuelto de Carne',
+    description: 'Carne picada salteada con cebolla, tomate, papas fritas y huevo revuelto',
+    legend: 'Un salteado clásico y rápido',
+    price: 30,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/revuelto-de-carne.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 85, productId: 28, name: 'Carne de res picada', description: 'Carne blanda cortada en tiras finas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 86, productId: 28, name: 'Huevos frescos', description: 'Batidos e incorporados al final', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 87, productId: 28, name: 'Papas fritas bastón', description: 'Mezcladas con la carne y huevo', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 29,
+    categoryId: 2,
+    name: 'Lenteja',
+    description: 'Guiso cremoso de lentejas con carne, chorizo y arroz blanco',
+    legend: 'Energía y sabor en tu plato',
+    price: 28,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/lenteja.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 88, productId: 29, name: 'Lentejas seleccionadas', description: 'Lentejas cocidas a fuego lento', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 89, productId: 29, name: 'Chorizo parrillero', description: 'Chorizo en rodajas sofrito', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 90, productId: 29, name: 'Arroz blanco', description: 'Guarnición para acompañar el guiso', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 30,
+    categoryId: 2,
+    name: 'Chorrellana',
+    description: 'Carne de res cubierta con salsa de cebolla, tomate y pimentón',
+    legend: 'Sabor jugoso con un toque criollo',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/chorrellana.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 91, productId: 30, name: 'Bife de res', description: 'Filete de carne sellado a la plancha', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 92, productId: 30, name: 'Cebolla y tomate en juliana', description: 'Salteados para formar la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 93, productId: 30, name: 'Arroz y huevo frito', description: 'Acompañamientos tradicionales', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 31,
+    categoryId: 2,
+    name: 'Chancho al Horno',
+    description: 'Carne de cerdo marinada con hierbas y horneada lentamente',
+    legend: 'Textura crujiente por fuera y tierna por dentro',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/chancho-al-horno.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 94, productId: 31, name: 'Pierna de cerdo', description: 'Carne tierna marinada previamente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 95, productId: 31, name: 'Hierbabuena y ajo', description: 'Para el adobo cruceño tradicional', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 96, productId: 31, name: 'Camote y ensalada', description: 'Guarniciones dulces y frescas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 32,
+    categoryId: 2,
+    name: 'Saice',
+    description: 'Guiso tradicional tarijeño de carne picada, arvejas y papa',
+    legend: 'Un emblema de la gastronomía nacional',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/saice.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 97, productId: 32, name: 'Carne de res picada', description: 'Carne magra cortada en dados pequeños', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 98, productId: 32, name: 'Ají colorado dulce', description: 'Ají que le otorga el color y sabor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 99, productId: 32, name: 'Fideo chuño y sarsa', description: 'Tradicional acompañamiento del sur boliviano', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 33,
+    categoryId: 2,
+    name: 'Papalisa con Charque',
+    description: 'Guiso cremoso de papalisa machacada con trozos de charque',
+    legend: 'Un sabor andino inigualable',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/papalisa-con-charque.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 100, productId: 33, name: 'Papalisa fresca', description: 'Tubérculo andino cocido y machacado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 101, productId: 33, name: 'Charque de res tostado', description: 'Trozos crujientes de carne salada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 102, productId: 33, name: 'Ahogado de ají amarillo', description: 'Base de cebolla, tomate y ají', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 34,
+    categoryId: 2,
+    name: 'Pollo al Jugo',
+    description: 'Presas de pollo cocidas lentamente en salsa de tomate y pimentón',
+    legend: 'Sencillo, jugoso y reconfortante',
+    price: 30,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-al-jugo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 103, productId: 34, name: 'Presas de pollo', description: 'Filete o muslos tiernos', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 104, productId: 34, name: 'Cebolla y pimentón', description: 'Verduras salteadas para la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 105, productId: 34, name: 'Arroz blanco y papa', description: 'Guarniciones para absorber el caldo', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 35,
+    categoryId: 2,
+    name: 'Albondigas',
+    description: 'Bolas de carne de res molida en salsa de tomate casera',
+    legend: 'Suaves y llenas de sabor casero',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/albondigas.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 106, productId: 35, name: 'Carne molida de res', description: 'Mezclada con pan molido y huevo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 107, productId: 35, name: 'Salsa de tomate casera', description: 'Tomates frescos triturados y orégano', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 108, productId: 35, name: 'Arroz graneado', description: 'Complemento clásico para la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 36,
+    categoryId: 2,
+    name: 'Milanesa de Carne',
+    description: 'Filete de res apanado y frito, crujiente y jugoso',
+    legend: 'Un clásico de la cocina criolla',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/milanesa-de-carne.avif',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 109, productId: 36, name: 'Pulpa de res tierna', description: 'Corte delgado y sazonado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 110, productId: 36, name: 'Pan molido crujiente', description: 'Rebozado con huevo batido', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 111, productId: 36, name: 'Papas fritas y ensalada', description: 'Completos tradicionales', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 37,
+    categoryId: 2,
+    name: 'Hamburguesa',
+    description: 'Hamburguesa casera de res con queso, papas fritas y ensalada',
+    legend: 'La receta clásica mejorada',
+    price: 28,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/hamburguesa.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 112, productId: 37, name: 'Carne molida seleccionada', description: 'Sazonada con ajo y perejil', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 113, productId: 37, name: 'Queso cheddar o mozzarella', description: 'Derretido sobre la carne caliente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 114, productId: 37, name: 'Papas fritas', description: 'Porción de papas crujientes', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 38,
+    categoryId: 2,
+    name: 'Pollo Dorado',
+    description: 'Presas de pollo marinadas fritas hasta quedar crujientes',
+    legend: 'Crujiente por fuera y tierno por dentro',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-dorado.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 115, productId: 38, name: 'Pollo en presas', description: 'Pollo sazonado con ajo y pimienta', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 116, productId: 38, name: 'Arroz con queso', description: 'Arroz húmedo tradicional cruceño', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 117, productId: 38, name: 'Yuca frita', description: 'Yuca dorada y suave por dentro', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 39,
+    categoryId: 2,
+    name: 'Pollo a la Piña',
+    description: 'Guiso de pollo con trozos de piña en salsa agridulce',
+    legend: 'Un toque tropical y delicioso',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-pina.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 118, productId: 39, name: 'Pechuga de pollo en cubos', description: 'Pollo tierno salteado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 119, productId: 39, name: 'Piña en almíbar', description: 'Trozos de piña que aportan dulzor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 120, productId: 39, name: 'Pimentón rojo y cebolla', description: 'Vegetales que balancean la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 40,
+    categoryId: 2,
+    name: 'Albongas con Espagueti',
+    description: 'Espagueti largo bañado en salsa con albóndigas de res',
+    legend: 'La combinación italiana perfecta',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/albongas-con-espagueti.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 121, productId: 40, name: 'Espagueti largo', description: 'Pasta hervida al dente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 122, productId: 40, name: 'Albóndigas de carne', description: 'Bolas de carne sazonadas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 123, productId: 40, name: 'Salsa bolognesa casera', description: 'Salsa espesa con especias frescas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 41,
+    categoryId: 2,
+    name: 'Costilla Frita',
+    description: 'Costillas de cerdo fritas y doradas acompañadas de choclo y yuca',
+    legend: 'Un festín para el paladar',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/costilla-frita.png',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 124, productId: 41, name: 'Costilla de cerdo', description: 'Trozos de costilla marinada con limón', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 125, productId: 41, name: 'Choclo hervido', description: 'Mazorca fresca de maíz tierno', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 126, productId: 41, name: 'Yuca cocida', description: 'Guarnición suave para acompañar', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 42,
+    categoryId: 2,
+    name: 'Chuleta de Res',
+    description: 'Chuleta de res a la plancha con arroz, huevo y papas fritas',
+    legend: 'Generosa y llena de sabor criollo',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/chuleta-de-res.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 127, productId: 42, name: 'Chuleta con hueso', description: 'Corte de res jugoso', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 128, productId: 42, name: 'Arroz con queso', description: 'Arroz cremoso para guarnición', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 129, productId: 42, name: 'Papas fritas y ensalada', description: 'Acompañamiento clásico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 43,
+    categoryId: 2,
+    name: 'Falso Conejo',
+    description: 'Filete de res apanado cocido en salsa de ají amarillo con arvejas',
+    legend: 'Un clásico de la comida paceña',
+    price: 32,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/falso-conejo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 130, productId: 43, name: 'Filete de res apanado', description: 'Carne estirada y rebozada en pan molido', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 131, productId: 43, name: 'Salsa de ají amarillo', description: 'Guiso con cebolla, arvejas y pimentón', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 132, productId: 43, name: 'Fideo y papa cocida', description: 'Acompañamientos infaltables', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 44,
+    categoryId: 2,
+    name: 'Higado Frito',
+    description: 'Filete de hígado de res frito con abundante cebolla salteada',
+    legend: 'Rico en hierro y muy sabroso',
+    price: 28,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/higado-frito.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 133, productId: 44, name: 'Hígado de res fresco', description: 'Corte fileteado sazonado con ajo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 134, productId: 44, name: 'Cebolla salteada', description: 'Abundante cebolla frita para cubrir el hígado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 135, productId: 44, name: 'Yuca cocida y ensalada', description: 'Para equilibrar el plato', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 45,
+    categoryId: 2,
+    name: 'Chuleta de cerdo',
+    description: 'Chuleta de cerdo frita o a la plancha acompañada de ensalada y papa',
+    legend: 'Jugosa y con el dorado perfecto',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/chuleta-de-cerdo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 136, productId: 45, name: 'Chuleta de cerdo fresca', description: 'Corte tierno con costilla', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 137, productId: 45, name: 'Salsa criolla fresca', description: 'Ensalada de tomate, cebolla y locoto', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 138, productId: 45, name: 'Arroz con queso', description: 'Complemento tradicional', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 46,
+    categoryId: 2,
+    name: 'Chicharron de Pollo',
+    description: 'Trozos de pollo crocantes fritos con mote de maíz y papa',
+    legend: 'Un bocado crujiente inolvidable',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/chicharron-de-pollo.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 139, productId: 46, name: 'Pechuga en dados', description: 'Pollo marinado con limón y mostaza', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 140, productId: 46, name: 'Mote de maíz', description: 'Maíz cocido suave', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 141, productId: 46, name: 'Papas hervidas', description: 'Acompañamiento tradicional', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 47,
+    categoryId: 2,
+    name: 'Carne al Horno',
+    description: 'Trozos de carne de res marinados y cocidos lentamente al horno',
+    legend: 'Carne tierna y desmenuzable',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/carne-al-horno.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 142, productId: 47, name: 'Pulpa de res entera', description: 'Corte de carne sazonado con ajo y comino', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 143, productId: 47, name: 'Arroz y yuca cocida', description: 'Guarniciones típicas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 144, productId: 47, name: 'Chorrellana salteada', description: 'Cubierta de cebolla y tomate', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 48,
+    categoryId: 2,
+    name: 'Bife',
+    description: 'Bife de lomo de res cocido a la plancha con guarniciones clásicas',
+    legend: 'El corte de carne por excelencia',
+    price: 42,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/bife.webp',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 145, productId: 48, name: 'Lomo de res fresco', description: 'Filete de carne blanda', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 146, productId: 48, name: 'Papas fritas bastón', description: 'Porción crujiente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 147, productId: 48, name: 'Ensalada de tomate y cebolla', description: 'Acompañamiento fresco', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 49,
+    categoryId: 2,
+    name: 'Pollo a la Naranja',
+    description: 'Filetes de pollo salteados en una salsa agridulce de naranja',
+    legend: 'Sabor cítrico y sofisticado',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-naranja.avif',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 148, productId: 49, name: 'Pechuga de pollo en tiras', description: 'Carne tierna y magra', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 149, productId: 49, name: 'Zumo de naranja natural', description: 'Base para espesar la salsa cítrica', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 150, productId: 49, name: 'Verduras salteadas', description: 'Brócoli y zanahoria', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 50,
+    categoryId: 2,
+    name: 'Pollo a la salsa blanca',
+    description: 'Pechuga de pollo bañada en una cremosa salsa bechamel',
+    legend: 'Suave, cremoso y delicioso',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos/pollo-a-la-salsa-blanca.jpg',
+    isFeatured: true,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 151, productId: 50, name: 'Filetes de pechuga', description: 'Carne de pollo a la plancha', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 152, productId: 50, name: 'Salsa bechamel', description: 'Base de leche, mantequilla y harina con nuez moscada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 153, productId: 50, name: 'Champiñones laminados', description: 'Para complementar la textura de la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+
+  {
+    productId: 51,
+    categoryId: 3,
+    name: 'Bife con Pure',
+    description: 'Filete de lomo de res a la plancha acompañado de un suave puré de papas',
+    legend: 'Un almuerzo clásico y equilibrado',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/bife-con-pure.avif',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 154, productId: 51, name: 'Lomo de res', description: 'Corte de carne tierna sellado a la plancha', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 155, productId: 51, name: 'Puré de papas', description: 'Papas trituradas con mantequilla y leche', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 156, productId: 51, name: 'Ensalada fresca', description: 'Lechuga y tomate en rodajas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 52,
+    categoryId: 3,
+    name: 'Picante de Pollo',
+    description: 'Pollo criollo cocido en una salsa espesa de ají colorado',
+    legend: 'Un sabor tradicional con el picor exacto',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/picante-de-pollo.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 157, productId: 52, name: 'Pollo en presas', description: 'Pollo cocido a fuego lento en la salsa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 158, productId: 52, name: 'Ají colorado molido', description: 'Salsa base de ajíes despepitados y fritos', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 159, productId: 52, name: 'Arroz y chuño', description: 'Acompañamientos tradicionales para balancear', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 53,
+    categoryId: 3,
+    name: 'Pollo al Horno',
+    description: 'Pollo marinado con finas hierbas y asado al horno hasta dorar',
+    legend: 'Piel crocante y carne muy jugosa',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/pollo-al-horno.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 160, productId: 53, name: 'Muslos de pollo', description: 'Presas con piel marinadas previamente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 161, productId: 53, name: 'Papas horneadas', description: 'Papas doradas junto al jugo del pollo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 162, productId: 53, name: 'Ensalada de repollo', description: 'Ensalada fresca con vinagreta', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 54,
+    categoryId: 3,
+    name: 'Lasaña',
+    description: 'Capas de pasta rellenas de salsa boloñesa, bechamel y queso fundido',
+    legend: 'El placer de la pasta al horno',
+    price: 40,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/lasana.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 163, productId: 54, name: 'Láminas de pasta', description: 'Pasta especial para lasaña precocida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 164, productId: 54, name: 'Carne molida boloñesa', description: 'Salsa espesa con carne de res y tomates', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 165, productId: 54, name: 'Queso mozzarella', description: 'Para gratinar en la superficie', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 55,
+    categoryId: 3,
+    name: 'Keperi al Horno',
+    description: 'Corte de keperi de res marinado en limón y horneado por horas',
+    legend: 'Tan tierno que se deshace en la boca',
+    price: 45,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/keperi-al-horno.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 166, productId: 55, name: 'Keperi de res', description: 'Corte de carne con una capa de grasa ideal', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 167, productId: 55, name: 'Yuca cocida frita', description: 'Acompañamiento tradicional cruceño', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 168, productId: 55, name: 'Arroz con queso', description: 'Arroz cremoso para contrastar la carne', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 56,
+    categoryId: 3,
+    name: 'Chancho al Horno',
+    description: 'Carne de cerdo horneada con hierbas aromáticas y un toque cítrico',
+    legend: 'Un festín de sabor crujiente',
+    price: 42,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/chancho-al-horno.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 169, productId: 56, name: 'Costilla de cerdo', description: 'Corte jugoso marinado en ajo y limón', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 170, productId: 56, name: 'Mote y camote', description: 'Acompañamientos dulces y salados', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 171, productId: 56, name: 'Sarsa de cebolla', description: 'Ensalada criolla con tomate y locoto', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 57,
+    categoryId: 3,
+    name: 'Sajta de Pollo',
+    description: 'Pollo cocido en salsa de ají amarillo con tunta rebosada y papa',
+    legend: 'El sabor picante de la tradición paceña',
+    price: 35,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/sajta-de-pollo.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 172, productId: 57, name: 'Pollo entero troceado', description: 'Hervido y luego guisado en ají amarillo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 173, productId: 57, name: 'Tunta con maní', description: 'Tunta remojada y picada con salsa de maní', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 174, productId: 57, name: 'Sarsa criolla', description: 'Cebolla en pluma y tomate fresco por encima', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 58,
+    categoryId: 3,
+    name: 'Mondongo Chuquisaqueño',
+    description: 'Carne de cerdo con mote de maíz amarillo y ají colorado',
+    legend: 'Un plato con la rica historia de Sucre',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/mondongo-chuquisaqueno.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 175, productId: 58, name: 'Carne de cerdo', description: 'Carne frita y guisada en ají colorado', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 176, productId: 58, name: 'Mote de maíz amarillo', description: 'Maíz cocido sazonado con palillo (cúrcuma)', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 177, productId: 58, name: 'Papas cocidas', description: 'Papas imilla enteras y suaves', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 59,
+    categoryId: 3,
+    name: 'Chicharron Cochabambino',
+    description: 'Carne de cerdo frita en su propia manteca acompañada de mote y papa',
+    legend: 'El orgullo crujiente de los valles',
+    price: 45,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/chicharron-cochabambino.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 178, productId: 59, name: 'Carne de cerdo con tocino', description: 'Cortes fritos a fuego lento con chicha', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 179, productId: 59, name: 'Mote de maíz blanco', description: 'Granos grandes de maíz cocido tierno', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 180, productId: 59, name: 'Llajua boliviana', description: 'Salsa picante de locoto y tomate', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 60,
+    categoryId: 3,
+    name: 'Silpancho Cochabambino',
+    description: 'Filete de carne de res extra delgado y apanado con arroz y huevo',
+    legend: 'Un clásico gigante y sabroso',
+    price: 34,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/silpancho-cochabambino.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 181, productId: 60, name: 'Carne de res apanada', description: 'Carne golpeada y rebozada con pan molido', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 182, productId: 60, name: 'Arroz blanco y papas doradas', description: 'Base del plato con rodajas de papa frita', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 183, productId: 60, name: 'Huevos fritos y ensalada pico', description: 'Huevo frito encima con cebolla y tomate picados', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 61,
+    categoryId: 3,
+    name: 'Chuleta con huevo',
+    description: 'Chuleta de res a la plancha servida con un huevo frito montado',
+    legend: 'Para un almuerzo completo y llenador',
+    price: 36,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/chuleta-con-huevo.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 184, productId: 61, name: 'Chuleta de res', description: 'Corte de carne jugoso con hueso', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 185, productId: 61, name: 'Huevo fresco', description: 'Huevo frito con yema tierna', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 186, productId: 61, name: 'Arroz y papas fritas', description: 'Guarnición doble para acompañar', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 62,
+    categoryId: 3,
+    name: 'Costilla Frita',
+    description: 'Trozos de costilla de cerdo frita acompañados de mote y yuca',
+    legend: 'Crujientes bocados con sabor inigualable',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/costilla-frita.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 187, productId: 62, name: 'Costilla de cerdo', description: 'Costillas cortadas en trozos pequeños maridados', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 188, productId: 62, name: 'Yuca cocida', description: 'Yuca suave de la región', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 189, productId: 62, name: 'Mote de maíz', description: 'Maíz tierno hervido para acompañar', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 63,
+    categoryId: 3,
+    name: 'Bife con huevo',
+    description: 'Filete de carne de res jugosa a la plancha con huevo frito encima',
+    legend: 'La proteína ideal para tu día',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/bife-con-huevo.jpeg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 190, productId: 63, name: 'Lomo de res', description: 'Bife tierno salpimentado a la plancha', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 191, productId: 63, name: 'Huevo frito', description: 'Huevo montado sobre el bife caliente', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 192, productId: 63, name: 'Papas fritas bastón', description: 'Porción clásica de papas fritas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 64,
+    categoryId: 3,
+    name: 'Pollerita al horno',
+    description: 'Corte de pollerita de res tierna y dorada al horno lentamente',
+    legend: 'Sabor asado directamente a tu plato',
+    price: 42,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/pollerita-al-horno.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 193, productId: 64, name: 'Pollerita de res', description: 'Corte jugoso asado en su jugo', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 194, productId: 64, name: 'Arroz con queso', description: 'Arroz cremoso con queso fresco', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 195, productId: 64, name: 'Yuca cocida', description: 'Yuca de textura suave y cremosa', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 65,
+    categoryId: 3,
+    name: 'Milanesa Napolitana',
+    description: 'Milanesa de carne cubierta con salsa de tomate, jamón y queso fundido',
+    legend: 'El toque italiano que estabas buscando',
+    price: 38,
+    isPromotion: false,
+    imageUrl: './images/product/segundos-extras/milanesa-napolitana.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 196, productId: 65, name: 'Milanesa de res', description: 'Filete de carne apanado y frito', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 197, productId: 65, name: 'Jamón y queso mozzarella', description: 'Para cubrir y gratinar la milanesa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 198, productId: 65, name: 'Salsa pomodoro casera', description: 'Salsa espesa de tomate esparcida sobre la carne', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  
+  {
+    productId: 66,
+    categoryId: 4,
+    name: 'Chicha',
+    description: 'Bebida tradicional de maíz fermentado o cocido con especias',
+    legend: 'El sabor ancestral refrescante de nuestra tierra',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/chicha.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 199, productId: 66, name: 'Maíz blanco', description: 'Maíz seleccionado hervido para extraer su esencia', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 200, productId: 66, name: 'Canela y clavo de olor', description: 'Especias aromáticas para dar sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 201, productId: 66, name: 'Azúcar morena', description: 'Para endulzar de forma natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 67,
+    categoryId: 4,
+    name: 'Lima',
+    description: 'Refresco natural de lima fresca, cítrico y muy aromático',
+    legend: 'Perfecto para acompañar cualquier comida',
+    price: 10,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/lima.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 202, productId: 67, name: 'Zumo de lima natural', description: 'Lima recién exprimida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 203, productId: 67, name: 'Agua purificada', description: 'Base cristalina y refrescante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 204, productId: 67, name: 'Azúcar refinada', description: 'Toque de dulzor balanceado', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 68,
+    categoryId: 4,
+    name: 'Limonada',
+    description: 'Refresco clásico de limón natural servido bien frío',
+    legend: 'La opción más refrescante y ligera',
+    price: 10,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/limonada.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 205, productId: 68, name: 'Limón criollo fresco', description: 'Limones jugosos exprimidos al momento', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 206, productId: 68, name: 'Hojas de menta', description: 'Para un toque extra de frescura opcional', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 207, productId: 68, name: 'Almíbar simple', description: 'Para endulzar uniformemente', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 69,
+    categoryId: 4,
+    name: 'Naranja',
+    description: 'Jugo de naranja natural dulce y lleno de vitamina C',
+    legend: 'Un clásico dulce y revitalizante',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/naranja.avif',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 208, productId: 69, name: 'Naranja dulce valencia', description: 'Naranjas de la región seleccionadas por su dulzor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 209, productId: 69, name: 'Agua purificada', description: 'Para balancear la acidez del zumo', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 70,
+    categoryId: 4,
+    name: 'Piña',
+    description: 'Refresco natural de piña hervida con cáscara y especias',
+    legend: 'Un sabor tropical inconfundible',
+    price: 10,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/pina.avif',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 210, productId: 70, name: 'Piña madura', description: 'Fruta fresca y cáscara para concentrar el sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 211, productId: 70, name: 'Canela en rama', description: 'Para infundir un aroma reconfortante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 212, productId: 70, name: 'Azúcar', description: 'Para resaltar la dulzura natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 71,
+    categoryId: 4,
+    name: 'Canela',
+    description: 'Refresco tradicional hervido con abundantes ramas de canela',
+    legend: 'Sabor especiado y aromático único',
+    price: 10,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/canela.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 213, productId: 71, name: 'Canela entera original', description: 'Ramas de canela de alta calidad hervidas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 214, productId: 71, name: 'Clavo de olor', description: 'Toque aromático complementario', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 215, productId: 71, name: 'Azúcar morena', description: 'Para darle cuerpo y dulzor al refresco', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 72,
+    categoryId: 4,
+    name: 'Linaza',
+    description: 'Bebida saludable de linaza hervida y colada con un toque de limón',
+    legend: 'Frescura que hace bien al cuerpo',
+    price: 10,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/linaza.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 216, productId: 72, name: 'Semillas de linaza', description: 'Hervidas para obtener su característica textura suave', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 217, productId: 72, name: 'Zumo de limón criollo', description: 'Para balancear y realzar el sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 218, productId: 72, name: 'Azúcar morena', description: 'Toque de dulzor sutil', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 73,
+    categoryId: 4,
+    name: 'Papaya',
+    description: 'Jugo espeso y dulce de papaya fresca licuada al momento',
+    legend: 'Dulzor natural para acompañar tu almuerzo',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/papaya.avif',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 219, productId: 73, name: 'Papaya madura', description: 'Pulpa de papaya seleccionada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 220, productId: 73, name: 'Agua purificada', description: 'Base para una textura ligera', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 221, productId: 73, name: 'Azúcar', description: 'Mínimo toque de azúcar refinada', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 74,
+    categoryId: 4,
+    name: 'Maracuya',
+    description: 'Refresco cítrico y aromático de pulpa fresca de maracuyá',
+    legend: 'El balance perfecto entre ácido y dulce',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/maracuya.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 222, productId: 74, name: 'Pulpa de maracuyá fresca', description: 'Semillas y jugo extraído de la fruta fresca', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 223, productId: 74, name: 'Agua cristalina', description: 'Para diluir y suavizar la acidez', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 224, productId: 74, name: 'Azúcar', description: 'Suficiente azúcar para equilibrar su sabor intenso', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 75,
+    categoryId: 4,
+    name: 'Mocochinchi',
+    description: 'Bebida tradicional de durazno seco hervido con canela y azúcar caramelizada',
+    legend: 'La bebida tradicional que nunca pasa de moda',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/mocochinchi.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 225, productId: 75, name: 'Durazno seco (k\'isa)', description: 'Durazno deshidratado hervido hasta ablandarse', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 226, productId: 75, name: 'Azúcar caramelizada', description: 'Para darle el color ámbar característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 227, productId: 75, name: 'Canela en rama', description: 'Aporte de aroma y sabor inigualable', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 76,
+    categoryId: 4,
+    name: 'Chicha de Mani',
+    description: 'Refresco cremoso de maní blanco tostado, hervido con canela',
+    legend: 'Deliciosa, nutritiva y tradicional',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/chicha-de-mani.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 228, productId: 76, name: 'Maní blanco molido', description: 'Maní tostado y triturado para dar textura cremosa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 229, productId: 76, name: 'Esencia de vainilla', description: 'Toque para aromatizar la bebida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 230, productId: 76, name: 'Azúcar morena', description: 'Para complementar su dulzura natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 77,
+    categoryId: 4,
+    name: 'Tamarindo',
+    description: 'Refresco agridulce elaborado con pulpa natural de tamarindo',
+    legend: 'Exótico, refrescante y con carácter',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/refrescos/tamarindo.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 231, productId: 77, name: 'Pulpa de tamarindo fresca', description: 'Vainas de tamarindo remojadas y coladas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 232, productId: 77, name: 'Agua purificada', description: 'Base para disolver la pulpa concentrada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 233, productId: 77, name: 'Azúcar refinada', description: 'Para lograr el balance agridulce perfecto', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+
+  {
+    productId: 78,
+    categoryId: 5,
+    name: 'Coca Cola Mini',
+    description: 'Bebida gaseosa refrescante sabor original en su versión individual mini',
+    legend: 'El tamaño ideal para un antojo rápido',
+    price: 3,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/coca-cola-mini.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 234, productId: 78, name: 'Agua carbonatada', description: 'Base burbujeante y refrescante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 235, productId: 78, name: 'Extractos naturales', description: 'Fórmula secreta con sabor original', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 236, productId: 78, name: 'Azúcares', description: 'Aporte de dulzor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 79,
+    categoryId: 5,
+    name: 'Coca Cola Personal',
+    description: 'Bebida gaseosa sabor original en botella de tamaño personal',
+    legend: 'Acompañamiento perfecto para tu almuerzo individual',
+    price: 6,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/coca-cola-personal.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 237, productId: 79, name: 'Agua carbonatada', description: 'Base burbujeante y refrescante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 238, productId: 79, name: 'Extractos naturales', description: 'Fórmula secreta con sabor original', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 239, productId: 79, name: 'Azúcares', description: 'Aporte de dulzor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 80,
+    categoryId: 5,
+    name: 'Coca Cola 2 Litros',
+    description: 'Bebida gaseosa refrescante sabor original de 2 litros para compartir',
+    legend: 'Para disfrutar con toda la familia',
+    price: 13,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/coca-cola-2-litros.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 240, productId: 80, name: 'Agua carbonatada', description: 'Base burbujeante y refrescante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 241, productId: 80, name: 'Extractos naturales', description: 'Fórmula secreta con sabor original', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 242, productId: 80, name: 'Azúcares', description: 'Aporte de dulzor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 81,
+    categoryId: 5,
+    name: 'Coca Cola 3 Litros',
+    description: 'Bebida gaseosa sabor original en su presentación familiar de 3 litros',
+    legend: 'La magia de compartir a lo grande',
+    price: 18,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/coca-cola-3-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 243, productId: 81, name: 'Agua carbonatada', description: 'Base burbujeante y refrescante', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 244, productId: 81, name: 'Extractos naturales', description: 'Fórmula secreta con sabor original', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 245, productId: 81, name: 'Azúcares', description: 'Aporte de dulzor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 82,
+    categoryId: 5,
+    name: 'Fanta 2 Litros',
+    description: 'Bebida gaseosa sabor naranja de 2 litros en botella descartable',
+    legend: 'El sabor frutal favorito para tus comidas',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/fanta-2-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 246, productId: 82, name: 'Agua carbonatada', description: 'Base refrescante gasificada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 247, productId: 82, name: 'Jugo de naranja concentrado', description: 'Brinda el característico sabor a fruta', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 248, productId: 82, name: 'Azúcares y colorantes', description: 'Otorga el color y dulzor vibrante', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 83,
+    categoryId: 5,
+    name: 'Fanta 3 Litros',
+    description: 'Bebida gaseosa sabor naranja de 3 litros tamaño familiar',
+    legend: 'Frescura y sabor para grandes grupos',
+    price: 16,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/fanta-3-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 249, productId: 83, name: 'Agua carbonatada', description: 'Base refrescante gasificada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 250, productId: 83, name: 'Jugo de naranja concentrado', description: 'Brinda el característico sabor a fruta', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 251, productId: 83, name: 'Azúcares y colorantes', description: 'Otorga el color y dulzor vibrante', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 84,
+    categoryId: 5,
+    name: 'Sprite 2 litros',
+    description: 'Bebida gaseosa sabor lima-limón de 2 litros refrescante',
+    legend: 'Quita la sed con su frescura intensa',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/sprite-2-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 252, productId: 84, name: 'Agua carbonatada', description: 'Base con burbujas cristalinas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 253, productId: 84, name: 'Esencia de lima-limón', description: 'Aroma y sabor cítrico natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 254, productId: 84, name: 'Acidulantes', description: 'Para el balance cítrico exacto', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 85,
+    categoryId: 5,
+    name: 'Sprite 3 litros',
+    description: 'Bebida gaseosa sabor lima-limón de 3 litros tamaño familiar',
+    legend: 'Para que nadie se quede sin frescura',
+    price: 16,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/sprite-3-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 255, productId: 85, name: 'Agua carbonatada', description: 'Base con burbujas cristalinas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 256, productId: 85, name: 'Esencia de lima-limón', description: 'Aroma y sabor cítrico natural', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 257, productId: 85, name: 'Acidulantes', description: 'Para el balance cítrico exacto', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 86,
+    categoryId: 5,
+    name: 'Simba 2 Litros',
+    description: 'Bebida gaseosa sabor guaraná de 2 litros refrescante',
+    legend: 'El sabor único de la guaraná en tu mesa',
+    price: 11,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/simba-2-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 258, productId: 86, name: 'Agua carbonatada', description: 'Base líquida gasificada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 259, productId: 86, name: 'Extracto de guaraná', description: 'Saborizante natural de guaraná', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 260, productId: 86, name: 'Azúcares', description: 'Para balancear el sabor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 87,
+    categoryId: 5,
+    name: 'Simba 3 Litros',
+    description: 'Bebida gaseosa sabor guaraná de 3 litros tamaño familiar',
+    legend: 'Sabor y energía para compartir en grande',
+    price: 15,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/simba-3-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 261, productId: 87, name: 'Agua carbonatada', description: 'Base líquida gasificada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 262, productId: 87, name: 'Extracto de guaraná', description: 'Saborizante natural de guaraná', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 263, productId: 87, name: 'Azúcares', description: 'Para balancear el sabor característico', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 88,
+    categoryId: 5,
+    name: 'Cabaña 2 Litros',
+    description: 'Agua de mesa purificada y refrescante sin gas en botella de 2 litros',
+    legend: 'Hidratación pura para toda la familia',
+    price: 9,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/cabana-2-litros.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 264, productId: 88, name: 'Agua purificada', description: 'Agua filtrada bajo estrictos estándares de calidad', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 265, productId: 88, name: 'Minerales esenciales', description: 'Aporte para un sabor limpio y fresco', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 89,
+    categoryId: 5,
+    name: 'Cabaña 3 Litros',
+    description: 'Agua de mesa purificada y refrescante sin gas en botella familiar de 3 litros',
+    legend: 'Bienestar y frescura en su máxima presentación',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/gaseosas/cabana-3-litros.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 266, productId: 89, name: 'Agua purificada', description: 'Agua filtrada bajo estrictos estándares de calidad', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 267, productId: 89, name: 'Minerales esenciales', description: 'Aporte para un sabor limpio y fresco', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 90,
+    categoryId: 6,
+    name: 'Tropifrut',
+    description: 'Jugo de frutas variadas con un delicioso toque tropical y refrescante',
+    legend: 'Toda la frescura de las frutas en tu mesa',
+    price: 14,
+    isPromotion: false,
+    imageUrl: './images/product/jugos/tropifrut.jpg',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 268, productId: 90, name: 'Pulpa de frutas mixtas', description: 'Selección de naranja, piña y durazno', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 269, productId: 90, name: 'Agua purificada', description: 'Base fluida para un balance perfecto', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 270, productId: 90, name: 'Azúcares', description: 'Para resaltar el dulzor de la fruta', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  },
+  {
+    productId: 91,
+    categoryId: 6,
+    name: 'Acuario',
+    description: 'Bebida isotónica y refrescante ideal para hidratarte en cualquier momento',
+    legend: 'Recupera tu energía con cada sorbo',
+    price: 12,
+    isPromotion: false,
+    imageUrl: './images/product/jugos/acuario-2-litros.webp',
+    isFeatured: false,
+    isAvailable: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    state: true,
+    productIngredientDetail: [
+      { id: 271, productId: 91, name: 'Agua purificada', description: 'Base para una hidratación óptima', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 272, productId: 91, name: 'Sales minerales', description: 'Aporte de electrolitos para reponer energías', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
+      { id: 273, productId: 91, name: 'Esencia cítrica', description: 'Toque ligero de sabor a frutas cítricas', createdAt: new Date().toISOString(), createdBy: 'system', state: true }
+    ]
+  }
+];
   storage.setCollection(PRODUCTS_KEY, defaultProducts);
 }
 

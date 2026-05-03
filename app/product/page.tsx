@@ -69,10 +69,10 @@ export default function ProductsPage() {
   const filteredProducts =
     selectedCategory !== null
       ? products.filter(
-          (p) =>
-            p.categoryId === selectedCategory ||
-            p.categoryId === Number(selectedCategory),
-        )
+        (p) =>
+          p.categoryId === selectedCategory ||
+          p.categoryId === Number(selectedCategory),
+      )
       : products;
 
   const handleCategoryFilter = (categoryId: number | null) => {
@@ -173,7 +173,7 @@ export default function ProductsPage() {
   };
 
   const getCategoryName = (categoryId: number) => {
-    return categories.find((c) => c.categoryId === categoryId)?.name || "N/A";
+    return categories.find((c) => c.id === categoryId)?.name || "N/A";
   };
 
   if (loading) {
@@ -214,13 +214,13 @@ export default function ProductsPage() {
             </ButtonGeneric>
             {categories.map((category) => (
               <ButtonGeneric
-                key={category.categoryId}
+                key={category.id}
                 variant={
-                  selectedCategory === category.categoryId
+                  selectedCategory === category.id
                     ? "red"
                     : "primaryRed"
                 }
-                onClick={() => handleCategoryFilter(category.categoryId)}
+                onClick={() => handleCategoryFilter(category.id)}
               >
                 {category.name}
               </ButtonGeneric>
@@ -333,7 +333,7 @@ export default function ProductsPage() {
               >
                 <option value={0}>Selecciona una categoría</option>
                 {categories.map((cat) => (
-                  <option key={cat.categoryId} value={cat.categoryId}>
+                  <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
                 ))}

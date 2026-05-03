@@ -81,17 +81,20 @@
 //   state: boolean;
 // }
 
-export interface Ingredient {
-  id_ingredient: string;
-  name: string;
-  quantity: number;
-  unit: string;
-  supplier: string;
-  cost: number;
-  id_tenant: string;
-  created_at: string;
-  updated_at: string;
-}
+// export interface Ingredient {
+//   id: number;
+//   name: string;
+//   description: string;
+//   quantity: number;
+//   unitType: string;
+//   currentStock: number;
+//   // supplier: string;
+//   // cost: number;
+//   // id_tenant: string;
+//   createdAt: string;
+//   updatedAt: string;
+//   state: boolean;
+// }
 
 export interface IngredientGroup {
   id_ingredient_group: string;

@@ -3,6 +3,202 @@ import { CartItem, Product, Sale, RespuestaGenericaDto } from "@/types";
 
 const SALES_KEY = "sales";
 
+function getRandomAprilDate(): Date {
+  const day = Math.floor(Math.random() * 30) + 1; // Días del 1 al 30
+  const hour = Math.floor(Math.random() * 14) + 8; // Horario laboral entre 08:00 y 22:00
+  const minute = Math.floor(Math.random() * 60);
+  const second = Math.floor(Math.random() * 60);
+  
+  return new Date(2026, 3, day, hour, minute, second); // Mes 3 es Abril en JS
+}
+
+const salesMockData: Sale[] = [
+  {
+    saleId: 100,
+    orderNumber: 1500,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 1,
+    userCustomerId: 10,
+    payInvoice: true,
+    total: 125000,
+    paymentType: "Efectivo" as any,
+    shift: "Mañana",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 1, name: "Producto A", price: 25000, quantity: 5, categoryId: 4 }
+    ]
+  },
+  {
+    saleId: 101,
+    orderNumber: 1501,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 2,
+    userCustomerId: 11,
+    payInvoice: false,
+    total: 45000,
+    paymentType: "QR" as any,
+    shift: "Mañana",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 2, name: "Producto B", price: 15000, quantity: 3, categoryId: 3 }
+    ]
+  },
+  {
+    saleId: 102,
+    orderNumber: 1502,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 1,
+    userCustomerId: 12,
+    payInvoice: true,
+    total: 210000,
+    paymentType: "Mixto" as any,
+    shift: "Tarde",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 1, name: "Producto A", price: 25000, quantity: 4, categoryId: 3 },
+      { productId: 3, name: "Producto C", price: 55000, quantity: 2, categoryId: 3 }
+    ]
+  },
+  {
+    saleId: 103,
+    orderNumber: 1503,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 3,
+    userCustomerId: 13,
+    payInvoice: true,
+    total: 30000,
+    paymentType: "Efectivo" as any,
+    shift: "Tarde",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 4, name: "Producto D", price: 10000, quantity: 3, categoryId: 2 }
+    ]
+  },
+  {
+    saleId: 104,
+    orderNumber: 1504,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 2,
+    userCustomerId: 14,
+    payInvoice: false,
+    total: 80000,
+    paymentType: "QR" as any,
+    shift: "Noche",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 2, name: "Producto B", price: 20000, quantity: 4, categoryId: 1 }
+    ]
+  },
+  {
+    saleId: 105,
+    orderNumber: 1505,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 1,
+    userCustomerId: 15,
+    payInvoice: true,
+    total: 165000,
+    paymentType: "Efectivo" as any,
+    shift: "Mañana",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 3, name: "Producto C", price: 55000, quantity: 3,categoryId: 3 }
+    ]
+  },
+  {
+    saleId: 106,
+    orderNumber: 1506,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 4,
+    userCustomerId: 16,
+    payInvoice: false,
+    total: 50000,
+    paymentType: "Mixto" as any,
+    shift: "Tarde",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 1, name: "Producto A", price: 25000, quantity: 2, categoryId: 2 }
+    ]
+  },
+  {
+    saleId: 107,
+    orderNumber: 1507,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 2,
+    userCustomerId: 17,
+    payInvoice: true,
+    total: 120000,
+    paymentType: "QR" as any,
+    shift: "Noche",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 5, name: "Producto E", price: 40000, quantity: 3, categoryId: 2 }
+    ]
+  },
+  {
+    saleId: 108,
+    orderNumber: 1508,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 3,
+    userCustomerId: 18,
+    payInvoice: false,
+    total: 95000,
+    paymentType: "Efectivo" as any,
+    shift: "Mañana",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 2, name: "Producto B", price: 15000, quantity: 3, categoryId: 1 },
+      { productId: 1, name: "Producto A", price: 25000, quantity: 2, categoryId: 1 }
+    ]
+  },
+  {
+    saleId: 109,
+    orderNumber: 1509,
+    orderStatus: "COMPLETADO" as any,
+    tenantId: 1,
+    userId: 1,
+    userCustomerId: 19,
+    payInvoice: true,
+    total: 110000,
+    paymentType: "QR" as any,
+    shift: "Tarde",
+    createdAt: getRandomAprilDate(),
+    updatedAt: new Date(),
+    state: true,
+    detail: [
+      { productId: 3, name: "Producto C", price: 55000, quantity: 2, categoryId: 1 }
+    ]
+  }
+];
+
+
+
 // --- HELPERS DE RESPUESTA (Simulando métodos estáticos de C#) ---
 const responderExito = <T>(contenido: T, mensaje = "Operación exitosa"): RespuestaGenericaDto<T> => ({
   codigo: 200,
@@ -16,9 +212,25 @@ const responderFalla = <T>(mensaje: string, codigo = 400): RespuestaGenericaDto<
   contenido: null
 });
 
+// export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
+//   try {
+//     const data = storage.getCollection<Sale>(SALES_KEY);
+//     return responderExito(data);
+//   } catch (error) {
+//     return responderFalla("Error al obtener el historial de ventas");
+//   }
+// }
 export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
-    const data = storage.getCollection<Sale>(SALES_KEY);
+    let data = storage.getCollection<Sale>(SALES_KEY);
+
+    if (!data || data.length === 0) {
+      salesMockData.forEach((sale) => {
+        storage.addToCollection(SALES_KEY, sale, 'saleId');
+      });
+      data = storage.getCollection<Sale>(SALES_KEY);
+    }
+
     return responderExito(data);
   } catch (error) {
     return responderFalla("Error al obtener el historial de ventas");

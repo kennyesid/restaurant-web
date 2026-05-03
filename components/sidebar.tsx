@@ -31,9 +31,13 @@ export function Sidebar() {
 
   const [isOpen, setIsOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(false);
-  const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
-    MENU_BY_ROL["SALES_MANAGER"],
-  );
+  // const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
+  //   MENU_BY_ROL["SALES_MANAGER"],
+  // );
+  const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(() => {
+    const role = (user?.role?.toUpperCase() as RoleType) || "SALES_MANAGER";
+    return MENU_BY_ROL[role] || MENU_BY_ROL["SALES_MANAGER"];
+  });
   const pathname = usePathname();
 
   // const mainMenuItems = [
@@ -68,7 +72,7 @@ export function Sidebar() {
     const role = user?.role?.toUpperCase() as RoleType;
     const getPermissions = MENU_BY_ROL[role];
     setMenuPermissions(getPermissions);
-  }, []);
+  }, [user?.role]);
 
   return (
     <>

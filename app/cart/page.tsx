@@ -11,7 +11,7 @@ import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 const getFeaturedProducts = (products: Product[]) => {
   return products
     .filter((p) => p.isFeatured)
-    .sort((a, b) => a.displayOrder - b.displayOrder);
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
 };
 
 export default function CartPage() {
@@ -79,13 +79,11 @@ export default function CartPage() {
             </ButtonGeneric>
             {categories.map((category) => (
               <ButtonGeneric
-                key={category.categoryId}
+                key={category.id}
                 variant={
-                  selectedCategory === category.categoryId
-                    ? "red"
-                    : "primaryRed"
+                  selectedCategory === category.id ? "red" : "primaryRed"
                 }
-                onClick={() => handleCategoryFilter(category.categoryId)}
+                onClick={() => handleCategoryFilter(category.id)}
               >
                 {category.name}
               </ButtonGeneric>

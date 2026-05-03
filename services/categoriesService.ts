@@ -1,5 +1,5 @@
 import { storage } from '@/lib/storage';
-import { Category } from '@/lib/types';
+import { Category } from '@/types';
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
