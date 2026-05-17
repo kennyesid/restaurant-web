@@ -1,12 +1,14 @@
 import { storage } from '@/lib/storage';
 import { Category } from '@/types';
 
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+function generateNumericId(collection: Category[]): number {
+  if (collection.length === 0) return 1;
+  const maxId = Math.max(...collection.map(p => p.id));
+  return maxId + 1;
 }
 
 const CATEGORIES_KEY = 'categories';
-const DEFAULT_TENANT_ID = 'tenant-1';
+// const DEFAULT_TENANT_ID = 'tenant-1';
 
 // Get all categories
 export async function getCategories(): Promise<Category[]> {
@@ -15,26 +17,27 @@ export async function getCategories(): Promise<Category[]> {
 
 // Get category by ID
 export async function getCategoryById(id: string): Promise<Category | null> {
-  return storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id_category');
+  return storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id');
 }
 
 // Create a new category
-export async function createCategory(category: Omit<Category, 'id_category'>): Promise<Category> {
+export async function createCategory(category: Omit<Category, 'id'>): Promise<Category> {
+  const current = storage.getCollection<Category>(CATEGORIES_KEY);
   const newCategory: Category = {
     ...category,
-    id_category: generateId(),
+    id: generateNumericId(current),
   };
-  storage.addToCollection(CATEGORIES_KEY, newCategory, 'id_category');
+  storage.addToCollection(CATEGORIES_KEY, newCategory, 'id');
   return newCategory;
 }
 
 // Update a category
 export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
-  const success = storage.updateInCollection(CATEGORIES_KEY, id, updates, 'id_category');
-  return success ? storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id_category') : null;
+  const success = storage.updateInCollection(CATEGORIES_KEY, id, updates, 'id');
+  return success ? storage.getFromCollection<Category>(CATEGORIES_KEY, id, 'id') : null;
 }
 
 // Delete a category
 export async function deleteCategory(id: string): Promise<boolean> {
-  return storage.removeFromCollection(CATEGORIES_KEY, id, 'id_category');
+  return storage.removeFromCollection(CATEGORIES_KEY, id, 'id');
 }

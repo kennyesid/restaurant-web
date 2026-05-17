@@ -238,12 +238,12 @@ export default function IngredientsABM() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 bg-white">
-                            {paginatedIngredients.map((item) => {
+                            {paginatedIngredients.map((item, index) => {
                                 const categoryName = categories.find((c) => c.id === item.ingredientCategoriesId)?.name || "Sin categoría";
                                 const supplierName = suppliers.find((s) => s.id === item.supplierId)?.name || "Ninguno";
 
                                 return (
-                                    <tr key={item.id} className="hover:bg-gray-50/60 transition-colors text-sm">
+                                    <tr key={index} className="hover:bg-gray-50/60 transition-colors text-sm">
                                         <td className="px-6 py-4 font-bold text-gray-500">#{item.id}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
@@ -267,7 +267,7 @@ export default function IngredientsABM() {
                                             {item.currentStock} {item.unitType}
                                         </td>
                                         <td className="px-6 py-4 text-right font-bold text-gray-900">
-                                            Bs {item.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            Bs {item.price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span

@@ -30,7 +30,7 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
       //   { label: "Carrito de Compras", icon: Beef, href: "/cart" },
       { label: "Ventas", icon: Beef, href: "/sales" },
       { label: "Productos", icon: Package, href: "/product" },
-      { label: "Ingredientes", icon: Beef, href: "/dashboard/ingredients" },
+      { label: "Ingredientes", icon: Beef, href: "/ingredient" },
     ],
     second: [
       { label: "Usuarios", icon: Users, href: "/dashboard/admin/users" },

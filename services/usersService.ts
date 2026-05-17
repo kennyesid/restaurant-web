@@ -34,9 +34,9 @@ function initializeDefaults() {
       },
       {
         id: 1,
-        username: "admin",
+        username: "Gonzalo",
         password: "admin", // In production, this would be hashed
-        fullName: "Administrator",
+        fullName: "Gonzalo",
         document: "12345678",
         phone: "123456789",
         address: "123 Main St",
@@ -45,7 +45,7 @@ function initializeDefaults() {
         avatarUrl: "",
         // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
-        role: "ADMIN",
+        role: "Administrador",
         nit: "789456123",
         state: true,
         createdAt: new Date().toISOString(),

@@ -1,3 +1,12 @@
+export default function IngredientsPage() {
+    return (
+        <div>
+            {/* El contenido de tu página de ingredientes */}
+            <h1>Gestión de Ingredientes</h1>
+        </div>
+    );
+}
+
 // "use client";
 
 // import { useEffect, useState } from "react";

@@ -24,6 +24,7 @@ import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
 import { User } from "@/types/";
 import { createUser } from "@/services/usersService";
+import Image from "next/image";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -179,11 +180,14 @@ export function ShoppingCart() {
               >
                 <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
-                      <img
+                    <div className="relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
+                      <Image
                         src={getImageUrl(item.imageUrl)}
                         alt={item.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="48px"
+                        priority
+                        className="object-cover"
                       />
                     </div>
 
