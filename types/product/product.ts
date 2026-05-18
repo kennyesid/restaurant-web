@@ -1,8 +1,10 @@
+import { ProductDetailProduct } from "./productDetailProduct";
 import { ProductIngredientDetail } from "./productIngredientDetail";
 
 export interface Product {
   productId: number;
   productIngredientDetail?: ProductIngredientDetail[];
+  productDetailProduct?: ProductDetailProduct[];
   categoryId: number;
   name: string;
   description: string;
@@ -20,7 +22,7 @@ export interface Product {
   state: boolean;
 }
 
-  // promotionId: int;
-  // id_ingredient_group: string;
-  // is_available: boolean;
-  // id_tenant: string;
+// promotionId: int;
+// id_ingredient_group: string;
+// is_available: boolean;
+// id_tenant: string;

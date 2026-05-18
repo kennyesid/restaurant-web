@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { Product } from '@/types';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
-import { GripVertical, Save, Trash2 } from 'lucide-react';
-import { getImageUrl } from '@/utils/format';
-import Image from 'next/image';
-import { updateFeaturedProductsOrder } from '@/services/productsSservice';
-import ButtonGeneric from './common/button/ButtonGeneric';
+import { Product, ToastType } from "@/types";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { GripVertical, Save, Trash2 } from "lucide-react";
+import { getImageUrl } from "@/utils/format";
+import Image from "next/image";
+import { updateFeaturedProductsOrder } from "@/services/productsSservice";
+import ButtonGeneric from "./common/button/ButtonGeneric";
+import { toast } from "sonner";
+import { CustomNotification } from "./common/toast/CustomNotification";
 
 interface DraggableFeaturedProductsProps {
   products: Product[];
@@ -23,7 +25,6 @@ export function DraggableFeaturedProducts({
   onReorder,
   onSaveSuccess,
 }: DraggableFeaturedProductsProps) {
-
   const [isSaving, setIsSaving] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
 
@@ -77,15 +78,18 @@ export function DraggableFeaturedProducts({
 
   const handleSaveToStorage = async () => {
     setIsSaving(true);
-    alert('aasdasd')
     try {
       await updateFeaturedProductsOrder(products);
-      // toast.success('¡Orden y estado de destacados guardados con éxito!');
-
+      const currentToastBody = {
+        type: ToastType.Successfully,
+        message: "Exito",
+        description: "Productos agregados a Favoritos correctamente.",
+        image: null,
+      };
+      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
       onSaveSuccess();
     } catch (error) {
       console.error(error);
-      // toast.error('Ocurrió un error al intentar guardar los cambios');
     } finally {
       setIsSaving(false);
     }
@@ -100,8 +104,9 @@ export function DraggableFeaturedProducts({
   }
 
   return (
-    <div className="flex flex-col w-full gap-4"> {/* Aumentamos el gap general a 4 */}
-
+    <div className="flex flex-col w-full gap-4">
+      {" "}
+      {/* Aumentamos el gap general a 4 */}
       {/* LISTA DE TARJETAS */}
       <div className="flex flex-col w-full gap-2">
         {products.map((product, index) => (
@@ -114,7 +119,7 @@ export function DraggableFeaturedProducts({
             onDragEnd={handleDragEnd}
             className={`flex flex-row items-center gap-3 p-2 w-full
             cursor-move transition-all border-none bg-slate-50/80 shadow-sm rounded-2xl
-            ${draggedItem === index ? 'opacity-40 ring-2 ring-blue-500 scale-[0.98]' : 'hover:bg-white hover:shadow-md'}
+            ${draggedItem === index ? "opacity-40 ring-2 ring-blue-500 scale-[0.98]" : "hover:bg-white hover:shadow-md"}
           `}
           >
             <div className="relative w-12 h-12 rounded-xl flex-shrink-0 overflow-hidden shadow-inner bg-gray-200">
@@ -128,7 +133,9 @@ export function DraggableFeaturedProducts({
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xl">🍔</div>
+                <div className="w-full h-full flex items-center justify-center text-xl">
+                  🍔
+                </div>
               )}
             </div>
 
@@ -138,7 +145,7 @@ export function DraggableFeaturedProducts({
                 {product.name}
               </p>
               <p className="text-[11px] font-semibold text-blue-600/70">
-                Bs {product.price.toLocaleString('es-BO')}
+                Bs {product.price.toLocaleString("es-BO")}
               </p>
             </div>
 
@@ -162,17 +169,12 @@ export function DraggableFeaturedProducts({
           </Card>
         ))}
       </div>
-
       <div className="flex justify-end border-t border-gray-100">
-        <ButtonGeneric
-          variant='primary'
-          onClick={handleSaveToStorage}
-        >
+        <ButtonGeneric variant="primary" onClick={handleSaveToStorage}>
           {/* <Save className="w-4 h-4" /> */}
-          {isSaving ? 'Guardando cambios...' : 'Guardar Cambios'}
+          {isSaving ? "Guardando cambios..." : "Guardar Cambios"}
         </ButtonGeneric>
       </div>
-
     </div>
   );
 

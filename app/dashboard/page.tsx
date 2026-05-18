@@ -5,11 +5,25 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
-  DollarSign, TrendingUp, TrendingDown, Calendar as CalendarIcon, RefreshCw
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Calendar as CalendarIcon,
+  RefreshCw,
 } from "lucide-react";
 
 import {
@@ -28,13 +42,8 @@ import {
 
 import { format, subDays, eachDayOfInterval, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-
 import { Sale, User, Product, Category } from "@/types";
-
-import {
-  getSales,
-} from "@/services/salesService";
-
+import { getSales } from "@/services/salesService";
 import { getUsers } from "@/services/usersService";
 import { getCategories, getProducts } from "@/services/productsSservice";
 
@@ -50,26 +59,23 @@ interface PieData {
   fill: string;
 }
 
-const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4'];
+const COLORS = [
+  "#3b82f6",
+  "#10b981",
+  "#8b5cf6",
+  "#f59e0b",
+  "#ef4444",
+  "#06b6d4",
+];
 
 export default function DashboardRecap() {
-  // const [dateRange, setDateRange] = useState<DateRange>({
-  //   from: subDays(new Date(), 30),
-  //   to: new Date(),
-  // });
-
   const [dateRange, setDateRange] = useState<{
     from: Date;
     to: Date;
   }>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // Primer día del mes actual
-    to: new Date(), // Hoy
+    to: new Date(),
   });
-
-  // const [dateRange, setDateRange] = useState<DateRange | undefined>({
-  //   from: subDays(new Date(), 30),
-  //   to: new Date(),
-  // });
 
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("all");
@@ -83,28 +89,28 @@ export default function DashboardRecap() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Cargar datos iniciales
   const loadAllData = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const [salesRes, usersRes, categoriesRes, productsRes] = await Promise.all([
-        getSales(),
-        getUsers(),
-        getCategories(),
-        getProducts(),
-      ]);
+      const [salesRes, usersRes, categoriesRes, productsRes] =
+        await Promise.all([
+          getSales(),
+          getUsers(),
+          getCategories(),
+          getProducts(),
+        ]);
 
       setSales(salesRes.contenido || []);
       setUsers(usersRes || []);
       setCategories(categoriesRes || []);
       setProducts(productsRes || []);
 
-      // Seleccionar automáticamente el último día con ventas
       if (salesRes.contenido && salesRes.contenido.length > 0) {
-        const latestSale = [...salesRes.contenido].sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        const latestSale = [...salesRes.contenido].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         )[0];
-        setSelectedDate(format(new Date(latestSale.createdAt), 'yyyy-MM-dd'));
+        setSelectedDate(format(new Date(latestSale.createdAt), "yyyy-MM-dd"));
       }
     } catch (error) {
       console.error("Error cargando datos:", error);
@@ -118,18 +124,20 @@ export default function DashboardRecap() {
     loadAllData();
   }, [loadAllData]);
 
-  // Filtrar ventas según rango de fechas y filtros
   const filteredSales = useMemo(() => {
-    return sales.filter(sale => {
+    return sales.filter((sale) => {
       const saleDate = startOfDay(new Date(sale.createdAt));
       const from = dateRange?.from ? startOfDay(dateRange.from) : null;
       const to = dateRange?.to ? startOfDay(dateRange.to) : null;
 
-      const inDateRange = (!from || saleDate >= from) && (!to || saleDate <= to);
-      const matchesUser = selectedUserId === "all" || sale.userId?.toString() === selectedUserId;
-      const matchesCategory = selectedCategoryId === "all" ||
-        sale.detail?.some(item => {
-          const product = products.find(p => p.productId === item.productId);
+      const inDateRange =
+        (!from || saleDate >= from) && (!to || saleDate <= to);
+      const matchesUser =
+        selectedUserId === "all" || sale.userId?.toString() === selectedUserId;
+      const matchesCategory =
+        selectedCategoryId === "all" ||
+        sale.detail?.some((item) => {
+          const product = products.find((p) => p.productId === item.productId);
           return product?.categoryId.toString() === selectedCategoryId;
         });
 
@@ -143,16 +151,16 @@ export default function DashboardRecap() {
       end: dateRange.to,
     });
 
-    return days.map(day => {
-      const dayStr = format(day, 'yyyy-MM-dd');
-      const daySales = filteredSales.filter(sale =>
-        format(new Date(sale.createdAt), 'yyyy-MM-dd') === dayStr
+    return days.map((day) => {
+      const dayStr = format(day, "yyyy-MM-dd");
+      const daySales = filteredSales.filter(
+        (sale) => format(new Date(sale.createdAt), "yyyy-MM-dd") === dayStr,
       );
 
       return {
         date: dayStr,
         revenue: daySales.reduce((sum, sale) => sum + (sale.total || 0), 0),
-        formattedDate: format(day, 'dd MMM', { locale: es }),
+        formattedDate: format(day, "dd MMM", { locale: es }),
       };
     });
   }, [filteredSales, dateRange]);
@@ -160,20 +168,23 @@ export default function DashboardRecap() {
   const pieData: PieData[] = useMemo(() => {
     if (!selectedDate) return [];
 
-    const daySales = filteredSales.filter(sale =>
-      format(new Date(sale.createdAt), 'yyyy-MM-dd') === selectedDate
+    const daySales = filteredSales.filter(
+      (sale) => format(new Date(sale.createdAt), "yyyy-MM-dd") === selectedDate,
     );
 
     const categoryMap = new Map<string, number>();
 
-    daySales.forEach(sale => {
-      sale.detail?.forEach(item => {
-        const product = products.find(p => p.productId === item.productId);
+    daySales.forEach((sale) => {
+      sale.detail?.forEach((item) => {
+        const product = products.find((p) => p.productId === item.productId);
         if (product) {
-          const category = categories.find(c => c.id === product.categoryId);
+          const category = categories.find((c) => c.id === product.categoryId);
           const catName = category?.name || "Sin categoría";
 
-          categoryMap.set(catName, (categoryMap.get(catName) || 0) + (item.price * item.quantity));
+          categoryMap.set(
+            catName,
+            (categoryMap.get(catName) || 0) + item.price * item.quantity,
+          );
         }
       });
     });
@@ -190,22 +201,28 @@ export default function DashboardRecap() {
   // KPIs
   const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total, 0);
   const totalOrders = filteredSales.length;
-  const avgTicket = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
+  const avgTicket =
+    totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
   // Simulación de Costo y Profit (puedes mejorar después)
   const totalCost = Math.round(totalRevenue * 0.65);
   const totalProfit = totalRevenue - totalCost;
-  const profitMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
+  const profitMargin =
+    totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
 
   const handleBarClick = (data: any) => {
-    alert('sadasd')
+    alert("sadasd");
     if (data && data.date) {
       setSelectedDate(data.date);
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-[70vh]">Cargando dashboard...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[70vh]">
+        Cargando dashboard...
+      </div>
+    );
   }
 
   return (
@@ -215,27 +232,35 @@ export default function DashboardRecap() {
         <div>
           <h1 className="text-3xl font-bold">Monthly Recap Report</h1>
           <p className="text-muted-foreground">
-            {format(dateRange?.from || new Date(), "dd MMM yyyy", { locale: es })} -{" "}
+            {format(dateRange?.from || new Date(), "dd MMM yyyy", {
+              locale: es,
+            })}{" "}
+            -{" "}
             {format(dateRange?.to || new Date(), "dd MMM yyyy", { locale: es })}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-3">
-
           <div className="flex flex-wrap gap-3">
             {/* Fecha Inicio */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2 min-w-[200px] justify-start text-left font-normal">
+                <Button
+                  variant="outline"
+                  className="gap-2 min-w-[200px] justify-start text-left font-normal"
+                >
                   <CalendarIcon className="h-4 w-4" />
-                  Inicio: {format(dateRange.from!, "dd/MM/yyyy", { locale: es })}
+                  Inicio:{" "}
+                  {format(dateRange.from!, "dd/MM/yyyy", { locale: es })}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={dateRange.from}
-                  onSelect={(date) => setDateRange(prev => ({ ...prev, from: date! }))}
+                  onSelect={(date) =>
+                    setDateRange((prev) => ({ ...prev, from: date! }))
+                  }
                   numberOfMonths={1}
                   defaultMonth={dateRange.from}
                   disabled={(date) => date > (dateRange.to || new Date())}
@@ -246,7 +271,10 @@ export default function DashboardRecap() {
             {/* Fecha Final */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="gap-2 min-w-[200px] justify-start text-left font-normal">
+                <Button
+                  variant="outline"
+                  className="gap-2 min-w-[200px] justify-start text-left font-normal"
+                >
                   <CalendarIcon className="h-4 w-4" />
                   Fin: {format(dateRange.to!, "dd/MM/yyyy", { locale: es })}
                 </Button>
@@ -255,10 +283,14 @@ export default function DashboardRecap() {
                 <Calendar
                   mode="single"
                   selected={dateRange.to}
-                  onSelect={(date) => setDateRange(prev => ({ ...prev, to: date! }))}
+                  onSelect={(date) =>
+                    setDateRange((prev) => ({ ...prev, to: date! }))
+                  }
                   numberOfMonths={1}
                   defaultMonth={dateRange.to}
-                  disabled={(date) => date < (dateRange.from || subDays(new Date(), 30))}
+                  disabled={(date) =>
+                    date < (dateRange.from || subDays(new Date(), 30))
+                  }
                 />
               </PopoverContent>
             </Popover>
@@ -270,7 +302,7 @@ export default function DashboardRecap() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los usuarios</SelectItem>
-                {users.map(user => (
+                {users.map((user) => (
                   <SelectItem key={user.id} value={user.id.toString()}>
                     {user.fullName}
                   </SelectItem>
@@ -278,7 +310,10 @@ export default function DashboardRecap() {
               </SelectContent>
             </Select>
 
-            <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+            <Select
+              value={selectedCategoryId}
+              onValueChange={setSelectedCategoryId}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Todas las categorías" />
               </SelectTrigger>
@@ -292,8 +327,14 @@ export default function DashboardRecap() {
               </SelectContent>
             </Select>
 
-            <Button onClick={loadAllData} disabled={isRefreshing} variant="outline">
-              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <Button
+              onClick={loadAllData}
+              disabled={isRefreshing}
+              variant="outline"
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
               Actualizar
             </Button>
           </div>
@@ -312,7 +353,10 @@ export default function DashboardRecap() {
             </SelectContent>
           </Select>
 
-          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+          <Select
+            value={selectedCategoryId}
+            onValueChange={setSelectedCategoryId}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
@@ -326,8 +370,14 @@ export default function DashboardRecap() {
             </SelectContent>
           </Select>
 
-          <Button onClick={loadAllData} disabled={isRefreshing} variant="outline">
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          <Button
+            onClick={loadAllData}
+            disabled={isRefreshing}
+            variant="outline"
+          >
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             Actualizar
           </Button>
         </div>
@@ -340,11 +390,7 @@ export default function DashboardRecap() {
           <ResponsiveContainer width="100%" height={380}>
             <AreaChart data={dailyRevenueData} onClick={handleBarClick}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="formattedDate"
-                stroke="#6b7280"
-                fontSize={12}
-              />
+              <XAxis dataKey="formattedDate" stroke="#6b7280" fontSize={12} />
               <YAxis
                 stroke="#6b7280"
                 fontSize={12}
@@ -356,7 +402,10 @@ export default function DashboardRecap() {
                   border: "1px solid #e5e7eb",
                   borderRadius: "8px",
                 }}
-                formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, "Revenue"]}
+                formatter={(value: number) => [
+                  `$${value.toLocaleString("es-CO")}`,
+                  "Revenue",
+                ]}
                 labelFormatter={(label) => `Fecha: ${label}`}
               />
               <Area
@@ -391,7 +440,9 @@ export default function DashboardRecap() {
             </h3>
             {selectedDate && (
               <Badge variant="secondary">
-                {pieData.reduce((sum, item) => sum + item.value, 0).toLocaleString("es-CO")}
+                {pieData
+                  .reduce((sum, item) => sum + item.value, 0)
+                  .toLocaleString("es-CO")}
               </Badge>
             )}
           </div>
@@ -412,7 +463,9 @@ export default function DashboardRecap() {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`]}
+                  formatter={(value: number) => [
+                    `$${value.toLocaleString("es-CO")}`,
+                  ]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -425,7 +478,10 @@ export default function DashboardRecap() {
           {/* Leyenda */}
           <div className="mt-6 space-y-2">
             {pieData.map((item, index) => (
-              <div key={index} className="flex items-center justify-between text-sm">
+              <div
+                key={index}
+                className="flex items-center justify-between text-sm"
+              >
                 <div className="flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-full"
@@ -433,7 +489,9 @@ export default function DashboardRecap() {
                   />
                   <span>{item.name}</span>
                 </div>
-                <span className="font-medium">${item.value.toLocaleString("es-CO")}</span>
+                <span className="font-medium">
+                  ${item.value.toLocaleString("es-CO")}
+                </span>
               </div>
             ))}
           </div>
@@ -474,7 +532,7 @@ function KpiCard({
   value,
   change,
   isPositive,
-  icon
+  icon,
 }: {
   title: string;
   value: string;
@@ -486,13 +544,21 @@ function KpiCard({
     <Card className="p-6">
       <div className="flex justify-between">
         <div>
-          <p className="text-sm text-muted-foreground uppercase tracking-widest">{title}</p>
+          <p className="text-sm text-muted-foreground uppercase tracking-widest">
+            {title}
+          </p>
           <p className="text-3xl font-bold mt-3">{value}</p>
         </div>
         <div className="text-4xl opacity-80">{icon}</div>
       </div>
-      <div className={`flex items-center gap-1 mt-4 text-sm ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-        {isPositive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+      <div
+        className={`flex items-center gap-1 mt-4 text-sm ${isPositive ? "text-emerald-600" : "text-red-600"}`}
+      >
+        {isPositive ? (
+          <TrendingUp className="h-4 w-4" />
+        ) : (
+          <TrendingDown className="h-4 w-4" />
+        )}
         <span>{change}</span>
         <span className="text-muted-foreground">desde el mes anterior</span>
       </div>

@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { Check, AlertTriangle, XCircle } from "lucide-react";
+import { Check, AlertTriangle, XCircle, X } from "lucide-react";
 import { ToastType } from "@/types";
 import { ToastBody } from "@/types/generic/toastBody";
 
@@ -36,14 +36,20 @@ export const CustomNotification = ({ t, body }: CustomToastProps) => {
       descriptionColor: "text-gray-500",
       buttonColor: "text-gray-700 hover:bg-gray-200",
     },
-
     [ToastType.Fail]: {
-      icon: <XCircle size={22} />,
-      iconWrapper: "bg-red-100 text-red-600 border-red-500",
-      titleColor: "text-gray-900",
-      descriptionColor: "text-gray-500",
-      buttonColor: "text-gray-700 hover:bg-gray-200",
+      icon: <X size={18} strokeWidth={3} />,
+      iconWrapper: "bg-red-50 text-red-600 border-red-200",
+      titleColor: "text-red-900",
+      descriptionColor: "text-red-700/70",
+      buttonColor: "text-red-700 hover:bg-red-50",
     },
+    // [ToastType.Fail]: {
+    //   icon: <XCircle size={22} />,
+    //   iconWrapper: "bg-red-100 text-red-600 border-red-500",
+    //   titleColor: "text-gray-900",
+    //   descriptionColor: "text-gray-500",
+    //   buttonColor: "text-gray-700 hover:bg-gray-200",
+    // },
   };
 
   const style = configs[type];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Product, Category } from "@/types/index";
+import { Product, Category, ToastType } from "@/types/index";
 import {
   getProducts,
   createProduct,
@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/dialog";
 import { ProductCard } from "@/components/cart/Product-card";
 import { useAppDispatch } from "@/store/store/hooks";
+import { CustomNotification } from "@/components/common/toast/CustomNotification";
+import { toast } from "sonner";
 
 export default function ProductsPage() {
   const dispatch = useAppDispatch();
@@ -63,7 +65,6 @@ export default function ProductsPage() {
         .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
       setFeaturedProducts(initialFeatured);
-
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -74,10 +75,10 @@ export default function ProductsPage() {
   const filteredProducts =
     selectedCategory !== null
       ? products.filter(
-        (p) =>
-          p.categoryId === selectedCategory ||
-          p.categoryId === Number(selectedCategory),
-      )
+          (p) =>
+            p.categoryId === selectedCategory ||
+            p.categoryId === Number(selectedCategory),
+        )
       : products.filter((p) => p.isFeatured);
 
   const handleCategoryFilter = (categoryId: number | null) => {
@@ -89,6 +90,15 @@ export default function ProductsPage() {
       (p) => p.productId === product.productId,
     );
 
+    const currentToastBody = {
+      type: isCurrentlyFeatured ? ToastType.Warning : ToastType.Successfully,
+      message: isCurrentlyFeatured ? "Exito" : "Exito",
+      description: isCurrentlyFeatured
+        ? "Producto eliminado de la lista."
+        : "Producto agregado correctamente.",
+      image: null,
+    };
+
     if (isCurrentlyFeatured) {
       setFeaturedProducts(
         featuredProducts.filter((p) => p.productId !== product.productId),
@@ -96,6 +106,7 @@ export default function ProductsPage() {
     } else {
       setFeaturedProducts([...featuredProducts, product]);
     }
+    toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
   };
 
   const handleRemoveFeatured = (productId: number) => {
@@ -209,9 +220,7 @@ export default function ProductsPage() {
               <ButtonGeneric
                 key={category.id}
                 variant={
-                  selectedCategory === category.id
-                    ? "red"
-                    : "primaryRed"
+                  selectedCategory === category.id ? "red" : "primaryRed"
                 }
                 onClick={() => handleCategoryFilter(category.id)}
               >

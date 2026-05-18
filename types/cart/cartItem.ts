@@ -7,5 +7,6 @@ export interface CartItem {
   modified?: boolean;
   modifiedSubtotal?: number;
   reasonModification?: string;
+  isPromotion?: boolean;
   imageUrl?: string;
 }

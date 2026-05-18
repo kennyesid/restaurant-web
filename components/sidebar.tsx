@@ -8,6 +8,7 @@ import { LogOut, Menu, Settings, ChevronDown } from "lucide-react";
 import { useAppSelector } from "@/store/store/hooks";
 import { MENU_BY_ROL, MenuConfig } from "@/lib/constants/menuByRol";
 import { RoleType } from "@/types";
+import Image from "next/image";
 
 export function Sidebar() {
   const { user } = useAppSelector((state) => state.auth);
@@ -20,9 +21,15 @@ export function Sidebar() {
   //   const role = (user?.role?.toUpperCase() as RoleType) || "SALES_MANAGER";
   //   return MENU_BY_ROL[role] || MENU_BY_ROL["SALES_MANAGER"];
   // });
+
+  // const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
+  //   MENU_BY_ROL["ADMIN"],
+  // );
+
   const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
-    MENU_BY_ROL["ADMIN"],
+    MENU_BY_ROL[(user?.role?.toUpperCase() as RoleType) || "VISITOR"],
   );
+
   const pathname = usePathname();
   const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
   const handleLogout = () => {
@@ -38,14 +45,14 @@ export function Sidebar() {
   //   const getPermissions = MENU_BY_ROL[role];
   //   setMenuPermissions(getPermissions);
   // }, [user?.role]);
+
   useEffect(() => {
     if (user?.role) {
       const role = user.role.toUpperCase() as RoleType;
-      // Si el rol existe en tu configuración usa ese, sino el por defecto
-      setMenuPermissions(MENU_BY_ROL[role] || MENU_BY_ROL["ADMIN"]);
+      setMenuPermissions(MENU_BY_ROL[role] || MENU_BY_ROL["VISITOR"]);
       setIsOpen(false);
     } else {
-      setMenuPermissions(MENU_BY_ROL["ADMIN"]);
+      setMenuPermissions(MENU_BY_ROL["VISITOR"]);
     }
   }, [user]);
 
@@ -67,12 +74,33 @@ export function Sidebar() {
         {/* Header / Logo Section */}
         <div className="p-8 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#FACC15] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
+            {/* <div className="w-10 h-10 bg-[#FACC15] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20">
               <span className="text-xl font-black text-[#052A3D]">Y</span>
+            </div> */}
+            {/* <div className="relative w-10 h-10 bg-[#FACC15] rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/20 overflow-hidden shrink-0">
+              <Image
+                src="./images/restaurante/logotipo-cocina-yeshua.jpeg"
+                alt="Logo YesiD REST"
+                fill
+                sizes="40px"
+                priority
+                className="object-cover p-1"
+              />
+            </div> */}
+
+            <div className="relative w-10 h-10 flex items-center justify-center shadow-lg shadow-yellow-500/20 overflow-hidden shrink-0">
+              <Image
+                src="./images/restaurante/logotipo-cocina-yeshua.jpeg"
+                alt="Logo YesiD REST"
+                fill
+                sizes="40px"
+                priority
+                className="object-cover p-1"
+              />
             </div>
             <div>
               <h1 className="text-lg font-bold tracking-tight text-white">
-                YesiD REST
+                {user?.role}
               </h1>
               <p className="text-[10px] text-yellow-500/80 font-bold uppercase tracking-widest">
                 Sucursal 1

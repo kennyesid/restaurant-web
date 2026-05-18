@@ -14,10 +14,20 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { authenticateUser } from "@/services/usersService";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
+import { ToastType } from "@/types";
+import { CustomNotification } from "@/components/common/toast/CustomNotification";
+
+// const loginSchema = z.object({
+//   email: z.string().min(1, "Email requerido"),
+//   password: z.string().min(1, "Contraseña requerida"),
+// });
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email requerido"),
-  password: z.string().min(1, "Contraseña requerida"),
+  email: z
+    .string()
+    .min(1, "El email es obligatorio")
+    .email("Formato de correo electrónico inválido (ej: usuario@gmail.com)"),
+  password: z.string().min(4, "La contraseña debe tener al menos 4 caracteres"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -49,7 +59,15 @@ export default function LoginPage() {
         toast.success(`¡Bienvenido, ${user.fullName}!`);
         router.push("/dashboard");
       } else {
-        toast.error("Usuario o contraseña incorrectos");
+        const currentToastBody = {
+          type: ToastType.Fail,
+          message: "Error",
+          description: "Usuario o contraseña incorrectos.",
+          image: null,
+        };
+        toast.custom((t) => (
+          <CustomNotification t={t} body={currentToastBody} />
+        ));
         setIsLoading(false);
       }
     } catch (error) {
@@ -76,11 +94,9 @@ export default function LoginPage() {
           <div className="mb-2 w-full">
             <div className="grid grid-cols-12 items-center gap-4">
               <div className="col-span-12 text-left">
-
                 <h2 className="text-center text-2xl font-black text-rest-primary leading-tight drop-shadow-sm">
                   Bienvenido al Panel Administrativo para Restaurantes
                 </h2>
-
                 <div className="flex items-center gap-2 text-center justify-center">
                   {/* <span className="h-[2px] w-4 bg-rest-primary rounded-full shrink-0"></span> */}
                   <p className=" text-xs font-medium text-rest-primary/80 italic">
@@ -101,15 +117,17 @@ export default function LoginPage() {
                 <Input
                   type="email"
                   placeholder="correo@ejemplo.com"
-                  {...register("email", {
-                    required: "El email es obligatorio",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Email inválido",
-                    },
-                  })}
-                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.email ? "border-red-400" : ""
-                    }`}
+                  {...register("email")}
+                  // {...register("email", {
+                  //   required: "El email es obligatorio",
+                  //   pattern: {
+                  //     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  //     message: "Email inválido",
+                  //   },
+                  // })}
+                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${
+                    errors.email ? "border-red-400" : ""
+                  }`}
                 />
                 {errors.email && (
                   <p className="text-xs text-red-500">{errors.email.message}</p>
@@ -123,15 +141,17 @@ export default function LoginPage() {
                 <Input
                   type="password"
                   placeholder="••••••••"
-                  {...register("password", {
-                    required: "La contraseña es obligatoria",
-                    minLength: {
-                      value: 4,
-                      message: "Mínimo 4 caracteres",
-                    },
-                  })}
-                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.password ? "border-red-400" : ""
-                    }`}
+                  {...register("password")}
+                  // {...register("password", {
+                  //   required: "La contraseña es obligatoria",
+                  //   minLength: {
+                  //     value: 4,
+                  //     message: "Mínimo 4 caracteres",
+                  //   },
+                  // })}
+                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${
+                    errors.password ? "border-red-400" : ""
+                  }`}
                 />
                 {errors.password && (
                   <p className="text-xs text-red-500">

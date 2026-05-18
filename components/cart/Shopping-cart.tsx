@@ -32,6 +32,8 @@ export function ShoppingCart() {
 
   const [showSummary, setShowSummary] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
+  const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
 
   const { items, paymentType } = useAppSelector((state) => state.cart) as {
     items: CartItem[];
@@ -41,12 +43,7 @@ export function ShoppingCart() {
 
   const [needsInvoice, setNeedsInvoice] = useState(false);
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
-  const [customNit, setCustomNit] = useState(""); // Para que sea modificable
-
-  // const total = items.reduce(
-  //   (sum, item) => sum + item.price * item.quantity,
-  //   0,
-  // );
+  const [customNit, setCustomNit] = useState("");
 
   let total = items.reduce(
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -98,7 +95,6 @@ export function ShoppingCart() {
           userSendId = selectedClient.id;
         }
       }
-      // setSelectedClient
 
       const response = await createSale({
         detail: saleItems,
@@ -111,10 +107,6 @@ export function ShoppingCart() {
         state: true,
         total,
         shift: getCurrentShift(),
-
-        // userCustomerId: needsInvoice && selectedClient ? selectedClient.id : 0,
-        // invoiceNit: needsInvoice ? customNit : null,
-        // requiresInvoice: needsInvoice,
       });
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
@@ -147,14 +139,33 @@ export function ShoppingCart() {
   };
 
   const handleChangeSubTotal = (newItems: CartItem[]) => {
-    // const haisdhijashd = items;
-    // const asdasdsss = newItems;
     dispatch(updateCartItems(newItems));
     total = items.reduce(
       (sum, item) =>
         sum + (item.modifiedSubtotal ?? item.price * item.quantity),
       0,
     );
+  };
+
+  const handleUpdatePromoQuantity = (subProductId: number, newQty: number) => {
+    if (!selectedPromo) return;
+
+    const updatedDetails = selectedPromo.productDetailProduct.map(
+      (subItem: any) =>
+        subItem.productId === subProductId
+          ? { ...subItem, quantity: Math.max(0, newQty) }
+          : subItem,
+    );
+
+    const updatedPromoItem = {
+      ...selectedPromo,
+      productDetailProduct: updatedDetails,
+    };
+    setSelectedPromo(updatedPromoItem);
+
+    // NOTA: Aquí deberías disparar un dispatch a tu Redux para actualizar este
+    // item específico dentro del carrito global con sus nuevas cantidades internas.
+    // dispatch(updateCartItemProps({ productId: selectedPromo.productId, changes: updatedPromoItem }));
   };
 
   return (
@@ -182,7 +193,34 @@ export function ShoppingCart() {
               >
                 <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
+                    <div
+                      onClick={() => {
+                        if (item.isPromotion) {
+                          setSelectedPromo(item);
+                          setIsPromoModalOpen(true);
+                        }
+                      }}
+                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${
+                        item.isPromotion
+                          ? "border-tomato-red ring-2 ring-red-500/20 cursor-pointer hover:opacity-80 scale-105"
+                          : "border-border"
+                      }`}
+                    >
+                      <Image
+                        src={getImageUrl(item.imageUrl)}
+                        alt={item.name + " asdasdasds"}
+                        fill
+                        sizes="48px"
+                        priority
+                        className="object-cover"
+                      />
+                      {item.isPromotion && (
+                        <span className="absolute bottom-0 right-0 bg-red-500 text-[8px] text-white font-black px-1 rounded-tl-sm uppercase tracking-tighter">
+                          Promo
+                        </span>
+                      )}
+                    </div>
+                    {/* <div className="relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
                       <Image
                         src={getImageUrl(item.imageUrl)}
                         alt={item.name}
@@ -191,7 +229,7 @@ export function ShoppingCart() {
                         priority
                         className="object-cover"
                       />
-                    </div>
+                    </div> */}
 
                     <div className="min-w-0">
                       <p className="font-medium text-sm leading-tight truncate">
@@ -325,6 +363,80 @@ export function ShoppingCart() {
           </div>
         )}
       </Card>
+      {/* NUEVO MODAL: DETALLE Y EDICIÓN DE LA PROMOCIÓN */}
+      {isPromoModalOpen && selectedPromo && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-xl shadow-2xl overflow-hidden border border-border flex flex-col">
+            {/* Header del Modal */}
+            <div className="p-4 bg-[#052A3D] text-white flex justify-between items-center">
+              <div>
+                <h4 className="font-bold text-base">{selectedPromo.name}</h4>
+                <p className="text-xs text-yellow-400 font-medium">
+                  Personaliza los platos incluidos
+                </p>
+              </div>
+              <button
+                onClick={() => setIsPromoModalOpen(false)}
+                className="text-white/80 hover:text-white font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Contenido / Datatable */}
+            <div className="p-4 overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-border bg-slate-50 text-slate-500 font-bold">
+                    <th className="p-2">Platillo</th>
+                    <th className="p-2 text-right">Precio Ref.</th>
+                    <th className="p-2 text-center w-24">Cantidad</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedPromo.productDetailProduct?.map((subItem: any) => (
+                    <tr
+                      key={subItem.id}
+                      className="border-b border-border hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="p-2 font-medium text-slate-800">
+                        {subItem.name}
+                      </td>
+                      <td className="p-2 text-right text-slate-400">
+                        Bs {subItem.price}
+                      </td>
+                      <td className="p-2 text-center">
+                        <input
+                          type="number"
+                          min="0"
+                          value={subItem.quantity}
+                          onChange={(e) =>
+                            handleUpdatePromoQuantity(
+                              subItem.productId,
+                              parseInt(e.target.value) || 0,
+                            )
+                          }
+                          className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer del Modal */}
+            <div className="p-4 border-t border-border bg-gray-50 flex justify-end gap-2">
+              <button
+                onClick={() => setIsPromoModalOpen(false)}
+                className="px-4 py-2 bg-[#052A3D] text-white text-xs font-bold rounded hover:bg-[#0c3d54] cursor-pointer transition-colors"
+              >
+                Confirmar Configuración
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal
         isOpen={showSummary}
