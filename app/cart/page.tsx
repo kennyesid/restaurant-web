@@ -70,7 +70,10 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex flex-row gap-2">
+          {/* RESPONSIVE */}
+          {/* <div className="flex flex-row gap-2"> */}
+          {/* <div className="flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-x-visible gap-2 pb-2 scrollbar-none"> */}
+          <div className="flex flex-wrap md:flex-nowrap md:overflow-x-auto gap-2 pb-2 md:scrollbar-none">
             <ButtonGeneric
               variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
