@@ -45,7 +45,7 @@ function initializeDefaults() {
         avatarUrl: "",
         // tenantId: DEFAULT_TENANT_ID,
         roleId: 1,
-        role: "Administrador",
+        role: "ADMIN",
         nit: "789456123",
         state: true,
         createdAt: new Date().toISOString(),
