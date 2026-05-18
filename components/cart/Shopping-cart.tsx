@@ -7,6 +7,7 @@ import {
   clearCart,
   setPaymentType,
   updateCartItems,
+  toggleCartSide,
 } from "@/store/store/slices/cartSlice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -132,6 +133,7 @@ export function ShoppingCart() {
       }
       dispatch(clearCart());
       setShowSummary(false);
+      dispatch(toggleCartSide());
     } catch (error) {
       toast.error("Error al procesar la venta");
     } finally {
@@ -279,10 +281,11 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
-                      ? "bg-[#facc15]  text-rest-primary"
-                      : "bg-muted text-foreground hover:bg-muted/80"
-                      }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
+                      paymentType === method
+                        ? "bg-[#facc15]  text-rest-primary"
+                        : "bg-muted text-foreground hover:bg-muted/80"
+                    }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -322,7 +325,7 @@ export function ShoppingCart() {
           </div>
         )}
       </Card>
-      // En ShoppingCart.tsx (al final, donde invocas el modal)
+      {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal
         isOpen={showSummary}
         // onClose={() => setShowSummary(false)}

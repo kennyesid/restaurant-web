@@ -4,12 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  LogOut,
-  Menu,
-  Settings,
-  ChevronDown,
-} from "lucide-react";
+import { LogOut, Menu, Settings, ChevronDown } from "lucide-react";
 import { useAppSelector } from "@/store/store/hooks";
 import { MENU_BY_ROL, MenuConfig } from "@/lib/constants/menuByRol";
 import { RoleType } from "@/types";
@@ -26,7 +21,7 @@ export function Sidebar() {
   //   return MENU_BY_ROL[role] || MENU_BY_ROL["SALES_MANAGER"];
   // });
   const [menuPermissions, setMenuPermissions] = useState<MenuConfig>(
-    MENU_BY_ROL["ADMIN"]
+    MENU_BY_ROL["ADMIN"],
   );
   const pathname = usePathname();
   const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");

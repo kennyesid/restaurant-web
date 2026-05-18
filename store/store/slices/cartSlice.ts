@@ -4,6 +4,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 const initialState: CartState = {
   items: [],
   paymentType: "cash",
+  isCartOpen: true,
 };
 
 const cartSlice = createSlice({
@@ -62,6 +63,9 @@ const cartSlice = createSlice({
     updateCartItems: (state, action) => {
       state.items = action.payload;
     },
+    toggleCartSide: (state) => {
+      state.isCartOpen = !state.isCartOpen;
+    },
   },
 });
 
@@ -73,5 +77,6 @@ export const {
   setPaymentType,
   setMixedPayment,
   updateCartItems,
+  toggleCartSide,
 } = cartSlice.actions;
 export default cartSlice.reducer;
