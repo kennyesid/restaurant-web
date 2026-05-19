@@ -26,6 +26,8 @@ import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
 import { User } from "@/types/";
 import { createUser } from "@/services/usersService";
 import Image from "next/image";
+import { ResponsiveModal } from "../common/modal/ResponsiveModal";
+import { Column, GenericDataTable } from "../common/table/GenericDataTable";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -44,6 +46,7 @@ export function ShoppingCart() {
   const [needsInvoice, setNeedsInvoice] = useState(false);
   const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [customNit, setCustomNit] = useState("");
+  // const [promoColumns, setPromoColumns] = useState<Column<any>[]>([]);
 
   let total = items.reduce(
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -162,11 +165,55 @@ export function ShoppingCart() {
       productDetailProduct: updatedDetails,
     };
     setSelectedPromo(updatedPromoItem);
-
-    // NOTA: Aquí deberías disparar un dispatch a tu Redux para actualizar este
-    // item específico dentro del carrito global con sus nuevas cantidades internas.
-    // dispatch(updateCartItemProps({ productId: selectedPromo.productId, changes: updatedPromoItem }));
   };
+
+  const handleSavePromoConfig = () => {
+    const updatedCartItems = items.map((cartItem) =>
+      cartItem.productId === selectedPromo.productId ? selectedPromo : cartItem
+    );
+    handleChangeSubTotal(updatedCartItems);
+    setIsPromoModalOpen(false);
+  };
+
+  const handlePromoSelected = (item: CartItem) => {
+    setSelectedPromo(item);
+    setIsPromoModalOpen(true);
+    // setPromoColumns(promoColumns);
+  };
+
+  const promoColumns: Column<any>[] = [
+    {
+      header: "Plato",
+      accessor: "name",
+    },
+    {
+      header: "Precio Ref.",
+      accessor: (item) => <span className="text-slate-400">Bs {item.price}</span>,
+    },
+    {
+      header: "Cantidad",
+      accessor: (item) => {
+        // Buscamos el valor más fresco directamente desde el estado reactivo 'selectedPromo'
+        const currentSubItem = selectedPromo?.productDetailProduct?.find(
+          (sub: any) => sub.productId === item.productId
+        );
+
+        return (
+          <div className="flex justify-center">
+            <input
+              type="number"
+              min="0"
+              value={currentSubItem ? currentSubItem.quantity : item.quantity}
+              onChange={(e) =>
+                handleUpdatePromoQuantity(item.productId, parseInt(e.target.value) || 0)
+              }
+              className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
+            />
+          </div>
+        );
+      },
+    },
+  ];
 
   return (
     <>
@@ -194,29 +241,29 @@ export function ShoppingCart() {
                 <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
                   <div className="flex items-center gap-2 min-w-0">
                     <div
-                      onClick={() => {
-                        if (item.isPromotion) {
-                          setSelectedPromo(item);
-                          setIsPromoModalOpen(true);
-                        }
-                      }}
-                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${
-                        item.isPromotion
-                          ? "border-tomato-red ring-2 ring-red-500/20 cursor-pointer hover:opacity-80 scale-105"
-                          : "border-border"
-                      }`}
+                      onClick={() => handlePromoSelected(item)}
+                      // onClick={() => {
+                      //   if (item.isPromotion) {
+                      //     setSelectedPromo(item);
+                      //     setIsPromoModalOpen(true);
+                      //   }
+                      // }}
+                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
+                        ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
+                        : "border-border"
+                        }`}
                     >
                       <Image
                         src={getImageUrl(item.imageUrl)}
-                        alt={item.name + " asdasdasds"}
+                        alt={item.name}
                         fill
                         sizes="48px"
                         priority
                         className="object-cover"
                       />
                       {item.isPromotion && (
-                        <span className="absolute bottom-0 right-0 bg-red-500 text-[8px] text-white font-black px-1 rounded-tl-sm uppercase tracking-tighter">
-                          Promo
+                        <span className="absolute bottom-0 right-0 bg-rest-yellow text-[8px] text-rest-primary font-black px-1 rounded-tl-sm uppercase tracking-tighter">
+                          OPCION
                         </span>
                       )}
                     </div>
@@ -319,11 +366,10 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
-                      paymentType === method
-                        ? "bg-[#facc15]  text-rest-primary"
-                        : "bg-muted text-foreground hover:bg-muted/80"
-                    }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
+                      ? "bg-[#facc15]  text-rest-primary"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                      }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -365,77 +411,122 @@ export function ShoppingCart() {
       </Card>
       {/* NUEVO MODAL: DETALLE Y EDICIÓN DE LA PROMOCIÓN */}
       {isPromoModalOpen && selectedPromo && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-xl rounded-xl shadow-2xl overflow-hidden border border-border flex flex-col">
-            {/* Header del Modal */}
-            <div className="p-4 bg-[#052A3D] text-white flex justify-between items-center">
-              <div>
-                <h4 className="font-bold text-base">{selectedPromo.name}</h4>
-                <p className="text-xs text-yellow-400 font-medium">
-                  Personaliza los platos incluidos
-                </p>
-              </div>
-              <button
-                onClick={() => setIsPromoModalOpen(false)}
-                className="text-white/80 hover:text-white font-bold text-sm cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Contenido / Datatable */}
-            <div className="p-4 overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-border bg-slate-50 text-slate-500 font-bold">
-                    <th className="p-2">Platillo</th>
-                    <th className="p-2 text-right">Precio Ref.</th>
-                    <th className="p-2 text-center w-24">Cantidad</th>
+        <ResponsiveModal
+          isOpen={isPromoModalOpen}
+          onClose={() => setIsPromoModalOpen(false)}
+          onConfirm={handleSavePromoConfig}
+          title={selectedPromo?.name || "Detalle de Promoción"}
+          subtitle="Personaliza los platos incluidos en este combo"
+          confirmText="Confirmar Configuración"
+          size="lg"
+        >
+          <GenericDataTable
+            columns={promoColumns}
+            data={selectedPromo?.productDetailProduct || []}
+            showActions={false}
+            rowKey="id"
+          />
+          {/* El Children queda 100% aislado de botones */}
+          {/* <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-border bg-slate-50 text-slate-500 font-bold">
+                  <th className="p-2">Platillo</th>
+                  <th className="p-2 text-right">Precio Ref.</th>
+                  <th className="p-2 text-center w-24">Cantidad</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedPromo?.productDetailProduct?.map((subItem: any) => (
+                  <tr key={subItem.id} className="border-b border-border hover:bg-slate-50/50 transition-colors">
+                    <td className="p-2 font-medium text-slate-800">{subItem.name}</td>
+                    <td className="p-2 text-right text-slate-400">Bs {subItem.price}</td>
+                    <td className="p-2 text-center">
+                      <input
+                        type="number"
+                        min="0"
+                        value={subItem.quantity}
+                        onChange={(e) => handleUpdatePromoQuantity(subItem.productId, parseInt(e.target.value) || 0)}
+                        className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
+                      />
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {selectedPromo.productDetailProduct?.map((subItem: any) => (
-                    <tr
-                      key={subItem.id}
-                      className="border-b border-border hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="p-2 font-medium text-slate-800">
-                        {subItem.name}
-                      </td>
-                      <td className="p-2 text-right text-slate-400">
-                        Bs {subItem.price}
-                      </td>
-                      <td className="p-2 text-center">
-                        <input
-                          type="number"
-                          min="0"
-                          value={subItem.quantity}
-                          onChange={(e) =>
-                            handleUpdatePromoQuantity(
-                              subItem.productId,
-                              parseInt(e.target.value) || 0,
-                            )
-                          }
-                          className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
+          </div> */}
+        </ResponsiveModal>
+        // <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        //   <div className="bg-white w-full max-w-xl rounded-xl shadow-2xl overflow-hidden border border-border flex flex-col">
+        //     {/* Header del Modal */}
+        //     <div className="p-4 bg-[#052A3D] text-white flex justify-between items-center">
+        //       <div>
+        //         <h4 className="font-bold text-base">{selectedPromo.name}</h4>
+        //         <p className="text-xs text-yellow-400 font-medium">
+        //           Personaliza los platos incluidos
+        //         </p>
+        //       </div>
+        //       <button
+        //         onClick={() => setIsPromoModalOpen(false)}
+        //         className="text-white/80 hover:text-white font-bold text-sm cursor-pointer"
+        //       >
+        //         ✕
+        //       </button>
+        //     </div>
 
-            {/* Footer del Modal */}
-            <div className="p-4 border-t border-border bg-gray-50 flex justify-end gap-2">
-              <button
-                onClick={() => setIsPromoModalOpen(false)}
-                className="px-4 py-2 bg-[#052A3D] text-white text-xs font-bold rounded hover:bg-[#0c3d54] cursor-pointer transition-colors"
-              >
-                Confirmar Configuración
-              </button>
-            </div>
-          </div>
-        </div>
+        //     {/* Contenido / Datatable */}
+        //     <div className="p-4 overflow-x-auto">
+        //       <table className="w-full text-left border-collapse text-xs">
+        //         <thead>
+        //           <tr className="border-b border-border bg-slate-50 text-slate-500 font-bold">
+        //             <th className="p-2">Platillo</th>
+        //             <th className="p-2 text-right">Precio Ref.</th>
+        //             <th className="p-2 text-center w-24">Cantidad</th>
+        //           </tr>
+        //         </thead>
+        //         <tbody>
+        //           {selectedPromo.productDetailProduct?.map((subItem: any) => (
+        //             <tr
+        //               key={subItem.id}
+        //               className="border-b border-border hover:bg-slate-50/50 transition-colors"
+        //             >
+        //               <td className="p-2 font-medium text-slate-800">
+        //                 {subItem.name}
+        //               </td>
+        //               <td className="p-2 text-right text-slate-400">
+        //                 Bs {subItem.price}
+        //               </td>
+        //               <td className="p-2 text-center">
+        //                 <input
+        //                   type="number"
+        //                   min="0"
+        //                   value={subItem.quantity}
+        //                   onChange={(e) =>
+        //                     handleUpdatePromoQuantity(
+        //                       subItem.productId,
+        //                       parseInt(e.target.value) || 0,
+        //                     )
+        //                   }
+        //                   className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
+        //                 />
+        //               </td>
+        //             </tr>
+        //           ))}
+        //         </tbody>
+        //       </table>
+        //     </div>
+
+        //     {/* Footer del Modal */}
+        //     <div className="p-4 border-t border-border bg-gray-50 flex justify-end gap-2">
+        //       <button
+        //         onClick={() => setIsPromoModalOpen(false)}
+        //         className="px-4 py-2 bg-[#052A3D] text-white text-xs font-bold rounded hover:bg-[#0c3d54] cursor-pointer transition-colors"
+        //       >
+        //         Confirmar Configuración
+        //       </button>
+        //     </div>
+        //   </div>
+        // </div>
       )}
       {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal

@@ -14,6 +14,9 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
   const dispatch = useAppDispatch();
 
   const handleAddToCart = (product: Product) => {
+
+    console.log('producto ' + product);
+
     dispatch(
       addToCart({
         productId: product.productId,
@@ -21,6 +24,9 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
         price: product.price,
         categoryId: product.categoryId,
         quantity: 1,
+        isPromotion: product.isPromotion,
+        isCountable: false,
+        productDetailProduct: product.productDetailProduct,
         imageUrl: product.imageUrl,
       }),
     );

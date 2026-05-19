@@ -6,6 +6,9 @@ import { getUsername } from "@/lib/auth";
 import { ShoppingCart } from "lucide-react";
 import { shallowEqual } from "react-redux";
 import { toggleCartSide } from "@/store/store/slices/cartSlice";
+import { ToastType } from "@/types";
+import { toast } from "sonner";
+import { CustomNotification } from "./common/toast/CustomNotification";
 
 export function DashboardHeader() {
   // const isDark = useAppSelector((state) => state.theme.isDark);
@@ -61,20 +64,29 @@ export function DashboardHeader() {
             {userInitial}
           </span>
         </div>
-
-        {/* SEPARADOR VISUAL */}
         <div className="h-5 w-px bg-border mx-1" />
-
-        {/* BOTÓN DEL CARRITO MINIMALISTA Y DINÁMICO */}
         <button
           onClick={() => dispatch(toggleCartSide())}
+          // onClick={() => {
+          //   if (totalQuantity === 0) {
+          //     const currentToastBody = {
+          //       type: ToastType.Warning,
+          //       message: "Advertencia",
+          //       description: "El carrito está vacío. Selecciona algunos productos primero.",
+          //       image: null,
+          //     };
+          //     toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+          //     return;
+          //   }
+          //   dispatch(toggleCartSide());
+          // }}
           className="relative p-2.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 cursor-pointer transition-all duration-200"
           aria-label="Carrito de compras"
         >
           <ShoppingCart size={20} className="sm:w-[22px] sm:h-[22px]" />
 
           {totalQuantity > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-[10px] font-black h-5 w-5 rounded-full flex items-center justify-center shadow-md shadow-red-600/20 animate-in fade-in zoom-in duration-300">
+            <span className="absolute -top-0.5 -right-0.5 bg-rest-primary text-white text-[10px] font-black h-5 w-5 rounded-full flex items-center justify-center shadow-md shadow-red-600/20 animate-in fade-in zoom-in duration-300">
               {totalQuantity}
             </span>
           )}

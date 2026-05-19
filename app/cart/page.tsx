@@ -9,7 +9,7 @@ import { Loader2, X } from "lucide-react";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/store/hooks";
-import { toggleCartSide } from "@/store/store/slices/cartSlice";
+import { setToggleCartFalse, toggleCartSide } from "@/store/store/slices/cartSlice";
 
 const getFeaturedProducts = (products: Product[]) => {
   return products
@@ -26,6 +26,11 @@ export default function CartPage() {
   const [isLoading, setIsLoading] = useState(true);
   const isCartSideOpen = useAppSelector((state) => state.cart.isCartOpen);
   // const [isCartSideOpen, setIsCartSideOpen] = useState(false);
+
+  useEffect(() => {
+    // Cuando el componente se monta, forzamos a que el sidebar se cierre
+    dispatch(setToggleCartFalse());
+  }, [dispatch]);
 
   useEffect(() => {
     const loadData = async () => {

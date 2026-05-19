@@ -6,6 +6,7 @@ export const STYLE_INTERNAL = {
     secondary: ` bg-rest-secondary text-rest-primary hover:bg-rest-secondary hover:text-white ${CURSOR_POINTER}`,
     red: ` bg-rest-red text-white ${CURSOR_POINTER}`,
     white: ` bg-white text-rest-primary w-full outline-1 outline-rest-primary ${CURSOR_POINTER}`,
+    cancelGray: ` bg-slate-200 text-slate-700 w-full  ${CURSOR_POINTER}`,
     headerModalPrimary: `
   bg-gradient-to-r 
   from-rest-primary-down 

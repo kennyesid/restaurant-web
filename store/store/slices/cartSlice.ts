@@ -26,6 +26,9 @@ const cartSlice = createSlice({
           price: product.price,
           imageUrl: product.imageUrl,
           categoryId: product.categoryId,
+          isPromotion: product.isPromotion,
+          isCountable: product.isCountable,
+          productDetailProduct: product.productDetailProduct,
           quantity: 1,
         });
       }
@@ -66,6 +69,9 @@ const cartSlice = createSlice({
     toggleCartSide: (state) => {
       state.isCartOpen = !state.isCartOpen;
     },
+    setToggleCartFalse: (state) => {
+      state.isCartOpen = false;
+    },
   },
 });
 
@@ -78,5 +84,6 @@ export const {
   setMixedPayment,
   updateCartItems,
   toggleCartSide,
+  setToggleCartFalse,
 } = cartSlice.actions;
 export default cartSlice.reducer;

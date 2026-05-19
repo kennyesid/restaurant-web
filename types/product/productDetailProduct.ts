@@ -7,7 +7,8 @@ export interface ProductDetailProduct {
   description?: string | null;
   quantity: number | 0;
   price: number | 0;
-  imageUrl: string | null;
+  isCountable?: boolean | false;
+  imageUrl?: string | null;
   createdAt: string | null;
   createdBy: string | null;
   state: boolean | null;
