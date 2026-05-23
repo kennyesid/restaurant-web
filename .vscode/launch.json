@@ -1,0 +1,88 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Levantar Next.js (Servidor)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
+      "args": ["dev"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Conectar al Navegador (Cliente)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "DEPURAR FULL (Servidor + Cliente)",
+      "configurations": ["Levantar Next.js (Servidor)", "Conectar al Navegador (Cliente)"]
+    }
+  ]
+}
+
+
+
+
+// {
+//   "version": "0.2.0",
+//   "configurations": [
+//     {
+//       "name": "Next.js: Depurar servidor",
+//       "type": "node-terminal",
+//       "request": "launch",
+//       "command": "npm run dev"
+//     },
+//     {
+//       "name": "Next.js: Depurar cliente",
+//       "type": "chrome",
+//       "request": "launch",
+//       "url": "http://localhost:3000"
+//     },
+//     {
+//       "name": "Next.js: Depurar full stack",
+//       "type": "node",
+//       "request": "launch",
+//       "program": "${workspaceFolder}/node_modules/.bin/next",
+//       "runtimeArgs": ["--inspect"],
+//       "skipFiles": ["<node_internals>/**"],
+//       "serverReadyAction": {
+//         "action": "debugWithEdge",
+//         "killOnServerStop": true,
+//         "pattern": "- Local:.+(https?://.+)",
+//         "uriFormat": "%s",
+//         "webRoot": "${workspaceFolder}"
+//       }
+//     }
+//   ]
+// }
+
+
+
+
+// {
+//     // Use IntelliSense to learn about possible attributes.
+//     // Hover to view descriptions of existing attributes.
+//     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+//     "version": "0.2.0",
+//     "configurations": [
+
+//         {
+//             "type": "node",
+//             "request": "launch",
+//             "name": "Launch Program",
+//             "skipFiles": [
+//                 "<node_internals>/**"
+//             ],
+//             "program": "${file}",
+//             "outFiles": [
+//                 "${workspaceFolder}/**/*.js"
+//             ]
+//         }
+//     ]
+// }

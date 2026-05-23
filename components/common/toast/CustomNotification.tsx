@@ -111,3 +111,5 @@ export const CustomNotification = ({ t, body }: CustomToastProps) => {
     </div>
   );
 };
+
+export default CustomNotification;

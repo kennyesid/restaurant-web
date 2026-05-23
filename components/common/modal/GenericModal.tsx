@@ -5,6 +5,7 @@ import { Save, Search, UserPlus, X } from "lucide-react";
 import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 import { storage } from "@/lib/storage";
 import { useEffect, useState } from "react";
+import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 
 interface SaleModalProps {
   isOpen: boolean;
@@ -21,7 +22,8 @@ interface SaleModalProps {
   changeSubTotal: (newItem: CartItem[]) => void;
   isEditMode: boolean;
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
-  // setIsEditMode: (isEditMode: boolean) => void;
+  orderType: OrderTypeEnum;
+  setOrderType: React.Dispatch<React.SetStateAction<OrderTypeEnum>>;
 }
 
 export function GenericModal({
@@ -39,11 +41,15 @@ export function GenericModal({
   changeSubTotal,
   isEditMode,
   setIsEditMode,
+  orderType,
+  setOrderType,
 }: SaleModalProps) {
   const [isNewClient, setIsNewClient] = useState(false);
   // const [isEditMode, setIsEditMode] = useState(false);
   const [editableItems, setEditableItems] = useState<CartItem[]>(items);
   const [isLocked, setIsLocked] = useState(false);
+  // const [orderType, setOrderType] = useState<OrderTypeEnum>(OrderTypeEnum.CONSUMO_LOCAL);
+
 
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
@@ -160,9 +166,9 @@ export function GenericModal({
             onClick={onConfirm}
             variant="confirmModalPrimary"
             disabled={isEditMode}
-            // disabled={isProcessing}
+          // disabled={isProcessing}
           >
-            {isProcessing ? "Procesando..." : "Confirmar"}
+            {isProcessing ? "Procesando..." : "ConfirmarRRRR"}
             <Save size={16} />
           </ButtonGeneric>
         </>
@@ -180,18 +186,16 @@ export function GenericModal({
               setIsEditMode(!isEditMode); // 👈 ya que ahora es prop boolean
             }}
             disabled={isLocked}
-            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${
-              isLocked
-                ? "bg-gray-200 cursor-not-allowed"
-                : isEditMode
-                  ? "bg-green-500" // 👈 aquí el color activo
-                  : "bg-gray-300"
-            }`}
+            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${isLocked
+              ? "bg-gray-200 cursor-not-allowed"
+              : isEditMode
+                ? "bg-green-500" // 👈 aquí el color activo
+                : "bg-gray-300"
+              }`}
           >
             <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${
-                isEditMode ? "translate-x-6" : "translate-x-0"
-              }`}
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${isEditMode ? "translate-x-6" : "translate-x-0"
+                }`}
             />
           </button>
 
@@ -300,8 +304,94 @@ export function GenericModal({
           </tbody>
         </table>
       </div>
-      <div className=" border-t space-y-4 bg-gray-50/50 pb-2">
-        {/* Switch Elegante */}
+
+      {/* NEW FORMULARIO */}
+      <div className="border-t space-y-4 bg-gray-50/50 p-3 rounded-xl border border-slate-100">
+        {/* 🍔 SELECCIÓN DE TIPO DE ORDEN (Responsive & Touch Friendly) */}
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
+            Tipo de Orden
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setOrderType(OrderTypeEnum.CONSUMO_LOCAL)}
+              className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.CONSUMO_LOCAL
+                ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                }`}
+            >
+              🍽️ Para Consumir Aquí
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrderType(OrderTypeEnum.PARA_LLEVAR)}
+              className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.PARA_LLEVAR
+                ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
+                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                }`}
+            >
+              🛍️ Para Llevar
+            </button>
+          </div>
+        </div>
+
+        <hr className="border-slate-200/60" />
+
+        {/* 📄 SECCIÓN DE FACTURACIÓN (Siempre visible) */}
+        <div className="space-y-3">
+          <div className="p-3 bg-yellow-50/60 border rounded-xl border-yellow-200/70 space-y-3">
+            <p className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+              Datos de Factura
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+              {/* Razón Social */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  Nombre / Razón Social
+                </label>
+                <input
+                  type="text"
+                  value={selectedClient?.fullName ?? ""}
+                  onChange={(e) =>
+                    setSelectedClient({
+                      ...(selectedClient || {}),
+                      fullName: e.target.value,
+                    } as any)
+                  }
+                  className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="Control Tributario / Nombre"
+                />
+              </div>
+
+              {/* NIT / CI */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                  NIT / CI
+                </label>
+                <input
+                  type="text"
+                  value={selectedClient?.nit ?? ""} // El '?? ""' mitiga el error de null al leer el value
+                  onChange={(e) =>
+                    setSelectedClient({
+                      ...(selectedClient || {}), // Si es null, esparce un objeto vacío
+                      id: selectedClient?.id || 1, // Forzamos a que siempre tenga un ID numérico válido
+                      nit: e.target.value,
+                    } as any) // El 'as any' silencia los choques de propiedades opcionales de la interfaz User
+                  }
+                  className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
+                  placeholder="0 (Sin NIT)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* NEW FORMUALRIO FIN */}
+
+
+      {/* <div className=" border-t space-y-4 bg-gray-50/50 pb-2">
         <div className="flex items-center justify-between">
           <label className="text-sm font-semibold text-gray-700">
             ¿Requiere Factura?
@@ -344,7 +434,6 @@ export function GenericModal({
                       email: "",
                       document: "",
                     } as any);
-                    // setIsNewClient(true);
                   }}
                 >
                   <UserPlus size={18} />
@@ -395,7 +484,7 @@ export function GenericModal({
             )}
           </div>
         )}
-      </div>
+      </div> */}
       <div className="flex justify-between items-center px-2">
         <span className="text-lg font-bold">Total a pagar:</span>
         <span className="text-2xl font-black text-[#052A3D]">

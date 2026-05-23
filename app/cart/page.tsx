@@ -67,6 +67,13 @@ export default function CartPage() {
     );
   }
 
+  const handleDebuugTest = () => {
+    let vg = "";
+    console.log("prueba del handleDebuugTest");
+    alert('asdasd');
+    const hhgg = "sadsad";
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex flex-col items-center justify-center text-center ">
@@ -163,6 +170,12 @@ export default function CartPage() {
           </div>
         )} */}
       </div>
+      {/* <ButtonGeneric
+        variant="primaryRed"
+        onClick={() => handleDebuugTest()}
+      >
+        joder
+      </ButtonGeneric> */}
     </div>
   );
 }

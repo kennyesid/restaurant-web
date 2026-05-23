@@ -1,29 +1,36 @@
-'use client';
+"use client";
 
-import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef } from "react";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ImageUploadProps {
   value?: string;
   onChange: (base64: string) => void;
   disabled?: boolean;
-  maxSize?: number; // in MB
+  maxSize?: number;
 }
 
-export function ImageUpload({ value, onChange, disabled = false, maxSize = 5 }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  onChange,
+  disabled = false,
+  maxSize = 5,
+}: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(value || null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Por favor selecciona un archivo de imagen válido');
+    if (!file.type.startsWith("image/")) {
+      setError("Por favor selecciona un archivo de imagen válido");
       return;
     }
 
@@ -46,21 +53,21 @@ export function ImageUpload({ value, onChange, disabled = false, maxSize = 5 }: 
         setLoading(false);
       };
       reader.onerror = () => {
-        setError('Error al leer la imagen');
+        setError("Error al leer la imagen");
         setLoading(false);
       };
       reader.readAsDataURL(file);
     } catch (err) {
-      setError('Error al procesar la imagen');
+      setError("Error al procesar la imagen");
       setLoading(false);
     }
   };
 
   const handleRemove = () => {
     setPreview(null);
-    onChange('');
+    onChange("");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -69,7 +76,9 @@ export function ImageUpload({ value, onChange, disabled = false, maxSize = 5 }: 
       <div
         onClick={() => !disabled && fileInputRef.current?.click()}
         className={`relative border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer transition-colors ${
-          disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary hover:bg-muted'
+          disabled
+            ? "opacity-50 cursor-not-allowed"
+            : "hover:border-primary hover:bg-muted"
         }`}
       >
         <input
@@ -88,12 +97,16 @@ export function ImageUpload({ value, onChange, disabled = false, maxSize = 5 }: 
               alt="Preview"
               className="h-40 w-40 object-cover rounded-lg"
             />
-            <p className="text-sm text-muted-foreground">Haz clic para cambiar la imagen</p>
+            <p className="text-sm text-muted-foreground">
+              Haz clic para cambiar la imagen
+            </p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <ImageIcon className="w-12 h-12 text-muted-foreground" />
-            <p className="text-sm font-medium">Arrastra una imagen aquí o haz clic para seleccionar</p>
+            <p className="text-sm font-medium">
+              Arrastra una imagen aquí o haz clic para seleccionar
+            </p>
             <p className="text-xs text-muted-foreground">
               Máximo {maxSize}MB • Formatos: PNG, JPG, GIF
             </p>

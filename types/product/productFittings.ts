@@ -1,12 +1,7 @@
-// types/ProductIngredientDetail.ts
-
-import { ProductFittings } from "./productFittings";
-
-export interface ProductDetailProduct {
+// Guarniciones
+export interface ProductFittings {
   id: number;
-  // ProductFittings?: ProductFittings[];
-  productFittings?: string[];
-  productId?: number;
+  productDetailProductId?: number;
   name?: string;
   description?: string | null;
   quantity?: number | 0;

@@ -1,4 +1,5 @@
 import { ProductDetailProduct } from "@/types/product/productDetailProduct";
+import { ProductFittings } from "../product/productFittings";
 
 export interface CartItem {
   productId: number;
@@ -11,6 +12,7 @@ export interface CartItem {
   reasonModification?: string;
   isPromotion?: boolean;
   isCountable?: boolean | false;
+  productFitting?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;
 }
