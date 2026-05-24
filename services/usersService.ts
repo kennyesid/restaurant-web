@@ -119,11 +119,16 @@ export async function createUser(
   const lastId =
     existingUsers.length > 0 ? Math.max(...existingUsers.map((u) => u.id)) : 1;
 
+const now = new Date();
+  const boliviaOffset = -4 * 60 * 60 * 1000; // -4 horas en milisegundos
+  const boliviaTime = new Date(now.getTime() + boliviaOffset + (now.getTimezoneOffset() * 60 * 1000));
+  const boliviaIsoString = boliviaTime.toISOString().replace("Z", "-04:00");
+
   const newUser: User = {
     ...user,
     id: lastId + 1,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: boliviaIsoString,
+    updatedAt: boliviaIsoString,
   };
   storage.addToCollection(USERS_KEY, newUser, "id");
   return newUser;

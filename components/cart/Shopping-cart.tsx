@@ -46,6 +46,12 @@ export function ShoppingCart() {
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [orderType, setOrderType] = useState<OrderTypeEnum>(OrderTypeEnum.CONSUMO_LOCAL);
 
+  // REAZON INIT
+  const [formReason, setFormReason] = useState("");
+  const [formModifiedPrice, setFormModifiedPrice] = useState<number | "">("");
+  // REAZON FIN
+
+
   // const { items, paymentType } = useAppSelector((state) => state.cart) as {
   //   items: CartItem[];
   //   paymentType: string;
@@ -100,7 +106,6 @@ export function ShoppingCart() {
   };
 
   const handleCheckout = async () => {
-    debugger;
     let userSendId = 0;
     if (items.length === 0) {
       toast.error("El carrito está vacío");
@@ -127,6 +132,8 @@ export function ShoppingCart() {
           price: item.price,
           categoryId: item.categoryId,
           productDetailProduct: item.productDetailProduct,
+          modifiedSubtotal: item.modifiedSubtotal,
+          reasonModification: item.reasonModification,
           isCountable: true,
           // isCountable: item.isCountable ?? false,
         };
@@ -140,6 +147,8 @@ export function ShoppingCart() {
             price: 0,
             categoryId: sub.categoryId || item.categoryId,
             productFitting: sub.productFittings || [],
+            modifiedSubtotal: sub.modifiedSubtotal,
+            reasonModification: sub.reasonModification,
             isCountable: false,
             productDetailProduct: undefined
           }));
@@ -242,17 +251,34 @@ export function ShoppingCart() {
   };
 
   const handleSavePromoConfig = () => {
+    // Aseguramos que si el precio fue alterado, lleve un motivo de cambio por defecto
+    const finalPromoConfig = {
+      ...selectedPromo,
+      reasonModification: selectedPromo.reasonModification?.trim() || "Precio de Combo Modificado"
+    };
+
     const updatedCartItems = items.map((cartItem) =>
-      cartItem.productId === selectedPromo.productId ? selectedPromo : cartItem,
+      cartItem.productId === finalPromoConfig.productId ? finalPromoConfig : cartItem
     );
-    handleChangeSubTotal(updatedCartItems);
+
+    handleChangeSubTotal(updatedCartItems); // Notifica el cambio al estado global/padre
     setIsPromoModalOpen(false);
   };
+
+  // const handleSavePromoConfig = () => {
+  //   const updatedCartItems = items.map((cartItem) =>
+  //     cartItem.productId === selectedPromo.productId ? selectedPromo : cartItem,
+  //   );
+  //   handleChangeSubTotal(updatedCartItems);
+  //   setIsPromoModalOpen(false);
+  // };
 
   const handlePromoSelected = (item: CartItem) => {
     setSelectedPromo(item);
     setIsPromoModalOpen(true);
     // setPromoColumns(promoColumns);
+    setFormReason("");
+    setFormModifiedPrice("");
   };
 
   const handleUpdateProductFittings = (
@@ -288,45 +314,70 @@ export function ShoppingCart() {
   const [formQuantity, setFormQuantity] = useState<number>(1);
   const [selectedFittings, setSelectedFittings] = useState<number[]>([]); // Guarda los IDs [1, 2, 3] activos
 
-  // 💡 TU NUEVA FUNCIÓN PARA AGREGAR EL PLATO CONFIGURADO AL ARRAY DE LA PROMO
   const handleAddProductToPromo = () => {
-    if (!formProductId || !selectedPromo) return;
+    const selectedProduct = productsList.find((p: any) => p.productId === formProductId);
+    if (!selectedProduct) return;
 
-    // Supongamos que tienes una lista global con todos los platos disponibles para el dropdown (ej: listadoBaseProductos)
-    // Reemplaza 'listadoBaseProductos' por el nombre de tu array de productos del backend
-    const baseProduct = productsList.find((p: any) => p.productId === formProductId);
-    if (!baseProduct) return;
+    const newSubProduct = {
+      id: Date.now(), // ID temporal
+      productId: selectedProduct.productId,
+      name: selectedProduct.name,
 
-    // Convertimos los IDs de guarniciones seleccionadas en strings para tu interfaz ProductFittings?: string[]
-    const namesOfFittings = CONSTANT_PRODUCT_FITTING
-      .filter(f => selectedFittings.includes(f.id))
-      .map(f => f.name || "");
+      // 👇 PASAMOS LAS NUEVAS VARIABLES MODIFICADAS
+      price: formModifiedPrice !== "" ? formModifiedPrice : selectedProduct.price,
+      reasonModification: formReason.trim() || "Cambio de ingrediente",
 
-    // Creamos el nuevo objeto con la interfaz ProductDetailProduct
-    const newSubProduct: ProductDetailProduct = {
-      id: Date.now(), // ID temporal para la fila
-      productId: baseProduct.productId,
-      name: baseProduct.name,
-      price: baseProduct.price,
       quantity: formQuantity,
-      productFittings: namesOfFittings, // ["Arroz", "Papa"]
-      imageUrl: baseProduct.imageUrl,
+      ProductFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)?.name).filter(Boolean),
       state: true
     };
 
-    // Actualizamos el estado general agregando el plato a la lista
+    // Guardamos en el estado del combo seleccionado
     setSelectedPromo({
       ...selectedPromo,
       productDetailProduct: [...(selectedPromo.productDetailProduct || []), newSubProduct]
     });
 
-    // Limpiamos el formulario para el siguiente registro
+    // Limpiamos los inputs del formulario para el siguiente elemento
     setFormProductId("");
     setFormQuantity(1);
     setSelectedFittings([]);
+    setFormReason("");
+    setFormModifiedPrice("");
   };
-  // CHANGE FORM FIN
 
+
+  // 💡 TU NUEVA FUNCIÓN PARA AGREGAR EL PLATO CONFIGURADO AL ARRAY DE LA PROMO
+  // const handleAddProductToPromo = () => {
+  //   if (!formProductId || !selectedPromo) return;
+
+  //   const baseProduct = productsList.find((p: any) => p.productId === formProductId);
+  //   if (!baseProduct) return;
+
+  //   const namesOfFittings = CONSTANT_PRODUCT_FITTING
+  //     .filter(f => selectedFittings.includes(f.id))
+  //     .map(f => f.name || "");
+
+  //   const newSubProduct: ProductDetailProduct = {
+  //     id: Date.now(),
+  //     productId: baseProduct.productId,
+  //     name: baseProduct.name,
+  //     price: baseProduct.price,
+  //     quantity: formQuantity,
+  //     productFittings: namesOfFittings,
+  //     imageUrl: baseProduct.imageUrl,
+  //     state: true
+  //   };
+
+  //   setSelectedPromo({
+  //     ...selectedPromo,
+  //     productDetailProduct: [...(selectedPromo.productDetailProduct || []), newSubProduct]
+  //   });
+
+  //   setFormProductId("");
+  //   setFormQuantity(1);
+  //   setSelectedFittings([]);
+  // };
 
   const promoColumns: Column<any>[] = [
     {
@@ -521,7 +572,8 @@ export function ShoppingCart() {
                       <Trash2 size={14} />
                     </button>
                     <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
-                      Bs {(item.price * item.quantity).toString()}
+                      {/* Bs {(item.price * item.quantity).toString()} */}
+                      Bs {(item.modifiedSubtotal ?? item.price * item.quantity).toString()}
                     </p>
                   </div>
                 </div>
@@ -583,7 +635,7 @@ export function ShoppingCart() {
           </div>
         )}
       </Card>
-      {/* NUEVO MODAL: DETALLE Y EDICIÓN DE LA PROMOCIÓN */}
+
       {isPromoModalOpen && selectedPromo && (
         <ResponsiveModal
           isOpen={isPromoModalOpen}
@@ -594,42 +646,63 @@ export function ShoppingCart() {
           confirmText="Confirmar"
           size="lg"
         >
-          {/* 🛠️ CONTENEDOR DEL FORMULARIO INYECTOR */}
+          {/* 🌟 NUEVA SECCIÓN: Modificar Datos del Producto Principal (Combo) */}
+          <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1 md:col-span-1">
+              <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">Precio (Bs)</label>
+              <input
+                type="number"
+                min="0"
+                value={selectedPromo.price}
+                onChange={(e) => {
+                  const newPrice = Number(e.target.value) || 0;
+                  setSelectedPromo({
+                    ...selectedPromo,
+                    price: newPrice,
+                    // Forzamos el subtotal modificado para que el carrito general lo reconozca
+                    modifiedSubtotal: newPrice
+                  });
+                }}
+                className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1 md:col-span-2">
+              <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">Motivo Cambio</label>
+              <input
+                type="text"
+                value={selectedPromo.reasonModification || ""}
+                onChange={(e) => {
+                  setSelectedPromo({
+                    ...selectedPromo,
+                    reasonModification: e.target.value
+                  });
+                }}
+                className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
+                placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
+              />
+            </div>
+          </div>
+
+          {/* ------------------- Separador ------------------- */}
+
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
             <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">Agregar Plato al Combo</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {/* 1. Dropdownlist de Selección */}
-              <div className="md:col-span-2 flex flex-col gap-1">
-                {/* <label className="text-xs text-slate-500 font-medium">Seleccionar Producto</label> */}
-                {/* 1. Reemplazo del viejo select por el nuevo DropdownSearchable */}
-                <div className="md:col-span-2">
-                  <DropdownSearchable
-                    label="Seleccionar Producto"
-                    placeholder="-- Elige un plato o escribe para buscar --"
-                    value={formProductId}
-                    onChange={(id) => setFormProductId(id)}
-                    options={productsList.map((p: any) => ({
-                      id: p.productId, // Conversión rápida a la interfaz que espera el componente
-                      name: p.name,
-                      price: p.price,
-                    }))}
-                  />
-                </div>
-                {/* <select
+              <div className="md:col-span-2">
+                <DropdownSearchable
+                  label="Seleccionar Producto"
+                  placeholder="-- Elige un plato o escribe para buscar --"
                   value={formProductId}
-                  onChange={(e) => setFormProductId(Number(e.target.value) || "")}
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400"
-                >
-                  <option value="">-- Elige un plato --</option>
-                  {productsList?.map((p: any) => (
-                    <option key={p.productId} value={p.productId}>
-                      {p.name} (Bs {p.price})
-                    </option>
-                  ))}
-                </select> */}
+                  onChange={(id) => setFormProductId(id)}
+                  options={productsList.map((p: any) => ({
+                    id: p.productId,
+                    name: p.name,
+                    price: p.price,
+                  }))}
+                />
               </div>
 
-              {/* 2. Input de Cantidad */}
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-slate-500 font-medium">Cantidad</label>
                 <input
@@ -642,7 +715,7 @@ export function ShoppingCart() {
               </div>
             </div>
 
-            {/* 3. Selección Interactiva de Guarniciones */}
+            {/* 3. Selección Interactiva de Guarniciones (Se mantiene igual que antes) */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-slate-500 font-medium">Guarniciones de Acompañamiento</label>
               <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
@@ -656,6 +729,102 @@ export function ShoppingCart() {
                     }
                   };
 
+                  return (
+                    <button
+                      key={fitting.id}
+                      type="button"
+                      onClick={handleToggleImage}
+                      className="flex-1 min-w-[64px] focus:outline-none transition-transform active:scale-95 flex flex-col items-center gap-1 cursor-pointer"
+                    >
+                      <img
+                        src={fitting.imageUrl ?? ""}
+                        alt={fitting.name}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive ? "border-yellow-400 opacity-100 scale-105" : "border-transparent opacity-30 grayscale"
+                          }`}
+                      />
+                      <span className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}>
+                        {fitting.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <ButtonGeneric variant="confirmYellow" onClick={handleAddProductToPromo} disabled={!formProductId}>
+                + Agregar a la Lista
+              </ButtonGeneric>
+            </div>
+          </div>
+
+          {/* 📊 TABLA RESUMEN INFERIOR (Muestra los subproductos normales) */}
+          <div className="space-y-2">
+            <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">Componentes del Combo actual</p>
+            <GenericDataTable
+              columns={promoColumns}
+              data={selectedPromo?.productDetailProduct || []}
+              showActions={false}
+              rowKey="id"
+            />
+          </div>
+        </ResponsiveModal>
+      )}
+
+
+      {/* NUEVO MODAL: DETALLE Y EDICIÓN DE LA PROMOCIÓN */}
+      {/* {isPromoModalOpen && selectedPromo && (
+        <ResponsiveModal
+          isOpen={isPromoModalOpen}
+          onClose={() => setIsPromoModalOpen(false)}
+          onConfirm={handleSavePromoConfig}
+          title={selectedPromo?.name || "Detalle de Promoción"}
+          subtitle="Personaliza los platos incluidos en este combo"
+          confirmText="Confirmar"
+          size="lg"
+        >
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">Agregar Plato al Combo</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="md:col-span-2 flex flex-col gap-1">
+                <div className="md:col-span-2">
+                  <DropdownSearchable
+                    label="Seleccionar Producto"
+                    placeholder="-- Elige un plato o escribe para buscar --"
+                    value={formProductId}
+                    onChange={(id) => setFormProductId(id)}
+                    options={productsList.map((p: any) => ({
+                      id: p.productId,
+                      name: p.name,
+                      price: p.price,
+                    }))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-slate-500 font-medium">Cantidad</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formQuantity}
+                  onChange={(e) => setFormQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-slate-500 font-medium">Guarniciones de Acompañamiento</label>
+              <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
+                {CONSTANT_PRODUCT_FITTING.map((fitting) => {
+                  const isActive = selectedFittings.includes(fitting.id);
+                  const handleToggleImage = () => {
+                    if (isActive) {
+                      setSelectedFittings(selectedFittings.filter(id => id !== fitting.id));
+                    } else {
+                      setSelectedFittings([...selectedFittings, fitting.id]);
+                    }
+                  };
                   return (
                     <button
                       key={fitting.id}
@@ -688,18 +857,8 @@ export function ShoppingCart() {
               >
                 + Agregar a la Lista
               </ButtonGeneric>
-              {/* <button
-                type="button"
-                onClick={handleAddProductToPromo}
-                disabled={!formProductId}
-                className="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-[#052A3D] font-bold rounded-lg text-xs shadow-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-              >
-                + Agregar a la Lista
-              </button> */}
             </div>
           </div>
-
-          {/* 📊 TABLA RESUMEN INFERIOR */}
           <div className="space-y-2">
             <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">Componentes del Combo actual</p>
             <GenericDataTable
@@ -710,23 +869,7 @@ export function ShoppingCart() {
             />
           </div>
         </ResponsiveModal>
-        // <ResponsiveModal
-        //   isOpen={isPromoModalOpen}
-        //   onClose={() => setIsPromoModalOpen(false)}
-        //   onConfirm={handleSavePromoConfig}
-        //   title={selectedPromo?.name || "Detalle de Promoción"}
-        //   subtitle="Personaliza los platos incluidos en este combo"
-        //   confirmText="Confirmar"
-        //   size="lg"
-        // >
-        //   <GenericDataTable
-        //     columns={promoColumns}
-        //     data={selectedPromo?.productDetailProduct || []}
-        //     showActions={false}
-        //     rowKey="id"
-        //   />
-        // </ResponsiveModal>
-      )}
+      )} */}
       {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal
         isOpen={showSummary}
@@ -739,13 +882,11 @@ export function ShoppingCart() {
         total={total}
         onConfirm={handleCheckout}
         isProcessing={isProcessing}
-        // PASA LAS NUEVAS PROPS:
         needsInvoice={needsInvoice}
         setNeedsInvoice={setNeedsInvoice}
         selectedClient={selectedClient}
         setSelectedClient={setSelectedClient}
         onOpenCreateClientModal={() => {
-          // Aquí abrirías el modal de creación de cliente=
           console.log("Abrir modal de nuevo cliente");
         }}
         changeSubTotal={handleChangeSubTotal}

@@ -108,12 +108,12 @@ export function GenericModal({
   const handleSaveModifications = () => {
     // 🟡 Normalizamos items
     const normalizedItems = editableItems.map((item) => {
-      // Si modificó subtotal y no puso razón → default
-      if (item.modifiedSubtotal !== undefined) {
+      // 👇 CAMBIO: Validamos si existe un subtotal modificado O si se escribió una razón
+      if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
         return {
           ...item,
-          reasonModification:
-            item.reasonModification?.trim() || "Venta Modificada",
+          // Si no se escribió nada, se guarda el texto por defecto
+          reasonModification: item.reasonModification?.trim() || "Venta Modificada",
         };
       }
       return item;
@@ -168,28 +168,28 @@ export function GenericModal({
             disabled={isEditMode}
           // disabled={isProcessing}
           >
-            {isProcessing ? "Procesando..." : "ConfirmarRRRR"}
+            {isProcessing ? "Procesando..." : "Confirmar"}
             <Save size={16} />
           </ButtonGeneric>
         </>
       }
     >
-      <div className="flex items-center justify-between mb-2 px-1">
-        {/* <div className="flex items-center justify-between mb-2 px-2"> */}
+
+      {/* NO ELIMINAR - ESTA SECCION ES PARA MODIFICAR EN LA TABLA        */}
+      {/* <div className="flex items-center justify-between mb-2 px-1">
         <span className="text-sm font-medium">Modificar subtotales</span>
 
         <div className="flex items-center gap-2">
-          {/* Toggle */}
           <button
             onClick={() => {
               if (isLocked) return;
-              setIsEditMode(!isEditMode); // 👈 ya que ahora es prop boolean
+              setIsEditMode(!isEditMode);
             }}
             disabled={isLocked}
             className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${isLocked
               ? "bg-gray-200 cursor-not-allowed"
               : isEditMode
-                ? "bg-green-500" // 👈 aquí el color activo
+                ? "bg-green-500"
                 : "bg-gray-300"
               }`}
           >
@@ -198,8 +198,6 @@ export function GenericModal({
                 }`}
             />
           </button>
-
-          {/* Guardar */}
           {isEditMode && (
             <button
               onClick={handleSaveModifications}
@@ -210,7 +208,8 @@ export function GenericModal({
             </button>
           )}
         </div>
-      </div>
+      </div> */}
+      {/* NO ELIMINAR - ESTA SECCION ES PARA MODIFICAR EN LA TABLA        */}
       {/* </div> */}
       <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-sm">
         <table className="w-full text-sm text-left">
