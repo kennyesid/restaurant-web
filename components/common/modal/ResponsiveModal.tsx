@@ -18,11 +18,18 @@ export interface ResponsiveModalProps {
   isProcessing?: boolean; // Para deshabilitar botones si está cargando
 }
 
+// const sizeClasses: Record<ModalSize, string> = {
+//   sm: "max-w-sm w-full",
+//   md: "max-w-md w-full",
+//   lg: "max-w-lg w-full",
+//   xl: "max-w-2xl w-full",
+//   full: "max-w-[95vw] h-[90vh] w-full",
+// };
 const sizeClasses: Record<ModalSize, string> = {
-  sm: "max-w-sm w-full",
-  md: "max-w-md w-full",
-  lg: "max-w-lg w-full",
-  xl: "max-w-2xl w-full",
+  sm: "max-w-sm w-full max-h-[85vh]",
+  md: "max-w-md w-full max-h-[85vh]",
+  lg: "max-w-lg w-full max-h-[85vh]",
+  xl: "max-w-2xl w-full max-h-[85vh]",
   full: "max-w-[95vw] h-[90vh] w-full",
 };
 

@@ -2349,7 +2349,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     description: "Segundo Suelto",
     legend: "Segundo Suelto",
     price: 15,
-    isPromotion: false,
+    isPromotion: true,
     imageUrl: "./images/product/segundos-extras/segundo-suelto.jpg",
     isFeatured: false,
     isAvailable: true,
