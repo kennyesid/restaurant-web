@@ -9,6 +9,8 @@ export const EnvConfig = {
   isProduction: process.env.NODE_ENV === "production",
   paddingTop: process.env.NEXT_PUBLIC_PADDING_TOP || 10,
   testPendejo: process.env.NEXT_PUBLIC_TEST || "pendejooooosss",
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
 
   /**
    * Validador para asegurar que las variables críticas están presentes

@@ -125,9 +125,8 @@ export default function LoginPage() {
                   //     message: "Email inválido",
                   //   },
                   // })}
-                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${
-                    errors.email ? "border-red-400" : ""
-                  }`}
+                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.email ? "border-red-400" : ""
+                    }`}
                 />
                 {errors.email && (
                   <p className="text-xs text-red-500">{errors.email.message}</p>
@@ -149,9 +148,8 @@ export default function LoginPage() {
                   //     message: "Mínimo 4 caracteres",
                   //   },
                   // })}
-                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${
-                    errors.password ? "border-red-400" : ""
-                  }`}
+                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.password ? "border-red-400" : ""
+                    }`}
                 />
                 {errors.password && (
                   <p className="text-xs text-red-500">

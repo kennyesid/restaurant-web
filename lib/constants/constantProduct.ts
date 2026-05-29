@@ -3,7 +3,7 @@ import { CONSTANT_PRODUCT_FITTING } from "./constantsFitting";
 
 export const CONSTANT_PRODUCT: Product[] = [
   {
-    productId: 1,
+    id: 1,
     categoryId: 1,
     name: "Corbatitas",
     description: "Sopa tradicional con fideos en forma de corbata",
@@ -13,8 +13,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/sopas/corbatitas.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -56,7 +56,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 2,
+    id: 2,
     categoryId: 1,
     name: "Choclo",
     description: "Plato a base de maíz tierno hervido con queso",
@@ -67,8 +67,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -101,7 +101,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 3,
+    id: 3,
     categoryId: 1,
     name: "Yuca",
     description: "Yuca cocida o frita acompañada de queso o carne",
@@ -112,8 +112,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -137,7 +137,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 4,
+    id: 4,
     categoryId: 1,
     name: "Letras",
     description: "Sopa de fideos de letras para toda la familia",
@@ -148,8 +148,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -182,7 +182,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 5,
+    id: 5,
     categoryId: 1,
     name: "Cabello de Angel",
     description: "Sopa ligera con fideos cabello de ángel y verduras",
@@ -193,8 +193,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -227,7 +227,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 6,
+    id: 6,
     categoryId: 1,
     name: "Mani",
     description: "Tradicional sopa de maní cremosa con papitas fritas",
@@ -238,8 +238,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -281,7 +281,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 7,
+    id: 7,
     categoryId: 1,
     name: "Fideo",
     description: "Sopa de fideo tostado y verduras frescas",
@@ -292,8 +292,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -326,7 +326,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 8,
+    id: 8,
     categoryId: 1,
     name: "Zapallo",
     description: "Crema espesa de zapallo fresco con crutones",
@@ -337,8 +337,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -371,7 +371,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 9,
+    id: 9,
     categoryId: 1,
     name: "Arroz",
     description: "Sopa ligera de arroz con pechuga de pollo",
@@ -382,8 +382,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -416,7 +416,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 10,
+    id: 10,
     categoryId: 1,
     name: "Chairo",
     description: "Sopa tradicional andina con chuño y carne de cordero",
@@ -427,8 +427,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -470,7 +470,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 11,
+    id: 11,
     categoryId: 1,
     name: "Macarron",
     description: "Sopa de fideos macarrón grueso en caldo de res",
@@ -481,8 +481,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     isFeatured: false,
 
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -515,7 +515,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 12,
+    id: 12,
     categoryId: 1,
     name: "Trigo",
     description: "Sopa nutritiva de granos de trigo pelado y verduras",
@@ -525,8 +525,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/sopas/trigo.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -559,7 +559,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 13,
+    id: 13,
     categoryId: 1,
     name: "Avena",
     description: "Sopa de avena en grano con trozos de pollo y verduras",
@@ -569,8 +569,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/sopas/avena.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -603,7 +603,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 14,
+    id: 14,
     categoryId: 2,
     name: "Majadito Tostado con Charque",
     description: "Arroz tostado con charque desmenuzado, plátano y huevo frito",
@@ -613,8 +613,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/majadito-tostado-con-charque.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -656,7 +656,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 15,
+    id: 15,
     categoryId: 2,
     name: "Pollo a la Mostaza",
     description: "Pechuga de pollo jugosa bañada en salsa de mostaza",
@@ -666,8 +666,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-mostaza.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -700,7 +700,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 16,
+    id: 16,
     categoryId: 2,
     name: "Rapi al Jugo",
     description: "Corte de rapi cocido lentamente en su propio jugo",
@@ -710,8 +710,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/rapi-al-jugo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -744,7 +744,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 17,
+    id: 17,
     categoryId: 2,
     name: "Milanesa de Pollo",
     description: "Filete de pollo apanado y frito, crujiente por fuera",
@@ -754,8 +754,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/milanesa-de-pollo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -788,7 +788,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 18,
+    id: 18,
     categoryId: 2,
     name: "Feiojada",
     description: "Guiso tradicional de porotos negros con variedad de carnes",
@@ -798,8 +798,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/feiojada.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -832,7 +832,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 19,
+    id: 19,
     categoryId: 2,
     name: "Tallarin de Pollo",
     description: "Tallarines con salsa de tomate casera y presas de pollo",
@@ -842,8 +842,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/tallarin-de-pollo.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -876,7 +876,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 20,
+    id: 20,
     categoryId: 2,
     name: "Majadito Batido",
     description: "Arroz húmedo con charque desmenuzado, huevo y plátano frito",
@@ -886,8 +886,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/majadito-batido.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -920,7 +920,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 21,
+    id: 21,
     categoryId: 2,
     name: "Pollo a la salsa BBQ",
     description: "Pollo asado bañado en una deliciosa y ahumada salsa barbacoa",
@@ -930,8 +930,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-salsa-bbq.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -964,7 +964,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 22,
+    id: 22,
     categoryId: 2,
     name: "Picante de Pollo",
     description:
@@ -975,8 +975,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/picante-de-pollo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1009,7 +1009,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 23,
+    id: 23,
     categoryId: 2,
     name: "Pique",
     description:
@@ -1020,8 +1020,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pique.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1054,7 +1054,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 24,
+    id: 24,
     categoryId: 2,
     name: "Pollo a la Plancha",
     description: "Filete de pechuga sazonado y cocido a la plancha",
@@ -1064,8 +1064,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-plancha.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1098,7 +1098,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 25,
+    id: 25,
     categoryId: 2,
     name: "Asado en Olla",
     description:
@@ -1109,8 +1109,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/asado-en-olla.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1143,7 +1143,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 26,
+    id: 26,
     categoryId: 2,
     name: "Salpicon de Pollo",
     description:
@@ -1154,8 +1154,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/salpicon-de-pollo.avif",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1188,7 +1188,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 27,
+    id: 27,
     categoryId: 2,
     name: "Pollo al Horno",
     description: "Presas de pollo marinadas con especias y asadas al horno",
@@ -1198,8 +1198,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-al-horno.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1232,7 +1232,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 28,
+    id: 28,
     categoryId: 2,
     name: "Revuelto de Carne",
     description:
@@ -1243,8 +1243,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/revuelto-de-carne.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1277,7 +1277,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 29,
+    id: 29,
     categoryId: 2,
     name: "Lenteja",
     description: "Guiso cremoso de lentejas con carne, chorizo y arroz blanco",
@@ -1287,8 +1287,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/lenteja.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1321,7 +1321,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 30,
+    id: 30,
     categoryId: 2,
     name: "Chorrellana",
     description:
@@ -1332,8 +1332,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/chorrellana.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1366,7 +1366,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 31,
+    id: 31,
     categoryId: 2,
     name: "Chancho al Horno",
     description: "Carne de cerdo marinada con hierbas y horneada lentamente",
@@ -1376,8 +1376,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/chancho-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1410,7 +1410,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 32,
+    id: 32,
     categoryId: 2,
     name: "Saice",
     description: "Guiso tradicional tarijeño de carne picada, arvejas y papa",
@@ -1420,8 +1420,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/saice.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1454,7 +1454,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 33,
+    id: 33,
     categoryId: 2,
     name: "Papalisa con Charque",
     description: "Guiso cremoso de papalisa machacada con trozos de charque",
@@ -1464,8 +1464,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/papalisa-con-charque.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1498,7 +1498,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 34,
+    id: 34,
     categoryId: 2,
     name: "Pollo al Jugo",
     description:
@@ -1509,8 +1509,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-al-jugo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1543,7 +1543,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 35,
+    id: 35,
     categoryId: 2,
     name: "Albondigas",
     description: "Bolas de carne de res molida en salsa de tomate casera",
@@ -1553,8 +1553,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/albondigas.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1587,7 +1587,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 36,
+    id: 36,
     categoryId: 2,
     name: "Milanesa de Carne",
     description: "Filete de res apanado y frito, crujiente y jugoso",
@@ -1597,8 +1597,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/milanesa-de-carne.avif",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1631,7 +1631,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 37,
+    id: 37,
     categoryId: 2,
     name: "Hamburguesa",
     description: "Hamburguesa casera de res con queso, papas fritas y ensalada",
@@ -1641,8 +1641,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/hamburguesa.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1675,7 +1675,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 38,
+    id: 38,
     categoryId: 2,
     name: "Pollo Dorado",
     description: "Presas de pollo marinadas fritas hasta quedar crujientes",
@@ -1685,8 +1685,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-dorado.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1719,7 +1719,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 39,
+    id: 39,
     categoryId: 2,
     name: "Pollo a la Piña",
     description: "Guiso de pollo con trozos de piña en salsa agridulce",
@@ -1729,8 +1729,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-pina.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1763,7 +1763,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 40,
+    id: 40,
     categoryId: 2,
     name: "Albongas con Espagueti",
     description: "Espagueti largo bañado en salsa con albóndigas de res",
@@ -1773,8 +1773,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/albongas-con-espagueti.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1807,7 +1807,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 41,
+    id: 41,
     categoryId: 2,
     name: "Costilla Frita",
     description:
@@ -1818,8 +1818,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/costilla-frita.png",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1852,7 +1852,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 42,
+    id: 42,
     categoryId: 2,
     name: "Chuleta de Res",
     description: "Chuleta de res a la plancha con arroz, huevo y papas fritas",
@@ -1862,8 +1862,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/chuleta-de-res.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1896,7 +1896,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 43,
+    id: 43,
     categoryId: 2,
     name: "Falso Conejo",
     description:
@@ -1907,8 +1907,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/falso-conejo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1941,7 +1941,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 44,
+    id: 44,
     categoryId: 2,
     name: "Higado Frito",
     description: "Filete de hígado de res frito con abundante cebolla salteada",
@@ -1951,8 +1951,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/higado-frito.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -1985,7 +1985,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 45,
+    id: 45,
     categoryId: 2,
     name: "Chuleta de cerdo",
     description:
@@ -1996,8 +1996,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/chuleta-de-cerdo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2030,7 +2030,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 46,
+    id: 46,
     categoryId: 2,
     name: "Chicharron de Pollo",
     description: "Trozos de pollo crocantes fritos con mote de maíz y papa",
@@ -2040,8 +2040,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/chicharron-de-pollo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2074,7 +2074,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 47,
+    id: 47,
     categoryId: 2,
     name: "Carne al Horno",
     description:
@@ -2085,8 +2085,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/carne-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2119,7 +2119,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 48,
+    id: 48,
     categoryId: 2,
     name: "Bife",
     description:
@@ -2130,8 +2130,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/bife.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2164,7 +2164,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 49,
+    id: 49,
     categoryId: 2,
     name: "Pollo a la Naranja",
     description: "Filetes de pollo salteados en una salsa agridulce de naranja",
@@ -2174,8 +2174,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-naranja.avif",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2208,7 +2208,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 50,
+    id: 50,
     categoryId: 2,
     name: "Pollo a la salsa blanca",
     description: "Pechuga de pollo bañada en una cremosa salsa bechamel",
@@ -2218,8 +2218,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos/pollo-a-la-salsa-blanca.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2253,7 +2253,7 @@ export const CONSTANT_PRODUCT: Product[] = [
   },
 
   {
-    productId: 220,
+    id: 220,
     categoryId: 3,
     name: "Almuerzo L-V",
     description: "Almuerzo de Lunes a Viernes",
@@ -2263,8 +2263,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/almuerzo-lunes-viernes.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
     productDetailProduct: [
@@ -2311,7 +2311,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 221,
+    id: 221,
     categoryId: 3,
     name: "Almuerzo Sabado",
     description: "Almuerzo de Sabado",
@@ -2321,13 +2321,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/almuerzo-sabado.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 222,
+    id: 222,
     categoryId: 3,
     name: "Sopa Suelta",
     description: "Sopa Suelta",
@@ -2337,13 +2337,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/sopa-suelta.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 223,
+    id: 223,
     categoryId: 3,
     name: "Segundo Suelto",
     description: "Segundo Suelto",
@@ -2353,14 +2353,14 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/segundo-suelto.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
 
   {
-    productId: 51,
+    id: 51,
     categoryId: 3,
     name: "Bife con Pure",
     description:
@@ -2371,8 +2371,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/bife-con-pure.avif",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2405,7 +2405,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 52,
+    id: 52,
     categoryId: 3,
     name: "Picante de Pollo",
     description: "Pollo criollo cocido en una salsa espesa de ají colorado",
@@ -2415,8 +2415,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/picante-de-pollo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2449,7 +2449,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 53,
+    id: 53,
     categoryId: 3,
     name: "Pollo al Horno",
     description:
@@ -2460,8 +2460,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/pollo-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2494,7 +2494,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 54,
+    id: 54,
     categoryId: 3,
     name: "Lasaña",
     description:
@@ -2505,8 +2505,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/lasana.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2539,7 +2539,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 55,
+    id: 55,
     categoryId: 3,
     name: "Keperi al Horno",
     description:
@@ -2550,8 +2550,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/keperi-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2584,7 +2584,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 56,
+    id: 56,
     categoryId: 3,
     name: "Chancho al Horno",
     description:
@@ -2595,8 +2595,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/chancho-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2629,7 +2629,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 57,
+    id: 57,
     categoryId: 3,
     name: "Sajta de Pollo",
     description:
@@ -2640,8 +2640,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/sajta-de-pollo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2674,7 +2674,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 58,
+    id: 58,
     categoryId: 3,
     name: "Mondongo Chuquisaqueño",
     description: "Carne de cerdo con mote de maíz amarillo y ají colorado",
@@ -2684,8 +2684,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/mondongo-chuquisaqueno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2718,7 +2718,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 59,
+    id: 59,
     categoryId: 3,
     name: "Chicharron Cochabambino",
     description:
@@ -2729,8 +2729,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/chicharron-cochabambino.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2763,7 +2763,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 60,
+    id: 60,
     categoryId: 3,
     name: "Silpancho Cochabambino",
     description:
@@ -2774,8 +2774,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/silpancho-cochabambino.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2808,7 +2808,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 61,
+    id: 61,
     categoryId: 3,
     name: "Chuleta con huevo",
     description:
@@ -2819,8 +2819,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/chuleta-con-huevo.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2853,7 +2853,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 62,
+    id: 62,
     categoryId: 3,
     name: "Costilla Frita",
     description: "Trozos de costilla de cerdo frita acompañados de mote y yuca",
@@ -2863,8 +2863,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/costilla-frita.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2897,7 +2897,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 63,
+    id: 63,
     categoryId: 3,
     name: "Bife con huevo",
     description:
@@ -2908,8 +2908,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/bife-con-huevo.jpeg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2942,7 +2942,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 64,
+    id: 64,
     categoryId: 3,
     name: "Pollerita al horno",
     description:
@@ -2953,8 +2953,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/pollerita-al-horno.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -2987,7 +2987,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 65,
+    id: 65,
     categoryId: 3,
     name: "Milanesa Napolitana",
     description:
@@ -2998,8 +2998,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/segundos-extras/milanesa-napolitana.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3043,8 +3043,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/chicha.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 199, productId: 66, name: 'Maíz blanco', description: 'Maíz seleccionado hervido para extraer su esencia', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3063,8 +3063,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/lima.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 202, productId: 67, name: 'Zumo de lima natural', description: 'Lima recién exprimida', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3083,8 +3083,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/limonada.webp',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 205, productId: 68, name: 'Limón criollo fresco', description: 'Limones jugosos exprimidos al momento', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3103,8 +3103,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/naranja.avif',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 208, productId: 69, name: 'Naranja dulce valencia', description: 'Naranjas de la región seleccionadas por su dulzor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3122,8 +3122,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/pina.avif',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 210, productId: 70, name: 'Piña madura', description: 'Fruta fresca y cáscara para concentrar el sabor', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3142,8 +3142,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/canela.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 213, productId: 71, name: 'Canela entera original', description: 'Ramas de canela de alta calidad hervidas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3162,8 +3162,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/linaza.webp',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 216, productId: 72, name: 'Semillas de linaza', description: 'Hervidas para obtener su característica textura suave', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3182,8 +3182,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/papaya.avif',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 219, productId: 73, name: 'Papaya madura', description: 'Pulpa de papaya seleccionada', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3202,8 +3202,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/maracuya.webp',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 222, productId: 74, name: 'Pulpa de maracuyá fresca', description: 'Semillas y jugo extraído de la fruta fresca', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3222,8 +3222,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/mocochinchi.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 225, productId: 75, name: 'Durazno seco (k\'isa)', description: 'Durazno deshidratado hervido hasta ablandarse', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3242,8 +3242,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/chicha-de-mani.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 228, productId: 76, name: 'Maní blanco molido', description: 'Maní tostado y triturado para dar textura cremosa', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3262,8 +3262,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/refrescos/tamarindo.webp',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 231, productId: 77, name: 'Pulpa de tamarindo fresca', description: 'Vainas de tamarindo remojadas y coladas', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -3272,8 +3272,10 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   ]
   // },
 
+
+  // ROJO
   {
-    productId: 78,
+    id: 78,
     categoryId: 5,
     name: "Coca Cola Mini",
     description:
@@ -3284,8 +3286,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-mini.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3318,7 +3320,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 203,
+    id: 203,
     categoryId: 5,
     name: "Coca Cola Peque",
     description: "Bebida gaseosa sabor original en botella de tamaño personal",
@@ -3328,8 +3330,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-personal.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3362,7 +3364,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 79,
+    id: 79,
     categoryId: 5,
     name: "Coca Cola Popular",
     description: "Bebida gaseosa sabor original en botella de tamaño personal",
@@ -3372,8 +3374,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-personal.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3406,7 +3408,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 204,
+    id: 204,
     categoryId: 5,
     name: "Coca Cola 1 1/2 L",
     description:
@@ -3417,8 +3419,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-2-litros.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3451,7 +3453,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 80,
+    id: 80,
     categoryId: 5,
     name: "Coca Cola 2 Litros",
     description:
@@ -3462,8 +3464,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-2-litros.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3496,7 +3498,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 81,
+    id: 81,
     categoryId: 5,
     name: "Coca Cola 3 Litros",
     description:
@@ -3507,8 +3509,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/coca-cola-3-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3542,7 +3544,7 @@ export const CONSTANT_PRODUCT: Product[] = [
   },
   // ROJO
   {
-    productId: 205,
+    id: 205,
     categoryId: 5,
     name: "Fanta Mini",
     description: "Bebida gaseosa sabor naranja en botella de tamaño personal",
@@ -3552,8 +3554,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-new-4.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3586,7 +3588,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 206,
+    id: 206,
     categoryId: 5,
     name: "Fanta Peque",
     description: "Bebida gaseosa sabor naranja en botella de tamaño pequeño",
@@ -3596,8 +3598,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-new-5.png",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3630,7 +3632,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 207,
+    id: 207,
     categoryId: 5,
     name: "Fanta Popular",
     description: "Bebida gaseosa sabor naranja en botella de tamaño popular",
@@ -3640,8 +3642,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-new-8.jpeg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3674,7 +3676,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 208,
+    id: 208,
     categoryId: 5,
     name: "Fanta 1 1/2 L",
     description: "Bebida gaseosa sabor naranja en botella de tamaño popular",
@@ -3684,8 +3686,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-new-13.jpeg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3718,7 +3720,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 82,
+    id: 82,
     categoryId: 5,
     name: "Fanta 2 Litros",
     description:
@@ -3729,8 +3731,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-2-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3763,7 +3765,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 83,
+    id: 83,
     categoryId: 5,
     name: "Fanta 3 Litros",
     description: "Bebida gaseosa sabor naranja de 3 litros tamaño familiar",
@@ -3773,14 +3775,14 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/fanta-3-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   // ROJO 2
   {
-    productId: 209,
+    id: 209,
     categoryId: 5,
     name: "Sprite Mini",
     description: "Bebida gaseosa sabor sprite en botella de tamaño personal",
@@ -3790,13 +3792,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-new-4.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 210,
+    id: 210,
     categoryId: 5,
     name: "Sprite Peque",
     description: "Bebida gaseosa sabor sprite en botella de tamaño pequeño",
@@ -3806,13 +3808,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-new-5.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 211,
+    id: 211,
     categoryId: 5,
     name: "Sprite Popular",
     description: "Bebida gaseosa sabor sprite en botella de tamaño popular",
@@ -3822,13 +3824,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-new-8.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 212,
+    id: 212,
     categoryId: 5,
     name: "Sprite 1 1/2 L",
     description: "Bebida gaseosa sabor sprite en botella de tamaño popular",
@@ -3838,13 +3840,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-new-13.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 84,
+    id: 84,
     categoryId: 5,
     name: "Sprite 2 litros",
     description: "Bebida gaseosa sabor lima-limón de 2 litros refrescante",
@@ -3854,8 +3856,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-2-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3888,7 +3890,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 85,
+    id: 85,
     categoryId: 5,
     name: "Sprite 3 litros",
     description: "Bebida gaseosa sabor lima-limón de 3 litros tamaño familiar",
@@ -3898,8 +3900,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/sprite-3-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3932,7 +3934,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 86,
+    id: 86,
     categoryId: 5,
     name: "Simba 2 Litros",
     description: "Bebida gaseosa sabor guaraná de 2 litros refrescante",
@@ -3942,8 +3944,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/simba-2-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -3976,7 +3978,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 87,
+    id: 87,
     categoryId: 5,
     name: "Simba 2 Litros",
     description: "Bebida gaseosa sabor guaraná de 2 litros tamaño familiar",
@@ -3986,8 +3988,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/simba-3-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4020,7 +4022,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 88,
+    id: 88,
     categoryId: 5,
     name: "Cabaña 2 Litros",
     description:
@@ -4031,8 +4033,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/gaseosas/cabana-2-litros.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4066,8 +4068,8 @@ export const CONSTANT_PRODUCT: Product[] = [
   //   imageUrl: './images/product/gaseosas/cabana-3-litros.jpg',
   //   isFeatured: false,
   //   isAvailable: true,
-  //   created_at: new Date().toISOString(),
-  //   updated_at: new Date().toISOString(),
+  //   createdAt: new Date().toISOString(),
+  //   updatedAt: new Date().toISOString(),
   //   state: true,
   //   productIngredientDetail: [
   //     { id: 266, productId: 89, name: 'Agua purificada', description: 'Agua filtrada bajo estrictos estándares de calidad', createdAt: new Date().toISOString(), createdBy: 'system', state: true },
@@ -4076,7 +4078,7 @@ export const CONSTANT_PRODUCT: Product[] = [
   // },
 
   {
-    productId: 200,
+    id: 200,
     categoryId: 6,
     name: "Refresco en Vaso",
     description:
@@ -4087,13 +4089,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/refrescos-3.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 201,
+    id: 201,
     categoryId: 6,
     name: "Refresco Mediano",
     description:
@@ -4104,13 +4106,13 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/refrescos-5.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
   {
-    productId: 202,
+    id: 202,
     categoryId: 6,
     name: "Refresco en Jarra 1L",
     description:
@@ -4121,14 +4123,14 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/refrescos-10.avif",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [],
   },
 
   {
-    productId: 213,
+    id: 213,
     categoryId: 6,
     name: "Tropifrut personal",
     description:
@@ -4139,8 +4141,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/tropifrut-generico.png",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4173,7 +4175,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 214,
+    id: 214,
     categoryId: 6,
     name: "Tropifrut popular",
     description:
@@ -4184,8 +4186,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/tropifrut-generico.png",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4218,7 +4220,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 215,
+    id: 215,
     categoryId: 6,
     name: "Tropifrut 1 L",
     description:
@@ -4229,8 +4231,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/tropifrut-generico.png",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4264,7 +4266,7 @@ export const CONSTANT_PRODUCT: Product[] = [
   },
 
   {
-    productId: 90,
+    id: 90,
     categoryId: 6,
     name: "Tropifrut",
     description:
@@ -4275,8 +4277,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/tropifrut.jpg",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {
@@ -4309,7 +4311,7 @@ export const CONSTANT_PRODUCT: Product[] = [
     ],
   },
   {
-    productId: 91,
+    id: 91,
     categoryId: 6,
     name: "Acuario",
     description:
@@ -4320,8 +4322,8 @@ export const CONSTANT_PRODUCT: Product[] = [
     imageUrl: "./images/product/jugos/acuario-2-litros.webp",
     isFeatured: false,
     isAvailable: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     state: true,
     productIngredientDetail: [
       {

@@ -75,10 +75,10 @@ export default function ProductsPage() {
   const filteredProducts =
     selectedCategory !== null
       ? products.filter(
-          (p) =>
-            p.categoryId === selectedCategory ||
-            p.categoryId === Number(selectedCategory),
-        )
+        (p) =>
+          p.categoryId === selectedCategory ||
+          p.categoryId === Number(selectedCategory),
+      )
       : products.filter((p) => p.isFeatured);
 
   const handleCategoryFilter = (categoryId: number | null) => {
@@ -87,7 +87,7 @@ export default function ProductsPage() {
 
   const handleToggleFeatured = (product: Product) => {
     const isCurrentlyFeatured = featuredProducts.some(
-      (p) => p.productId === product.productId,
+      (p) => p.id === product.id,
     );
 
     const currentToastBody = {
@@ -101,7 +101,7 @@ export default function ProductsPage() {
 
     if (isCurrentlyFeatured) {
       setFeaturedProducts(
-        featuredProducts.filter((p) => p.productId !== product.productId),
+        featuredProducts.filter((p) => p.id !== product.id),
       );
     } else {
       setFeaturedProducts([...featuredProducts, product]);
@@ -109,9 +109,9 @@ export default function ProductsPage() {
     toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
   };
 
-  const handleRemoveFeatured = (productId: number) => {
+  const handleRemoveFeatured = (id: number) => {
     setFeaturedProducts(
-      featuredProducts.filter((p) => p.productId !== productId),
+      featuredProducts.filter((p) => p.id !== id),
     );
   };
 
@@ -145,7 +145,7 @@ export default function ProductsPage() {
   const handleSave = async () => {
     try {
       if (editingProduct) {
-        await updateProduct(editingProduct.productId, {
+        await updateProduct(editingProduct.id, {
           ...formData,
           categoryId: formData.CategoryId,
           isPromotion: editingProduct.isPromotion,
@@ -167,7 +167,6 @@ export default function ProductsPage() {
           displayOrder: 0,
           state: true,
           isAvailable: true,
-          productId: 0,
         });
       }
       await loadData();
@@ -232,7 +231,7 @@ export default function ProductsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredProducts.map((product, index) => {
               const isFeatured = featuredProducts.some(
-                (p) => p.productId === product.productId,
+                (p) => p.id === product.id,
               );
               return (
                 <ProductCard

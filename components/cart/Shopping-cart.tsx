@@ -126,7 +126,7 @@ export function ShoppingCart() {
 
       const saleItems = items.flatMap((item) => {
         const mainItem = {
-          productId: item.productId,
+          id: item.id,
           name: item.name,
           quantity: item.quantity,
           price: item.price,
@@ -141,7 +141,7 @@ export function ShoppingCart() {
 
         if (isPromo && item.productDetailProduct) {
           const flatSubProducts = item.productDetailProduct.map((sub: any) => ({
-            productId: sub.productId,
+            id: sub.id,
             name: `${sub.name} ${sub.productFittings && sub.productFittings.length > 0 ? `(${sub.productFittings.join(", ")})` : ""}`,
             quantity: 0,
             price: 0,
@@ -258,7 +258,7 @@ export function ShoppingCart() {
     };
 
     const updatedCartItems = items.map((cartItem) =>
-      cartItem.productId === finalPromoConfig.productId ? finalPromoConfig : cartItem
+      cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem
     );
 
     handleChangeSubTotal(updatedCartItems); // Notifica el cambio al estado global/padre
@@ -315,12 +315,12 @@ export function ShoppingCart() {
   const [selectedFittings, setSelectedFittings] = useState<number[]>([]); // Guarda los IDs [1, 2, 3] activos
 
   const handleAddProductToPromo = () => {
-    const selectedProduct = productsList.find((p: any) => p.productId === formProductId);
+    const selectedProduct = productsList.find((p: any) => p.id === formProductId);
     if (!selectedProduct) return;
 
     const newSubProduct = {
       id: Date.now(), // ID temporal
-      productId: selectedProduct.productId,
+      productId: selectedProduct.id,
       name: selectedProduct.name,
 
       // 👇 PASAMOS LAS NUEVAS VARIABLES MODIFICADAS
@@ -328,7 +328,7 @@ export function ShoppingCart() {
       reasonModification: formReason.trim() || "Cambio de ingrediente",
 
       quantity: formQuantity,
-      ProductFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)?.name).filter(Boolean),
+      productFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)?.name).filter(Boolean),
       state: true
     };
 
@@ -460,7 +460,7 @@ export function ShoppingCart() {
           ) : (
             items.map((item) => (
               <div
-                key={item.productId}
+                key={item.id}
                 className="border bg-white border-border rounded-lg p-2"
               >
                 <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
@@ -518,7 +518,7 @@ export function ShoppingCart() {
                       onClick={() =>
                         dispatch(
                           updateQuantity({
-                            productId: item.productId,
+                            id: item.id,
                             quantity: Math.max(1, item.quantity - 1),
                           }),
                         )
@@ -535,7 +535,7 @@ export function ShoppingCart() {
                       onChange={(e) =>
                         dispatch(
                           updateQuantity({
-                            productId: item.productId,
+                            id: item.id,
                             quantity: parseInt(e.target.value) || 1,
                           }),
                         )
@@ -554,7 +554,7 @@ export function ShoppingCart() {
                       onClick={() =>
                         dispatch(
                           updateQuantity({
-                            productId: item.productId,
+                            id: item.id,
                             quantity: item.quantity + 1,
                           }),
                         )
@@ -566,7 +566,7 @@ export function ShoppingCart() {
                   </div>
                   <div className="flex flex-col items-end">
                     <button
-                      onClick={() => dispatch(removeFromCart(item.productId))}
+                      onClick={() => dispatch(removeFromCart(item.id))}
                       className="cursor-pointer text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
                     >
                       <Trash2 size={14} />

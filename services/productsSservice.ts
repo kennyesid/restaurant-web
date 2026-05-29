@@ -1,10 +1,14 @@
+import { createClient } from '@supabase/supabase-js';
+import { EnvConfig } from '@/config/env.config';
 import { CONSTANT_PRODUCT } from '@/lib/constants/constantProduct';
 import { storage } from '@/lib/storage';
 import { Product, Category } from '@/types';
 
+const supabase = createClient(EnvConfig.supabaseUrl, EnvConfig.supabaseKey);
+
 function generateNumericId(collection: Product[]): number {
   if (collection.length === 0) return 1;
-  const maxId = Math.max(...collection.map(p => p.productId));
+  const maxId = Math.max(...collection.map(p => p.id));
   return maxId + 1;
 }
 
@@ -86,7 +90,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  return storage.getFromCollection<Product>(PRODUCTS_KEY, id, 'ProductId');
+  return storage.getFromCollection<Product>(PRODUCTS_KEY, id, 'id');
 }
 
 export async function getProductsByCategory(categoryId: number): Promise<Product[]> {
@@ -94,15 +98,15 @@ export async function getProductsByCategory(categoryId: number): Promise<Product
   return products.filter(p => p.categoryId === categoryId);
 }
 
-export async function createProduct(product: Omit<Product, 'ProductId' | 'created_at' | 'updated_at'>): Promise<Product> {
+export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
   const currentProducts = storage.getCollection<Product>(PRODUCTS_KEY);
   const newProduct: Product = {
     ...product,
-    productId: generateNumericId(currentProducts),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
+    id: generateNumericId(currentProducts),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
-  storage.addToCollection(PRODUCTS_KEY, newProduct, 'ProductId');
+  storage.addToCollection(PRODUCTS_KEY, newProduct, 'id');
   return newProduct;
 }
 
@@ -112,15 +116,15 @@ export async function updateProduct(id: number, updates: Partial<Product>): Prom
     id,
     {
       ...updates,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
-    'id_product'
+    'id'
   );
-  return success ? storage.getFromCollection<Product>(PRODUCTS_KEY, id, 'id_product') : null;
+  return success ? storage.getFromCollection<Product>(PRODUCTS_KEY, id, 'id') : null;
 }
 
 export async function deleteProduct(id: number): Promise<boolean> {
-  return storage.removeFromCollection(PRODUCTS_KEY, id, 'id_product');
+  return storage.removeFromCollection(PRODUCTS_KEY, id, 'id');
 }
 
 // Category CRUD
@@ -161,7 +165,7 @@ export async function updateFeaturedProductsOrder(reorderedFeaturedProducts: Pro
   // 2. Mapeamos la colección completa aplicando la nueva lógica
   const updatedProducts = allProducts.map((product) => {
     // Buscamos si el producto actual está en la lista que viene del frontend
-    const matchedIdx = reorderedFeaturedProducts.findIndex(p => p.productId === product.productId);
+    const matchedIdx = reorderedFeaturedProducts.findIndex(p => p.id === product.id);
 
     if (matchedIdx !== -1) {
       // SI ESTÁ EN LA LISTA: Activamos el destacado y le ponemos su orden real del frontend
@@ -169,7 +173,7 @@ export async function updateFeaturedProductsOrder(reorderedFeaturedProducts: Pro
         ...product,
         isFeatured: true,
         displayOrder: reorderedFeaturedProducts[matchedIdx].displayOrder || (matchedIdx + 1),
-        updated_at: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
     } else {
       // NO ESTÁ EN LA LISTA: Nos aseguramos de resetearlo por completo para que deje de ser destacado
@@ -177,7 +181,7 @@ export async function updateFeaturedProductsOrder(reorderedFeaturedProducts: Pro
         ...product,
         isFeatured: false,
         displayOrder: 0,
-        updated_at: new Date().toISOString()
+        updatedAt: new Date().toISOString()
       };
     }
   });

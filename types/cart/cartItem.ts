@@ -2,7 +2,7 @@ import { ProductDetailProduct } from "@/types/product/productDetailProduct";
 import { ProductFittings } from "../product/productFittings";
 
 export interface CartItem {
-  productId: number;
+  id: number;
   name: string; // Añadido
   price: number;
   categoryId: number; // Añadido
@@ -15,4 +15,7 @@ export interface CartItem {
   productFitting?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  state?: boolean;
 }

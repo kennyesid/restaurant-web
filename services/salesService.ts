@@ -239,7 +239,7 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
 
 export async function getSaleById(id: number): Promise<RespuestaGenericaDto<Sale>> {
   try {
-    const sale = storage.getFromCollection<Sale>(SALES_KEY, id, "saleId");
+    const sale = storage.getFromCollection<Sale>(SALES_KEY, id, "id");
     if (!sale) return responderFalla(`Venta #${id} no encontrada`, 404);
     return responderExito(sale);
   } catch (error) {
@@ -263,20 +263,20 @@ export async function getSaleById(id: number): Promise<RespuestaGenericaDto<Sale
 // }
 
 export async function createSale(
-  sale: Omit<Sale, "saleId" | "createdAt" | "updatedAt">
+  sale: Omit<Sale, "id" | "createdAt" | "updatedAt">
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
     const currentSales = storage.getCollection<Sale>(SALES_KEY);
-    const maxId = currentSales.length > 0 ? Math.max(...currentSales.map(s => s.saleId)) : 0;
+    const maxId = currentSales.length > 0 ? Math.max(...currentSales.map(s => s.id)) : 0;
 
     const newSale: Sale = {
       ...sale,
-      saleId: maxId + 1,
+      id: maxId + 1,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    storage.addToCollection(SALES_KEY, newSale, "saleId");
+    storage.addToCollection(SALES_KEY, newSale, "id");
     return responderExito(newSale, "Venta registrada con éxito");
   } catch (error) {
     return responderFalla("No se pudo procesar la venta");
@@ -285,7 +285,7 @@ export async function createSale(
 
 export async function deleteSale(id: number): Promise<RespuestaGenericaDto<boolean>> {
   try {
-    const deleted = storage.removeFromCollection(SALES_KEY, id, "saleId");
+    const deleted = storage.removeFromCollection(SALES_KEY, id, "id");
     return deleted 
       ? responderExito(true, "Venta eliminada") 
       : responderFalla("No se encontró la venta para eliminar");
@@ -320,12 +320,12 @@ export async function getTopProducts(limit: number = 5): Promise<RespuestaGeneri
 
     sales.forEach((sale) => {
       sale.detail?.forEach((item) => {
-        if (productMap.has(item.productId)) {
-          const existing = productMap.get(item.productId)!;
+        if (productMap.has(item.id)) {
+          const existing = productMap.get(item.id)!;
           existing.quantity += item.quantity;
           existing.revenue += item.price * item.quantity;
         } else {
-          productMap.set(item.productId, {
+          productMap.set(item.id, {
             name: item.name,
             quantity: item.quantity,
             revenue: item.price * item.quantity,

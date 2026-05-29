@@ -19,7 +19,7 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
 
     dispatch(
       addToCart({
-        productId: product.productId,
+        id: product.id,
         name: product.name,
         price: product.price,
         categoryId: product.categoryId,

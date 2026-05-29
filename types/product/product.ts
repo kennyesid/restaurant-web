@@ -2,9 +2,10 @@ import { ProductDetailProduct } from "./productDetailProduct";
 import { ProductIngredientDetail } from "./productIngredientDetail";
 
 export interface Product {
-  productId: number;
+  id: number;
   productIngredientDetail?: ProductIngredientDetail[];
   productDetailProduct?: ProductDetailProduct[];
+  groupId?: string;
   categoryId: number;
   name: string;
   description: string;
@@ -17,8 +18,8 @@ export interface Product {
   displayOrder?: number;
   isAvailable: boolean;
   piecesOfChicken?: number;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
   state: boolean;
 }
 

@@ -232,7 +232,7 @@ export function GenericModal({
           <tbody>
             {editableItems.map((item) => (
               // className="border-t"
-              <tr key={item.productId}>
+              <tr key={item.id}>
                 <td className="p-2 font-medium">{item.name}</td>
                 <td className="p-2 text-center">
                   <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
@@ -264,7 +264,7 @@ export function GenericModal({
 
                           setEditableItems((prev) =>
                             prev.map((i) =>
-                              i.productId === item.productId
+                              i.id === item.id
                                 ? { ...i, reasonModification: value }
                                 : i,
                             ),
@@ -286,7 +286,7 @@ export function GenericModal({
 
                           setEditableItems((prev) =>
                             prev.map((i) =>
-                              i.productId === item.productId
+                              i.id === item.id
                                 ? { ...i, modifiedSubtotal: value }
                                 : i,
                             ),

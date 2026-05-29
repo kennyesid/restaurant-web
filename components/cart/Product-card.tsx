@@ -10,7 +10,7 @@ import Image from "next/image";
 interface ProductCardProps {
   product: Product;
   onEdit?: ((product: Product) => void) | null;
-  onDelete?: ((productId: number) => void) | null;
+  onDelete?: ((id: number) => void) | null;
   onClick?: (product: Product) => void;
   showActions?: boolean;
   className?: string;
@@ -103,7 +103,7 @@ export function ProductCard({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onDelete?.(product.productId);
+                    onDelete?.(product.id);
                   }}
                   className="p-1.5 bg-red-600 hover:bg-red-700 rounded text-white"
                 >

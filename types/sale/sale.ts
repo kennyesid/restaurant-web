@@ -5,7 +5,7 @@ import { User } from "../user/user";
 import { OrderTypeEnum } from "../enum/orderTypeEnum";
 
 export interface Sale {
-  saleId: number;
+  id: number;
   detail: CartItem[]; 
   userId?: number;
   userName?: string;

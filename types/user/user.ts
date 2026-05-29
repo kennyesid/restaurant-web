@@ -12,11 +12,13 @@ export interface User {
   branchId?: number;
   avatarUrl?: string;
   tenantId?: number;
-  roleId: number;
+  roleId?: number;
   role?: string;
-  createdAt: string;
-  updatedAt: string;
-  state: boolean;
+  groupId?: number;
+  groupCode?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  state?: boolean;
 }
 
 export interface Role {
