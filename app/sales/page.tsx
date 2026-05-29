@@ -5,7 +5,18 @@ import { getSales, deleteSale } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale } from "@/types";
 import { Card } from "@/components/ui/card";
-import { Trash2, Eye, Edit, Key, Utensils, Package, Moon, Sun, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Trash2,
+  Eye,
+  Edit,
+  Key,
+  Utensils,
+  Package,
+  Moon,
+  Sun,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import React from "react";
@@ -24,7 +35,9 @@ export default function SalesPage() {
   const [endDate, setEndDate] = useState(today);
   const [filterUser, setFilterUser] = useState("all");
   const [filterPaymentType, setFilterPaymentType] = useState("all");
-  const [expandedPromos, setExpandedPromos] = useState<Record<string, boolean>>({});
+  const [expandedPromos, setExpandedPromos] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const [appliedFilters, setAppliedFilters] = useState({
     startDate: today,
@@ -80,7 +93,7 @@ export default function SalesPage() {
 
   const paginatedSales = filteredSales.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
   const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
   const uniquePaymentTypes = ["cash", "qr", "mixed"];
@@ -134,9 +147,6 @@ export default function SalesPage() {
   };
   */
 
-
-
-
   const togglePromo = (saleId: number, itemIdx: number) => {
     const key = `${saleId}-${itemIdx}`;
     setExpandedPromos((prev) => ({
@@ -180,7 +190,9 @@ export default function SalesPage() {
             <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
               <div>
                 <p className="text-[10px] uppercase opacity-70">Efectivo</p>
-                <p className="text-lg font-bold text-[#facc15]">{cashSales.length}</p>
+                <p className="text-lg font-bold text-[#facc15]">
+                  {cashSales.length}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] uppercase opacity-70">QR</p>
@@ -321,7 +333,14 @@ export default function SalesPage() {
                           {new Date(sale.createdAt).toLocaleDateString("es-BO")}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {new Date(sale.createdAt).toLocaleTimeString("es-BO", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          {new Date(sale.createdAt).toLocaleTimeString(
+                            "es-BO",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            },
+                          )}
                         </span>
                       </div>
                     </td>
@@ -332,7 +351,9 @@ export default function SalesPage() {
                             {sale.userName}
                           </span>
                         ) : (
-                          <span className="text-xs italic text-gray-400">Sin Nombre</span>
+                          <span className="text-xs italic text-gray-400">
+                            Sin Nombre
+                          </span>
                         )}
                         {sale.userDocument && (
                           <span className="text-[10px] font-mono text-muted-foreground">
@@ -342,11 +363,18 @@ export default function SalesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${sale.orderType === "CONSUMO LOCAL"
-                        ? "bg-amber-50 text-amber-800 border border-amber-200"
-                        : "bg-teal-50 text-teal-800 border border-teal-200"
-                        }`}>
-                        {sale.orderType === "CONSUMO LOCAL" ? <Utensils size={10} /> : <Package size={10} />}
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${
+                          sale.orderType === "CONSUMO LOCAL"
+                            ? "bg-amber-50 text-amber-800 border border-amber-200"
+                            : "bg-teal-50 text-teal-800 border border-teal-200"
+                        }`}
+                      >
+                        {sale.orderType === "CONSUMO LOCAL" ? (
+                          <Utensils size={10} />
+                        ) : (
+                          <Package size={10} />
+                        )}
                         {sale.orderType}
                       </span>
                     </td>
@@ -363,12 +391,13 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
-                          ? "bg-green-100 text-green-700"
-                          : sale.paymentType === "qr"
-                            ? "bg-blue-100 text-blue-700"
-                            : "bg-purple-100 text-purple-700"
-                          }`}
+                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                          sale.paymentType === "cash"
+                            ? "bg-green-100 text-green-700"
+                            : sale.paymentType === "qr"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-purple-100 text-purple-700"
+                        }`}
                       >
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
@@ -404,7 +433,6 @@ export default function SalesPage() {
                     <tr className="bg-slate-50/70">
                       <td colSpan={9} className="px-6 py-4">
                         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-1">
-
                           {/* Top bar de la expansión */}
                           <div className="flex flex-wrap justify-between items-center  gap-2">
                             <div>
@@ -416,7 +444,9 @@ export default function SalesPage() {
                               </p> */}
                             </div>
                             <div className="text-right">
-                              <p className="text-xs text-gray-400 font-medium">Total</p>
+                              <p className="text-xs text-gray-400 font-medium">
+                                Total
+                              </p>
                               <span className="font-black text-xl text-[#052A3D]">
                                 Bs {sale.total.toLocaleString()}
                               </span>
@@ -429,40 +459,68 @@ export default function SalesPage() {
                                 <thead className="bg-slate-50/70">
                                   <tr>
                                     {/* Nueva columna para el botón de expandir la promo interna */}
-                                    <th scope="col" className="w-10 px-2 py-3 text-center"></th>
-                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-16">
+                                    <th
+                                      scope="col"
+                                      className="w-10 px-2 py-3 text-center"
+                                    ></th>
+                                    <th
+                                      scope="col"
+                                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-16"
+                                    >
                                       Cant.
                                     </th>
-                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                    <th
+                                      scope="col"
+                                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                                    >
                                       Producto / Descripción
                                     </th>
 
-                                    <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">
+                                    <th
+                                      scope="col"
+                                      className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32"
+                                    >
                                       Precio Unit.
                                     </th>
-
                                   </tr>
                                 </thead>
 
                                 <tbody className="divide-y divide-slate-100 bg-white">
                                   {sale.detail
-                                    .filter((item: any) => item.isCountable !== false)
+                                    .filter(
+                                      (item: any) => item.isCountable !== false,
+                                    )
                                     .map((item: any, itemIdx: number) => {
-                                      const isModificado = item.quantity === 0 && item.price === 0;
-                                      const tieneDesglose = item.isPromocion || (item.productDetailProduct && item.productDetailProduct.length > 0);
+                                      const isModificado =
+                                        item.quantity === 0 && item.price === 0;
+                                      const tieneDesglose =
+                                        item.isPromocion ||
+                                        (item.productDetailProduct &&
+                                          item.productDetailProduct.length > 0);
 
                                       // Verificamos si este item específico está expandido
-                                      const isPromoExpanded = !!expandedPromos[`${sale.saleId}-${itemIdx}`];
+                                      const isPromoExpanded =
+                                        !!expandedPromos[
+                                          `${sale.saleId}-${itemIdx}`
+                                        ];
 
                                       return (
                                         <Fragment key={itemIdx}>
-                                          <tr className={`transition-colors ${isModificado ? "bg-slate-50/60 italic" : "hover:bg-slate-50/40"}`}>
+                                          <tr
+                                            className={`transition-colors ${isModificado ? "bg-slate-50/60 italic" : "hover:bg-slate-50/40"}`}
+                                          >
                                             {/* Celda del trigger interno */}
                                             <td className="px-2 py-3.5 text-center whitespace-nowrap">
-                                              {tieneDesglose && !isModificado ? (
+                                              {tieneDesglose &&
+                                              !isModificado ? (
                                                 <button
                                                   type="button"
-                                                  onClick={() => togglePromo(sale.saleId, itemIdx)}
+                                                  onClick={() =>
+                                                    togglePromo(
+                                                      sale.saleId,
+                                                      itemIdx,
+                                                    )
+                                                  }
                                                   className="p-1 rounded-md hover:bg-slate-200 text-slate-500 transition-colors focus:outline-none"
                                                 >
                                                   {isPromoExpanded ? (
@@ -477,12 +535,16 @@ export default function SalesPage() {
                                             </td>
 
                                             <td className="px-4 py-3.5 font-medium text-slate-600 font-mono">
-                                              {isModificado ? "-" : `${item.quantity}x`}
+                                              {isModificado
+                                                ? "-"
+                                                : `${item.quantity}x`}
                                             </td>
                                             <td className="px-4 py-3.5">
                                               <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                  <span className={`font-medium text-slate-800 ${isModificado ? "line-through text-slate-400" : ""}`}>
+                                                  <span
+                                                    className={`font-medium text-slate-800 ${isModificado ? "line-through text-slate-400" : ""}`}
+                                                  >
                                                     {item.name}
                                                   </span>
                                                   {item.isPromocion && (
@@ -497,71 +559,121 @@ export default function SalesPage() {
                                                   )}
                                                 </div>
 
-                                                {item.productFitting && item.productFitting.length > 0 && (
-                                                  <p className="text-xs text-slate-400">
-                                                    <span className="font-medium text-slate-500">Acompañamientos:</span> {item.productFitting.join(", ")}
-                                                  </p>
-                                                )}
+                                                {item.productFitting &&
+                                                  item.productFitting.length >
+                                                    0 && (
+                                                    <p className="text-xs text-slate-400">
+                                                      <span className="font-medium text-slate-500">
+                                                        Acompañamientos:
+                                                      </span>{" "}
+                                                      {item.productFitting.join(
+                                                        ", ",
+                                                      )}
+                                                    </p>
+                                                  )}
 
                                                 {item.reasonModification && (
                                                   <p className="text-xs text-slate-500">
-                                                    <span className="font-medium text-slate-600">Nota:</span> {item.reasonModification}
+                                                    <span className="font-medium text-slate-600">
+                                                      Nota:
+                                                    </span>{" "}
+                                                    {item.reasonModification}
                                                   </p>
                                                 )}
                                               </div>
                                             </td>
 
                                             <td className="px-4 py-3.5 text-right font-mono text-slate-600 whitespace-nowrap">
-                                              {isModificado ? "-" : `Bs ${item.price}`}
+                                              {isModificado
+                                                ? "-"
+                                                : `Bs ${item.price}`}
                                             </td>
                                           </tr>
 
                                           {/* Fila de Desglose Condicional controlada de forma segura */}
-                                          {tieneDesglose && !isModificado && isPromoExpanded && (
-                                            <>
-                                              {/* Fila de encabezado del desglose */}
+                                          {tieneDesglose &&
+                                            !isModificado &&
+                                            isPromoExpanded && (
+                                              <>
+                                                {/* Fila de encabezado del desglose */}
 
-                                              {/* Filas de los sub-productos */}
-                                              {item.productDetailProduct.map((sub: any) => (
-                                                <tr key={sub.id} className="bg-slate-50/30 border-b border-slate-100/60 last:border-b-2 hover:bg-slate-50 transition-colors">
-                                                  {/* Espaciador/Icono */}
-                                                  <td className="px-2 py-2 text-center text-slate-400 text-xs">
-                                                    •
-                                                  </td>
+                                                {/* Filas de los sub-productos */}
+                                                {item.productDetailProduct.map(
+                                                  (sub: any) => (
+                                                    <tr
+                                                      key={sub.id}
+                                                      className="bg-slate-50/30 border-b border-slate-100/60 last:border-b-2 hover:bg-slate-50 transition-colors"
+                                                    >
+                                                      {/* Espaciador/Icono */}
+                                                      <td className="px-2 py-2 text-center text-slate-400 text-xs">
+                                                        •
+                                                      </td>
 
-                                                  {/* Cantidad */}
-                                                  <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-500">
-                                                    {sub.quantity}x
-                                                  </td>
+                                                      {/* Cantidad */}
+                                                      <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-500">
+                                                        {sub.quantity}x
+                                                      </td>
 
-                                                  {/* Nombre y Detalles (Acompañamientos / Notas) */}
-                                                  <td className="px-4 py-2 text-xs" colSpan={2}>
-                                                    <div className="space-y-0.5">
-                                                      <span className="font-medium text-slate-700">{sub.name}</span>
+                                                      {/* Nombre y Detalles (Acompañamientos / Notas) */}
+                                                      <td
+                                                        className="px-4 py-2 text-xs"
+                                                        colSpan={2}
+                                                      >
+                                                        <div className="space-y-0.5">
+                                                          <div className="flex flex-wrap items-center gap-2">
+                                                            <span className="font-medium text-slate-700">
+                                                              {sub.name}
+                                                            </span>
 
-                                                      {/* Acompañamientos */}
-                                                      {sub.ProductFittings && sub.ProductFittings.length > 0 && (
-                                                        <span className="text-[11px] text-slate-400 block">
-                                                          <span className="font-medium text-slate-500">Acompañamientos:</span> {sub.ProductFittings.join(", ")}
-                                                        </span>
-                                                      )}
+                                                            {/* 👇 BADGE ELEGANTE Y COMPACTO AL LADO DEL NOMBRE */}
+                                                            {sub.reasonModification && (
+                                                              <span
+                                                                className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium leading-none max-w-[180px] truncate"
+                                                                title={
+                                                                  sub.reasonModification
+                                                                }
+                                                              >
+                                                                {
+                                                                  sub.reasonModification
+                                                                }
+                                                              </span>
+                                                            )}
+                                                          </div>
+                                                          {/* <span className="font-medium text-slate-700">
+                                                            {sub.name}
+                                                          </span> */}
 
-                                                      {/* Razón de modificación */}
-                                                      {/* {sub.reasonModification && (
+                                                          {/* Acompañamientos */}
+                                                          {sub.ProductFittings &&
+                                                            sub.ProductFittings
+                                                              .length > 0 && (
+                                                              <span className="text-[11px] text-slate-400 block">
+                                                                <span className="font-medium text-slate-500">
+                                                                  Acompañamientos:
+                                                                </span>{" "}
+                                                                {sub.ProductFittings.join(
+                                                                  ", ",
+                                                                )}
+                                                              </span>
+                                                            )}
+
+                                                          {/* Razón de modificación */}
+                                                          {/* {sub.reasonModification && (
                                                         <span className="text-[11px] text-amber-600 block italic">
                                                           <span className="font-medium not-italic text-amber-700">Nota:</span> {sub.reasonModification}
                                                         </span>
                                                       )} */}
-                                                    </div>
-                                                  </td>
-                                                  {/* Precio */}
-                                                  <td className="px-4 py-2 text-right font-mono text-xs text-slate-600">
-                                                    Bs {sub.price}
-                                                  </td>
-                                                </tr>
-                                              ))}
-                                            </>
-                                          )}
+                                                        </div>
+                                                      </td>
+                                                      {/* Precio */}
+                                                      <td className="px-4 py-2 text-right font-mono text-xs text-slate-600">
+                                                        Bs {sub.price}
+                                                      </td>
+                                                    </tr>
+                                                  ),
+                                                )}
+                                              </>
+                                            )}
                                         </Fragment>
                                       );
                                     })}
@@ -569,7 +681,6 @@ export default function SalesPage() {
                               </table>
                             </div>
                           </div>
-
                         </div>
                       </td>
                     </tr>
@@ -588,7 +699,8 @@ export default function SalesPage() {
         {filteredSales.length > 0 && (
           <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-700">
             <div>
-              Mostrando <span className="font-bold">{paginatedSales.length}</span> de{" "}
+              Mostrando{" "}
+              <span className="font-bold">{paginatedSales.length}</span> de{" "}
               <span className="font-bold">{filteredSales.length}</span> ventas
             </div>
             <div className="flex gap-2">
@@ -608,7 +720,9 @@ export default function SalesPage() {
                 variant="outline"
                 size="sm"
                 disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 className="h-8 px-3"
               >
                 Siguiente
