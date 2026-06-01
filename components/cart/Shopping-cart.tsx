@@ -735,7 +735,7 @@ export function ShoppingCart() {
                   value={formProductId}
                   onChange={(id) => setFormProductId(id)}
                   options={productsList.map((p: any) => ({
-                    id: p.productId,
+                    id: p.id,
                     name: p.name,
                     price: p.price,
                   }))}
