@@ -1,9 +1,9 @@
 export interface UserGroup {
- id: number;
- code: string;
+  id: number;
+  code: string;
   name: string;
   description?: string;
-  canAccess?: boolean; // Indica si el grupo tiene permitido acceder o no 🚫/✅
+  canAccess?: boolean;
   tenantId?: number;
   createdAt: string;
   updatedAt: string;

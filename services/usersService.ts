@@ -1,5 +1,9 @@
+import { createClient } from "@supabase/supabase-js";
+import { EnvConfig } from "@/config/env.config";
 import { storage } from "@/lib/storage";
 import { User, Role } from "@/types/user/user";
+
+const supabase = createClient(EnvConfig.supabaseUrl, EnvConfig.supabaseKey);
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -112,6 +116,71 @@ export async function getUserById(id: number): Promise<User | null> {
   return storage.getFromCollection<User>(USERS_KEY, id, "id");
 }
 
+export async function createUserNew(
+  user: Omit<User, "id" | "createdAt" | "updatedAt">,
+): Promise<User> {
+  try {
+    // Manejo de zona horaria de Bolivia (-04:00) para el timestamp manual si deseas mantener consistencia
+    const now = new Date();
+    const boliviaOffset = -4 * 60 * 60 * 1000;
+    const boliviaTime = new Date(
+      now.getTime() + boliviaOffset + now.getTimezoneOffset() * 60 * 1000,
+    );
+    const boliviaIsoString = boliviaTime.toISOString().replace("Z", "-04:00");
+
+    // Insertamos en Supabase omitiendo el ID para que la base de datos lo autogenere
+    const { data, error } = await supabase
+      .from("users")
+      .insert([
+        {
+          username: user.username,
+          password: user.password, // Nota: Se recomienda encriptar antes de enviar
+          fullName: user.fullName,
+          lastname: user.lastname || null,
+          document: user.document,
+          nit: user.nit || null,
+          phone: user.phone,
+          address: user.address,
+          email: user.email,
+          branchId: user.branchId,
+          avatarUrl: user.avatarUrl || null,
+          tenantId: user.tenantId || 1,
+          roleId: user.roleId,
+          role: user.role,
+          groupId: user.groupId, // Columna de relación agregada previamente
+          state: user.state ?? true,
+          createdAt: boliviaIsoString,
+          updatedAt: boliviaIsoString,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as User;
+  } catch (error) {
+    console.error(
+      "Supabase error [createUser], guardando en LocalStorage local de contingencia:",
+      error,
+    );
+
+    // Fallback operativo local en caso de que falle la red o base de datos
+    const existingUsers = storage.getCollection<User>(USERS_KEY);
+    const lastId =
+      existingUsers.length > 0
+        ? Math.max(...existingUsers.map((u) => u.id))
+        : 1;
+    const newUser: User = {
+      ...user,
+      id: lastId + 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    storage.addToCollection(USERS_KEY, newUser, "id");
+    return newUser;
+  }
+}
+
 export async function createUser(
   user: Omit<User, "id" | "createdAt" | "updatedAt">,
 ): Promise<User> {
@@ -119,9 +188,11 @@ export async function createUser(
   const lastId =
     existingUsers.length > 0 ? Math.max(...existingUsers.map((u) => u.id)) : 1;
 
-const now = new Date();
+  const now = new Date();
   const boliviaOffset = -4 * 60 * 60 * 1000; // -4 horas en milisegundos
-  const boliviaTime = new Date(now.getTime() + boliviaOffset + (now.getTimezoneOffset() * 60 * 1000));
+  const boliviaTime = new Date(
+    now.getTime() + boliviaOffset + now.getTimezoneOffset() * 60 * 1000,
+  );
   const boliviaIsoString = boliviaTime.toISOString().replace("Z", "-04:00");
 
   const newUser: User = {
@@ -176,9 +247,7 @@ export async function updateRole(
   updates: Partial<Role>,
 ): Promise<Role | null> {
   const success = storage.updateInCollection(ROLES_KEY, id, updates, "id");
-  return success
-    ? storage.getFromCollection<Role>(ROLES_KEY, id, "id")
-    : null;
+  return success ? storage.getFromCollection<Role>(ROLES_KEY, id, "id") : null;
 }
 
 export async function deleteRole(id: number): Promise<boolean> {
