@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Category } from '@/types/category/category';
-import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/productsSservice';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '@/services/categoriesService';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -61,9 +61,7 @@ export default function CategoriesPage() {
       } else {
         await createCategory({
           ...formData,
-          state: true,               // Valor por defecto para nuevas categorías
-          createdAt: new Date().toISOString(), // Fecha actual
-          updatedAt: new Date().toISOString(), // Fecha actual
+          state: true,
         });
       }
       await loadData();
