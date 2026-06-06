@@ -1,5 +1,83 @@
+// "use client";
+
+// import { ApiService } from "@/services/apiService"; // Ajusta la ruta a tu api.service
+// import { useEffect, useState } from "react";
+
+// // 1. Definimos la interfaz del objeto que devuelve tu API de .NET
+// interface WeatherForecastData {
+//   date: string;
+//   temperatureC: number;
+//   temperatureF: number;
+//   summary: string;
+// }
+
+// export default function DashboardRecap() {
+//   // Estados para manejar el contenido de la API, carga y posibles errores
+//   const [clima, setClima] = useState<WeatherForecastData[] | null>(null);
+//   const [cargando, setCargando] = useState<boolean>(true);
+//   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     const consultarApi = async () => {
+//       setCargando(true);
+//       setErrorMsg(null);
+
+//       // 2. Invocamos al servicio genérico especificando el tipo de dato esperado <WeatherForecastData[]>
+//       const respuesta = await ApiService.get<WeatherForecastData[]>(
+//         "https://localhost:7175/WeatherForecast"
+//       );
+
+//       console.log("respuesta: " + JSON.stringify(respuesta));
+
+//       // 3. Evaluamos la respuesta estructurada por nuestra interfaz RespuestaGenericaDto
+//       if (respuesta.codigo >= 200 && respuesta.codigo < 300) {
+//         setClima(respuesta.contenido); // El contenido está fuertemente tipado automáticamente
+//       } else {
+//         setErrorMsg(respuesta.mensaje);
+//       }
+
+//       setCargando(false);
+//     };
+
+//     consultarApi();
+//   }, []);
+
+//   // Renderizado condicional según el estado de la petición HTTP
+//   if (cargando) return <div>Cargando datos del clima desde .NET...</div>;
+//   if (errorMsg) return <div style={{ color: "red" }}>Error: {errorMsg}</div>;
+
+//   return (
+//     <div style={{ padding: "20px" }}>
+//       <h2>Dashboard - Pronóstico del Tiempo</h2>
+
+//       <table border={1} cellPadding={10} style={{ borderCollapse: "collapse", marginTop: "10px" }}>
+//         <thead>
+//           <tr>
+//             <th>Fecha</th>
+//             <th>Temp (°C)</th>
+//             <th>Temp (°F)</th>
+//             <th>Resumen</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {clima?.map((item, index) => (
+//             <tr key={index}>
+//               <td>{new Date(item.date).toLocaleDateString()}</td>
+//               <td>{item.temperatureC}°C</td>
+//               <td>{item.temperatureF}°F</td>
+//               <td>{item.summary}</td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// }
+
 export default function DashboardRecap() {
-  return <div>Dashboard</div>;
+  return (
+    <div>hola</div>
+  )
 }
 
 

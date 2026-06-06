@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getProducts, getCategories } from "@/services/productsSservice";
+import { getProducts } from "@/services/productsSservice";
+import { getCategories } from "@/services/categoriesService";
 import { Product, Category } from "@/types/index";
 import { ProductGrid } from "@/components/cart/Product-grid";
 import { ShoppingCart } from "@/components/cart/Shopping-cart";

@@ -4,6 +4,8 @@ export type { CartState } from "@/types/cart/cartState";
 export type { Category } from "@/types/category/category";
 
 export type { Product } from "@/types/product/product";
+export type { ProductDetailProduct } from "@/types/product/productDetailProduct";
+export type { ProductIngredientDetail } from "@/types/product/productIngredientDetail";
 
 export type { Sale } from "@/types/sale/sale";
 export type { RespuestaGenericaDto } from "@/types/generic/respuestaGenericaDto";

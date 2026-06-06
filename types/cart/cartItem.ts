@@ -12,7 +12,7 @@ export interface CartItem {
   reasonModification?: string;
   isPromotion?: boolean;
   isCountable?: boolean | false;
-  productFitting?: ProductFittings[];
+  productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;
   createdAt?: string;

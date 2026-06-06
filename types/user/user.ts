@@ -14,8 +14,8 @@ export interface User {
   tenantId?: number;
   roleId?: number;
   role?: string;
-  groupId?: number;
-  groupCode?: string;
+  // groupId?: number;
+  // groupCode?: string;
   createdAt?: string;
   updatedAt?: string;
   state?: boolean;

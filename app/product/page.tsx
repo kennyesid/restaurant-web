@@ -7,8 +7,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-  getCategories,
 } from "@/services/productsSservice";
+import { getCategories } from "@/services/categoriesService";
 import { DraggableFeaturedProducts } from "@/components/draggable-featured-products";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import { Button } from "@/components/ui/button";

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trash2, Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createSale } from "@/services/salesService";
+import { createSale, obtenerSiguienteOrdenDiariaSupabase } from "@/services/salesService";
 import { toast } from "sonner";
 import { CartItem } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
@@ -35,6 +35,9 @@ import { getProducts } from "@/services/productsSservice";
 import { Product } from "@/types";
 import { DropdownSearchable } from "@/components/common";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
+import { ApiService } from "@/services/apiService";
+import { DateUtils } from "@/utils/date-utils";
+import { parameterService } from "@/services/parameterService";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -121,16 +124,6 @@ export function ShoppingCart() {
 
     setIsProcessing(true);
     try {
-      // const saleItems = items.map((item) => ({
-      //   productId: item.productId,
-      //   name: item.name,
-      //   quantity: item.quantity,
-      //   price: item.price,
-      //   categoryId: item.categoryId,
-      //   productDetailProduct: item.productDetailProduct,
-      //   isCountable: item.isCountable
-      // }));
-
       const saleItems = items.flatMap((item) => {
         const mainItem = {
           id: item.id,
@@ -151,11 +144,12 @@ export function ShoppingCart() {
         if (isPromo && item.productDetailProduct) {
           const flatSubProducts = item.productDetailProduct.map((sub: any) => ({
             id: sub.id,
-            name: `${sub.name} ${sub.productFittings && sub.productFittings.length > 0 ? `(${sub.productFittings.join(", ")})` : ""}`,
+            // name: `${sub.name} ${sub.productFittings && sub.productFittings.length > 0 ? `(${sub.productFittings.join(", ")})` : ""}`,
+            name: sub.name,
             quantity: 0,
             price: 0,
             categoryId: sub.categoryId || item.categoryId,
-            productFitting: sub.productFittings || [],
+            productFittings: sub.productFittings ? sub.productFittings : [],
             modifiedSubtotal: sub.modifiedSubtotal,
             reasonModification: sub.reasonModification,
             isCountable: false,
@@ -188,6 +182,8 @@ export function ShoppingCart() {
         }
       }
 
+      const numeroOrdenCalculado = await obtenerSiguienteOrdenDiariaSupabase();
+
       const response = await createSale({
         detail: saleItems,
         paymentType: paymentType as any,
@@ -195,7 +191,7 @@ export function ShoppingCart() {
         userCustomerId: userSendId,
         userName: selectedClient?.fullName ?? "SIN NOMBRE",
         userDocument: selectedClient?.nit ?? "0",
-        orderNumber: 1,
+        orderNumber: numeroOrdenCalculado,
         orderStatus: OrderStatusEnum.EN_COCINA,
         tenantId: 1,
         state: true,
@@ -218,6 +214,72 @@ export function ShoppingCart() {
       if (!isSuccess) {
         return;
       }
+
+      // ========================================================
+      // 💡 NUEVO: CONSUMO DEL ENDPOINT DE IMPRESIÓN (.NET)
+      try {
+        const printPayload = {
+          detail: saleItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            categoryId: item.categoryId,
+            reasonModification: item.reasonModification || "",
+            isCountable: item.isCountable,
+            // Si el item tiene productFitting mapeado como objetos, extraemos solo sus nombres en texto plano
+            productFittings: Array.isArray((item as any).productFittings)
+              ? (item as any).productFittings.map((f: any) => f.name || f)
+              : [],
+            // Mapeamos también los subproductos internos si existieran con la misma lógica
+            productDetailProduct: Array.isArray(item.productDetailProduct)
+              ? item.productDetailProduct.map((sub: any) => ({
+                id: sub.id,
+                productId: sub.productId || 0,
+                name: sub.name,
+                // price: sub.price || 0,
+                price: 0,
+                reasonModification: sub.reasonModification || "",
+                quantity: sub.quantity || 0,
+                productFittings: Array.isArray(sub.productFittings)
+                  ? sub.productFittings.map((f: any) => f.name || f)
+                  : [],
+                state: sub.state ?? true
+              }))
+              : []
+          })),
+          paymentType: paymentType,
+          userId: user?.id || 1,
+          userCustomerId: userSendId,
+          userName: selectedClient?.fullName ?? "SIN NOMBRE",
+          userDocument: selectedClient?.nit ?? "0",
+          orderNumber: numeroOrdenCalculado,
+          orderStatus: 1,
+          tenantId: 1,
+          state: true,
+          total: total,
+          orderType: orderType,
+          shift: getCurrentShift(),
+          createdAt: DateUtils.obtenerFechaBoliviaISO(),
+          updatedAt: DateUtils.obtenerFechaBoliviaISO()
+        };
+
+
+        const urlImpresion = await parameterService.obtenerValorUrl(
+          'API_PRINT_URL',
+          'https://localhost:7175/api/Print/PrintRestaurant'
+        );
+        console.log('api_impresion: ' + urlImpresion);
+        await ApiService.post(urlImpresion, printPayload);
+
+        // console.log("printPayload: ", JSON.stringify(printPayload));
+        // await ApiService.post("https://localhost:7175/api/Print/PrintRestaurant", printPayload);
+
+      } catch (printError) {
+        console.error("Error en el servicio de impresión física:", printError);
+        toast.error("La venta se guardó, pero hubo un problema con la ticketera.");
+      }
+
       dispatch(clearCart());
       setShowSummary(false);
       dispatch(toggleCartSide());
@@ -324,22 +386,17 @@ export function ShoppingCart() {
     if (!selectedProduct) return;
 
     const newSubProduct = {
-      id: Date.now(), // ID temporal
+      // id: Date.now(),
+      id: selectedProduct.id,
       productId: selectedProduct.id,
       name: selectedProduct.name,
-
-      // 👇 PASAMOS LAS NUEVAS VARIABLES MODIFICADAS
       price:
         formModifiedPrice !== "" ? formModifiedPrice : selectedProduct.price,
       reasonModification: formReason.trim() || null,
-      // reasonModification: formReason.trim() || "Cambio de ingrediente",
-
       quantity: formQuantity,
-      productFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)?.name).filter(Boolean),
+      productFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)).filter(Boolean),
       state: true
     };
-
-    // Guardamos en el estado del combo seleccionado
     setSelectedPromo({
       ...selectedPromo,
       productDetailProduct: [
@@ -348,81 +405,59 @@ export function ShoppingCart() {
       ],
     });
 
-    // Limpiamos los inputs del formulario para el siguiente elemento
     setFormProductId("");
     setFormQuantity(1);
     setSelectedFittings([]);
     setFormReason("");
     setFormModifiedPrice("");
+
+    const currentToastBody = {
+      type: ToastType.Successfully,
+      message: "Exito",
+      description: `Se agrego el producto ${selectedProduct.name} al combo`,
+    };
+    toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+
   };
-
-  // 💡 TU NUEVA FUNCIÓN PARA AGREGAR EL PLATO CONFIGURADO AL ARRAY DE LA PROMO
-  // const handleAddProductToPromo = () => {
-  //   if (!formProductId || !selectedPromo) return;
-
-  //   const baseProduct = productsList.find((p: any) => p.productId === formProductId);
-  //   if (!baseProduct) return;
-
-  //   const namesOfFittings = CONSTANT_PRODUCT_FITTING
-  //     .filter(f => selectedFittings.includes(f.id))
-  //     .map(f => f.name || "");
-
-  //   const newSubProduct: ProductDetailProduct = {
-  //     id: Date.now(),
-  //     productId: baseProduct.productId,
-  //     name: baseProduct.name,
-  //     price: baseProduct.price,
-  //     quantity: formQuantity,
-  //     productFittings: namesOfFittings,
-  //     imageUrl: baseProduct.imageUrl,
-  //     state: true
-  //   };
-
-  //   setSelectedPromo({
-  //     ...selectedPromo,
-  //     productDetailProduct: [...(selectedPromo.productDetailProduct || []), newSubProduct]
-  //   });
-
-  //   setFormProductId("");
-  //   setFormQuantity(1);
-  //   setSelectedFittings([]);
-  // };
 
   const promoColumns: Column<any>[] = [
     {
-      header: "Plato",
+      header: "Producto",
       accessor: "name",
     },
     {
-      header: "Cantidad",
+      header: "Cant",
       accessor: (item) => (
         <span className="font-semibold">{item.quantity} u</span>
       ),
     },
     {
-      header: "Guarniciones Seleccionadas",
-      accessor: (item) => (
-        <div className="flex flex-wrap gap-1.5">
-          {item.ProductFittings && item.ProductFittings.length > 0 ? (
-            item.ProductFittings.map((fittingName: string, index: number) => (
-              <span
-                key={index}
-                className="px-2.5 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full text-xs font-medium"
-              >
-                {fittingName}
-              </span>
-            ))
-          ) : (
-            <span className="text-slate-300 italic text-xs">
-              Sin guarnición
-            </span>
-          )}
-        </div>
-      ),
+      header: "Acomp",
+      accessor: (item: any) => {
+        const guarniciones = item.productFittings;
+
+        // Validamos que sea un array y tenga elementos
+        if (Array.isArray(guarniciones) && guarniciones.length > 0) {
+          return (
+            <div className="flex flex-wrap gap-1">
+              {guarniciones.map((g: ProductFittings, index: number) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                >
+                  {g.name}
+                </span>
+              ))}
+            </div>
+          );
+        }
+
+        return <span className="text-slate-400 text-xs italic">Ninguna</span>;
+      },
     },
     {
       /* 👇 NUEVA COLUMNA ADICIONADA */
-      header: "Observación",
+      header: "Obs",
       accessor: (item) => (
         <span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block">
           {item.reasonModification || (
@@ -433,39 +468,16 @@ export function ShoppingCart() {
     },
   ];
 
-  // const promoColumns: Column<any>[] = [
-  //   {
-  //     header: "Plato",
-  //     accessor: "name",
-  //   },
-  //   {
-  //     header: "Precio Ref.",
-  //     accessor: (item) => <span className="text-slate-400">Bs {item.price}</span>,
-  //   },
-  //   {
-  //     header: "Cantidad",
-  //     accessor: (item) => {
-  //       // Buscamos el valor más fresco directamente desde el estado reactivo 'selectedPromo'
-  //       const currentSubItem = selectedPromo?.productDetailProduct?.find(
-  //         (sub: any) => sub.productId === item.productId
-  //       );
+  const handleRemoveProductFromPromo = (itemToDelete: any) => {
+    const updatedSubProducts = (selectedPromo.productDetailProduct || []).filter(
+      (item: any) => item.id !== itemToDelete.id
+    );
 
-  //       return (
-  //         <div className="flex justify-center">
-  //           <input
-  //             type="number"
-  //             min="0"
-  //             value={currentSubItem ? currentSubItem.quantity : item.quantity}
-  //             onChange={(e) =>
-  //               handleUpdatePromoQuantity(item.productId, parseInt(e.target.value) || 0)
-  //             }
-  //             className="w-16 text-center border border-border rounded p-1 bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
-  //           />
-  //         </div>
-  //       );
-  //     },
-  //   },
-  // ];
+    setSelectedPromo({
+      ...selectedPromo,
+      productDetailProduct: updatedSubProducts,
+    });
+  };
 
   return (
     <>
@@ -760,7 +772,7 @@ export function ShoppingCart() {
               {/* 👇 NUEVA CAJITA DE TEXTO PARA EL MOTIVO DEL PLATO AGRUPADO */}
               <div className="flex flex-col gap-1 md:col-span-3">
                 <label className="text-xs text-slate-500 font-medium">
-                  Observación / Motivo del Plato
+                  Observación
                 </label>
                 <input
                   type="text"
@@ -865,7 +877,10 @@ export function ShoppingCart() {
             <GenericDataTable
               columns={promoColumns}
               data={selectedPromo?.productDetailProduct || []}
-              showActions={false}
+              showActions={true}
+              actions={{
+                onDelete: handleRemoveProductFromPromo
+              }}
               rowKey="id"
             />
           </div>
