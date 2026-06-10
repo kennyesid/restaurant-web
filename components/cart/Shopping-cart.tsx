@@ -695,19 +695,24 @@ export function ShoppingCart() {
                 Precio (Bs)
               </label>
               <input
-                type="number"
-                min="0"
+                onFocus={(e) => e.target.select()}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*\.?[0-9]*"
                 value={
                   selectedPromo.modifiedSubtotal ??
                   selectedPromo.price * (selectedPromo.quantity || 1)
                 }
                 onChange={(e) => {
-                  const newPrice = Number(e.target.value) || 0;
+                  const raw = e.target.value.replace(/[^0-9.]/g, '');
+                  const parts = raw.split('.');
+                  let sanitized = parts[0];
+                  if (parts.length > 1) sanitized += '.' + parts.slice(1).join('');
+                  const newPrice = sanitized === '' ? 0 : parseFloat(sanitized);
                   setSelectedPromo({
                     ...selectedPromo,
                     price: selectedPromo.price * (selectedPromo.quantity || 1),
-                    // Forzamos el subtotal modificado para que el carrito general lo reconozca
-                    modifiedSubtotal: newPrice,
+                    modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
                   });
                 }}
                 className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
@@ -732,9 +737,6 @@ export function ShoppingCart() {
               />
             </div>
           </div>
-
-          {/* ------------------- Separador ------------------- */}
-
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
             <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">
               Agregar Plato al Combo
@@ -759,17 +761,19 @@ export function ShoppingCart() {
                   Cantidad
                 </label>
                 <input
-                  type="number"
-                  min="1"
+                  onFocus={(e) => e.target.select()}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formQuantity}
-                  onChange={(e) =>
-                    setFormQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                  }
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    const num = raw === '' ? 1 : Math.max(1, parseInt(raw, 10));
+                    setFormQuantity(num);
+                  }}
                   className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
                 />
               </div>
-
-              {/* 👇 NUEVA CAJITA DE TEXTO PARA EL MOTIVO DEL PLATO AGRUPADO */}
               <div className="flex flex-col gap-1 md:col-span-3">
                 <label className="text-xs text-slate-500 font-medium">
                   Observación
@@ -783,37 +787,6 @@ export function ShoppingCart() {
                 />
               </div>
             </div>
-            {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="md:col-span-2">
-                <DropdownSearchable
-                  label="Seleccionar Producto"
-                  placeholder="-- Elige un plato o escribe para buscar --"
-                  value={formProductId}
-                  onChange={(id) => setFormProductId(id)}
-                  options={productsList.map((p: any) => ({
-                    id: p.productId,
-                    name: p.name,
-                    price: p.price,
-                  }))}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-medium">
-                  Cantidad
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formQuantity}
-                  onChange={(e) =>
-                    setFormQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                  }
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
-                />
-              </div>
-            </div> */}
-
             {/* 3. Selección Interactiva de Guarniciones (Se mantiene igual que antes) */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs text-slate-500 font-medium">
@@ -886,105 +859,6 @@ export function ShoppingCart() {
           </div>
         </ResponsiveModal>
       )}
-
-      {/* NUEVO MODAL: DETALLE Y EDICIÓN DE LA PROMOCIÓN */}
-      {/* {isPromoModalOpen && selectedPromo && (
-        <ResponsiveModal
-          isOpen={isPromoModalOpen}
-          onClose={() => setIsPromoModalOpen(false)}
-          onConfirm={handleSavePromoConfig}
-          title={selectedPromo?.name || "Detalle de Promoción"}
-          subtitle="Personaliza los platos incluidos en este combo"
-          confirmText="Confirmar"
-          size="lg"
-        >
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
-            <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">Agregar Plato al Combo</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="md:col-span-2 flex flex-col gap-1">
-                <div className="md:col-span-2">
-                  <DropdownSearchable
-                    label="Seleccionar Producto"
-                    placeholder="-- Elige un plato o escribe para buscar --"
-                    value={formProductId}
-                    onChange={(id) => setFormProductId(id)}
-                    options={productsList.map((p: any) => ({
-                      id: p.productId,
-                      name: p.name,
-                      price: p.price,
-                    }))}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-medium">Cantidad</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={formQuantity}
-                  onChange={(e) => setFormQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-slate-500 font-medium">Guarniciones de Acompañamiento</label>
-              <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
-                {CONSTANT_PRODUCT_FITTING.map((fitting) => {
-                  const isActive = selectedFittings.includes(fitting.id);
-                  const handleToggleImage = () => {
-                    if (isActive) {
-                      setSelectedFittings(selectedFittings.filter(id => id !== fitting.id));
-                    } else {
-                      setSelectedFittings([...selectedFittings, fitting.id]);
-                    }
-                  };
-                  return (
-                    <button
-                      key={fitting.id}
-                      type="button"
-                      onClick={handleToggleImage}
-                      className="flex-1 min-w-[64px] focus:outline-none transition-transform active:scale-95 flex flex-col items-center gap-1 cursor-pointer"
-                    >
-                      <img
-                        src={fitting.imageUrl ?? ""}
-                        alt={fitting.name}
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
-                          ? "border-yellow-400 opacity-100 scale-105"
-                          : "border-transparent opacity-30 grayscale"
-                          }`}
-                      />
-                      <span className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"
-                        }`}>
-                        {fitting.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="flex justify-end pt-1">
-              <ButtonGeneric
-                variant="confirmYellow"
-                onClick={handleAddProductToPromo}
-                disabled={!formProductId}
-              >
-                + Agregar a la Lista
-              </ButtonGeneric>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">Componentes del Combo actual</p>
-            <GenericDataTable
-              columns={promoColumns}
-              data={selectedPromo?.productDetailProduct || []}
-              showActions={false}
-              rowKey="id"
-            />
-          </div>
-        </ResponsiveModal>
-      )} */}
       {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal
         isOpen={showSummary}

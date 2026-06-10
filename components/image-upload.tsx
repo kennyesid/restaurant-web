@@ -3,6 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { optimizeAndConvertToWebP } from "@/lib/help/imageOptimizer";
 
 interface ImageUploadProps {
   value?: string;
@@ -45,18 +46,22 @@ export function ImageUpload({
     setError(null);
 
     try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setPreview(base64);
-        onChange(base64);
-        setLoading(false);
-      };
-      reader.onerror = () => {
-        setError("Error al leer la imagen");
-        setLoading(false);
-      };
-      reader.readAsDataURL(file);
+      const optimizedBase64 = await optimizeAndConvertToWebP(file, 800, 0.85);
+      setPreview(optimizedBase64);
+      onChange(optimizedBase64);
+      setLoading(false);
+      // const reader = new FileReader();
+      // reader.onload = (e) => {
+      //   const base64 = e.target?.result as string;
+      //   setPreview(base64);
+      //   onChange(base64);
+      //   setLoading(false);
+      // };
+      // reader.onerror = () => {
+      //   setError("Error al leer la imagen");
+      //   setLoading(false);
+      // };
+      // reader.readAsDataURL(file);
     } catch (err) {
       setError("Error al procesar la imagen");
       setLoading(false);
