@@ -111,7 +111,7 @@ export function DraggableFeaturedProducts({
       <div className="flex flex-col w-full gap-2">
         {products.map((product, index) => (
           <Card
-            key={product.productId}
+            key={product.id}
             draggable
             onDragStart={() => handleDragStart(index)}
             onDragOver={handleDragOver}
@@ -161,7 +161,7 @@ export function DraggableFeaturedProducts({
               className="h-8 w-8 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
-                onRemove(product.productId);
+                onRemove(product.id);
               }}
             >
               <Trash2 className="w-4 h-4" />

@@ -54,7 +54,6 @@ export function GenericModal({
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
       setSelectedClient(null);
-      // setIsNewClient(false);
       return;
     }
 
@@ -63,7 +62,6 @@ export function GenericModal({
     const search = query.toLowerCase();
 
     const found = users.find((u: any) => {
-      // Convertimos todo a string por si vienen números del storage
       const fullName = (u.full_name || u.fullName || "")
         .toString()
         .toLowerCase();
@@ -92,33 +90,25 @@ export function GenericModal({
         createdAt: Date.now().toString(),
         updatedAt: Date.now().toString(),
         state: true,
-        // fullName: found.full_name,
         fullName: found.full_name ?? found.fullName ?? "",
         document: "",
         email: found.email,
       });
-
-      // setCustomNit("");
-      // setIsNewClient(false);
     } else {
       setSelectedClient(null);
     }
   };
 
   const handleSaveModifications = () => {
-    // 🟡 Normalizamos items
     const normalizedItems = editableItems.map((item) => {
-      // 👇 CAMBIO: Validamos si existe un subtotal modificado O si se escribió una razón
       if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
         return {
           ...item,
-          // Si no se escribió nada, se guarda el texto por defecto
           reasonModification: item.reasonModification?.trim() || "Venta Modificada",
         };
       }
       return item;
     });
-    // 🔢 Recalcular total
     const newTotal = normalizedItems.reduce(
       (sum, item) =>
         sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -129,11 +119,6 @@ export function GenericModal({
     setEditableItems(normalizedItems);
     setIsEditMode(false);
   };
-
-  // const total = items.reduce(
-  //   (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
-  //   0,
-  // );
 
   useEffect(() => {
     setEditableItems(
@@ -239,10 +224,6 @@ export function GenericModal({
                     {item.quantity}
                   </span>
                 </td>
-                {/* <td className="p-2 text-right">
-                  Bs {(item.price * item.quantity).toLocaleString()}
-                </td> */}
-                {/* MODO NORMAL */}
                 {!isEditMode && (
                   <td className="p-2 text-right">
                     Bs{" "}
@@ -251,8 +232,6 @@ export function GenericModal({
                     ).toLocaleString()}
                   </td>
                 )}
-
-                {/* MODO EDICIÓN */}
                 {isEditMode && (
                   <>
                     <td className="p-2">
@@ -303,10 +282,7 @@ export function GenericModal({
           </tbody>
         </table>
       </div>
-
-      {/* NEW FORMULARIO */}
       <div className="border-t space-y-4 bg-gray-50/50 p-3 rounded-xl border border-slate-100">
-        {/* 🍔 SELECCIÓN DE TIPO DE ORDEN (Responsive & Touch Friendly) */}
         <div className="space-y-2">
           <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
             Tipo de Orden
@@ -336,8 +312,6 @@ export function GenericModal({
         </div>
 
         <hr className="border-slate-200/60" />
-
-        {/* 📄 SECCIÓN DE FACTURACIÓN (Siempre visible) */}
         <div className="space-y-3">
           <div className="p-3 bg-yellow-50/60 border rounded-xl border-yellow-200/70 space-y-3">
             <p className="text-xs font-bold text-yellow-800 uppercase tracking-wide">

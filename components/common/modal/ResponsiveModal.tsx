@@ -8,23 +8,16 @@ export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
 export interface ResponsiveModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void; // 👈 Callback para el botón Aceptar
+  onConfirm: () => void;
   title: string;
   subtitle?: string;
   size?: ModalSize;
   children: React.ReactNode;
-  confirmText?: string; // Opcional por si quieres cambiar "Confirmar" por otra palabra
-  cancelText?: string; // Opcional por si quieres cambiar "Cancelar"
-  isProcessing?: boolean; // Para deshabilitar botones si está cargando
+  confirmText?: string;
+  cancelText?: string;
+  isProcessing?: boolean;
 }
 
-// const sizeClasses: Record<ModalSize, string> = {
-//   sm: "max-w-sm w-full",
-//   md: "max-w-md w-full",
-//   lg: "max-w-lg w-full",
-//   xl: "max-w-2xl w-full",
-//   full: "max-w-[95vw] h-[90vh] w-full",
-// };
 const sizeClasses: Record<ModalSize, string> = {
   sm: "max-w-sm w-full max-h-[85vh]",
   md: "max-w-md w-full max-h-[85vh]",
@@ -54,15 +47,15 @@ export function ResponsiveModal({
         onClick={onClose}
       />
       <div
-        className={`bg-white rounded-xl shadow-2xl border border-border overflow-hidden flex flex-col relative z-10 transform transition-all animate-in zoom-in-95 duration-200 ${sizeClasses[size]}`}
+        className={`bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col relative z-10 transform transition-all animate-in zoom-in-95 duration-200 ${sizeClasses[size]}`}
       >
-        <div className="p-4 bg-[#052A3D] text-white flex justify-between items-start flex-shrink-0">
+        <div className="p-4 bg-[#052A3D] text-white flex justify-between items-start flex-shrink-0 rounded-t-xl">
           <div className="space-y-0.5">
             <h3 className="font-bold text-base tracking-wide leading-none">
               {title}
             </h3>
             {subtitle && (
-              <p className="text-xs text-yellow-400 font-medium opacity-90">
+              <p className="text-xs text-gray-400 font-medium opacity-90">
                 {subtitle}
               </p>
             )}

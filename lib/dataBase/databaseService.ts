@@ -122,3 +122,36 @@ export async function uploadProductImage(file: File): Promise<string | null> {
     return null;
   }
 }
+
+export async function uploadImageToSupabase(
+  base64String: string,
+  folder: string = 'products',
+  fileName?: string
+): Promise<string> {
+  // Convertir base64 a Blob
+  const base64Data = base64String.split(',')[1];
+  const mimeType = base64String.match(/data:(image\/\w+);/)?.[1] || 'image/jpeg';
+  const blob = Buffer.from(base64Data, 'base64');
+
+  // Generar nombre único si no se proporciona
+  const finalFileName = fileName || `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${mimeType.split('/')[1]}`;
+  const filePath = `${folder}/${finalFileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('product-images') // Reemplaza con el nombre de tu bucket
+    .upload(filePath, blob, {
+      contentType: mimeType,
+      cacheControl: '3600',
+      upsert: true,
+    });
+
+  if (error) {
+    throw new Error(`Error al subir imagen: ${error.message}`);
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('product-images')
+    .getPublicUrl(filePath);
+
+  return publicUrlData.publicUrl;
+}

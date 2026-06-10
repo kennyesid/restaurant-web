@@ -1,4 +1,4 @@
-import { DatabaseService } from '@/lib/dataBase/databaseService';
+import { DatabaseService, uploadImageToSupabase } from '@/lib/dataBase/databaseService';
 import { Product, ProductIngredientDetail, ProductDetailProduct } from '@/types';
 
 // 1. Instanciamos los servicios genéricos para cada tabla involucrada
@@ -68,11 +68,22 @@ export async function getProductsByCategory(categoryId: number): Promise<Product
 }
 
 // Crear un nuevo producto guardando en cascada lógica
-export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>, imageBase64?: string): Promise<Product> {
+  try{
+let imageUrl = product.imageUrl || '';
+
+  if (imageBase64) {
+    try {
+      imageUrl = await uploadImageToSupabase(imageBase64, 'products');
+    } catch (error) {
+      console.error('Error subiendo imagen:', error);
+      throw new Error('No se pudo guardar la imagen');
+    }
+  }
+
   const { productIngredientDetail, productDetailProduct, ...mainProduct } = product;
 
-  // 1. Guardamos los datos base del producto en la tabla principal
-  const newProduct = await productService.create(mainProduct);
+  const newProduct = await productService.create({ ...mainProduct, imageUrl });
 
   let insertedIngredients: ProductIngredientDetail[] = [];
   let insertedDetails: ProductDetailProduct[] = [];
@@ -105,21 +116,67 @@ export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 
     productIngredientDetail: insertedIngredients,
     productDetailProduct: insertedDetails
   };
+  }catch(exception){
+    console.error('Error creando producto:', exception);
+    throw new Error('No se pudo crear el producto');
+  }
 }
+
+// export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> {
+//   const { productIngredientDetail, productDetailProduct, ...mainProduct } = product;
+
+//   // 1. Guardamos los datos base del producto en la tabla principal
+//   const newProduct = await productService.create(mainProduct);
+
+//   let insertedIngredients: ProductIngredientDetail[] = [];
+//   let insertedDetails: ProductDetailProduct[] = [];
+
+//   // 2. Si vienen ingredientes, les inyectamos el nuevo productId y los creamos secuencialmente
+//   if (productIngredientDetail && productIngredientDetail.length > 0) {
+//     for (const ingredient of productIngredientDetail) {
+//       const savedIngredient = await ingredientService.create({
+//         ...ingredient,
+//         productId: newProduct.id
+//       });
+//       insertedIngredients.push(savedIngredient);
+//     }
+//   }
+
+//   // 3. Si vienen subproductos/detalles, hacemos exactamente lo mismo
+//   if (productDetailProduct && productDetailProduct.length > 0) {
+//     for (const detail of productDetailProduct) {
+//       const savedDetail = await detailProductService.create({
+//         ...detail,
+//         productId: newProduct.id
+//       });
+//       insertedDetails.push(savedDetail);
+//     }
+//   }
+
+//   // Retornamos el objeto unificado tal como lo requiere el tipado original
+//   return {
+//     ...newProduct,
+//     productIngredientDetail: insertedIngredients,
+//     productDetailProduct: insertedDetails
+//   };
+// }
 
 // Actualizar un producto y sus propiedades
-export async function updateProduct(id: number, updates: Partial<Product>): Promise<Product | null> {
-  const { productIngredientDetail, productDetailProduct, id: _, createdAt, updatedAt, ...mainUpdates } = updates;
-
-  // Actualizamos el producto en la tabla base
-  const updatedProduct = await productService.update('id', id, mainUpdates);
-  if (!updatedProduct) return null;
-
-  // Nota: Si en el futuro necesitas actualizar los arreglos internos dinámicamente desde aquí,
-  // puedes usar los métodos del ingredientService y detailProductService usando el productId de manera independiente.
-
-  return getProductById(id);
+export async function updateProduct(
+  id: number,
+  updates: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<Product | null> {
+  // Si no necesitas manejar ingredientes/subproductos por ahora, puedes hacer:
+  return productService.update('id', id, updates);
 }
+// export async function updateProduct(id: number, updates: Partial<Product>): Promise<Product | null> {
+//   const { productIngredientDetail, productDetailProduct, id: _, createdAt, updatedAt, ...mainUpdates } = updates;
+
+//   const updatedProduct = await productService.update('id', id, mainUpdates);
+//   if (!updatedProduct) return null;
+
+//   return getProductById(id);
+// }
 
 // Eliminar un producto por completo
 export async function deleteProduct(id: number): Promise<boolean> {

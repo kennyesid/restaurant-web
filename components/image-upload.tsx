@@ -75,11 +75,10 @@ export function ImageUpload({
     <div className="flex flex-col gap-4">
       <div
         onClick={() => !disabled && fileInputRef.current?.click()}
-        className={`relative border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer transition-colors ${
-          disabled
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:border-primary hover:bg-muted"
-        }`}
+        className={`relative border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer transition-colors ${disabled
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:border-primary hover:bg-muted"
+          }`}
       >
         <input
           ref={fileInputRef}
@@ -105,7 +104,7 @@ export function ImageUpload({
           <div className="flex flex-col items-center gap-2">
             <ImageIcon className="w-12 h-12 text-muted-foreground" />
             <p className="text-sm font-medium">
-              Arrastra una imagen aquí o haz clic para seleccionar
+              Haz clic para seleccionar
             </p>
             <p className="text-xs text-muted-foreground">
               Máximo {maxSize}MB • Formatos: PNG, JPG, GIF
