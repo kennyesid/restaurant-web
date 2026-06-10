@@ -16,6 +16,7 @@ async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = t
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
+      .eq('state', true) 
       .order(orderBy, { ascending });
 
 
