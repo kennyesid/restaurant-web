@@ -308,7 +308,8 @@ export default function ProductsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex flex-row gap-2">
+          {/* 💡 REEMPLAZA ESTA LÍNEA */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap md:flex-nowrap md:overflow-x-auto gap-2 pb-2 md:scrollbar-none">
             <ButtonGeneric
               variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
@@ -392,97 +393,99 @@ export default function ProductsPage() {
         cancelText="Cancelar"
         isProcessing={false} // Puedes enlazarlo aquí a un estado local 'isSaving' si lo requieres en el futuro
       >
-        {/* Contenedor en dos columnas adaptativo para el formulario */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="max-h-[calc(100vh-220px)] md:max-h-none overflow-y-auto px-1 pb-2">
+          {/* Contenedor en dos columnas adaptativo para el formulario */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 
-          {/* COLUMNA IZQUIERDA (Atributos principales de identificación y costos) */}
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Nombre *</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Nombre del producto"
-                className={errors.name ? "border-red-500" : ""}
-              />
-            </div>
+            {/* COLUMNA IZQUIERDA (Atributos principales de identificación y costos) */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Nombre *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Nombre del producto"
+                  className={errors.name ? "border-red-500" : ""}
+                />
+              </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Descripción *</label>
-              <Input
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Descripción o ingredientes..."
-                className={errors.description ? "border-red-500" : ""}
-              />
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Descripción *</label>
+                <Input
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Descripción o ingredientes..."
+                  className={errors.description ? "border-red-500" : ""}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Categoría *</label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: Number(e.target.value) })}
+                  className={`w-full border ${errors.categoryId ? "border-red-500" : "border-input"} rounded-lg h-10 px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring`}
+                >
+                  <option value={0}>Selecciona una categoría</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Categoría *</label>
-              <select
-                value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: Number(e.target.value) })}
-                className={`w-full border ${errors.categoryId ? "border-red-500" : "border-input"} rounded-lg h-10 px-3 py-2 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring`}
-              >
-                <option value={0}>Selecciona una categoría</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Leyenda del Ticket</label>
-              <Input
-                value={formData.legend}
-                onChange={(e) => setFormData({ ...formData, legend: e.target.value })}
-                placeholder="Ej: Con papas fritas y gaseosa"
-              />
-            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Leyenda del Ticket</label>
+                <Input
+                  value={formData.legend}
+                  onChange={(e) => setFormData({ ...formData, legend: e.target.value })}
+                  placeholder="Ej: Con papas fritas y gaseosa"
+                />
+              </div>
 
-            <div>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">Precio *</label>
-              <Input
-                type="number"
-                value={formData.price || ""}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                placeholder="0"
-                className={errors.price ? "border-red-500" : ""}
-              />
-            </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Precio *</label>
+                <Input
+                  type="number"
+                  value={formData.price || ""}
+                  onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                  placeholder="0"
+                  className={errors.price ? "border-red-500" : ""}
+                />
+              </div>
 
-            <div className="">
-              <label className="text-xs font-semibold text-slate-600 block mb-2">
-                ¿Es Promoción / Combo?
-              </label>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={formData.isPromotion}
-                onClick={() => setFormData({ ...formData, isPromotion: !formData.isPromotion })}
-                className={`
+              <div className="">
+                <label className="text-xs font-semibold text-slate-600 block mb-2">
+                  ¿Es Promoción / Combo?
+                </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.isPromotion}
+                  onClick={() => setFormData({ ...formData, isPromotion: !formData.isPromotion })}
+                  className={`
                             relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500
                             ${formData.isPromotion ? 'bg-yellow-500' : 'bg-gray-300'}
                           `}
-              >
-                <span
-                  className={`
+                >
+                  <span
+                    className={`
                             inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform 
                             ${formData.isPromotion ? 'translate-x-6' : 'translate-x-0.5'}
                           `}
-                />
-              </button>
+                  />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-600 block">Imagen del Producto</label>
-          <ImageUpload
-            value={formData.imageUrl}
-            onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
-          />
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-600 block">Imagen del Producto</label>
+            <ImageUpload
+              value={formData.imageUrl}
+              onChange={(imageUrl) => setFormData({ ...formData, imageUrl })}
+            />
+          </div>
         </div>
       </ResponsiveModal>
     </div>

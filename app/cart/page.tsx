@@ -26,10 +26,8 @@ export default function CartPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const isCartSideOpen = useAppSelector((state) => state.cart.isCartOpen);
-  // const [isCartSideOpen, setIsCartSideOpen] = useState(false);
 
   useEffect(() => {
-    // Cuando el componente se monta, forzamos a que el sidebar se cierre
     dispatch(setToggleCartFalse());
   }, [dispatch]);
 
@@ -99,8 +97,7 @@ export default function CartPage() {
             isCartSideOpen ? "lg:col-span-2" : "lg:col-span-1",
           )}
         >
-          {/* TUS BOTONES RESPONSIVE DE CATEGORÍAS */}
-          <div className="flex flex-wrap md:flex-nowrap md:overflow-x-auto gap-2 pb-2 md:scrollbar-none">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap md:flex-nowrap md:overflow-x-auto gap-2 pb-2 md:scrollbar-none">
             <ButtonGeneric
               variant={selectedCategory === null ? "red" : "primaryRed"}
               onClick={() => handleCategoryFilter(null)}
@@ -119,31 +116,21 @@ export default function CartPage() {
               </ButtonGeneric>
             ))}
           </div>
-
-          {/* GRID DE PRODUCTOS (Se expandirá solo automáticamente) */}
           <ProductGrid products={filteredProducts} />
         </div>
-
-        {/* 3. CONTENEDOR DEL CARRITO (OCULTABLE) */}
         {isCartSideOpen && (
           <>
-            {/* OVERLAY / FONDO OSCURO (Solo visible en móviles/tablets) */}
             <div
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200"
               onClick={() => dispatch(toggleCartSide())}
             />
-
-            {/* CONTENEDOR DEL CARRITO */}
             <div
               className={cn(
-                // Comportamiento en Móvil (Modal flotante tipo Drawer)
                 "fixed top-0 right-0 h-full w-full max-w-md bg-card z-50 p-4 shadow-2xl flex flex-col justify-between",
                 "animate-in slide-in-from-right duration-300",
-                // Comportamiento en Computadora (Inserto estable en el Grid)
                 "lg:static lg:h-auto lg:w-auto lg:max-w-none lg:z-0 lg:p-0 lg:shadow-none lg:bg-transparent lg:col-span-1",
               )}
             >
-              {/* Encabezado del Carrito exclusivo para la vista modal móvil */}
               <div className="flex items-center justify-between pb-2 mb-2 border-b lg:hidden">
                 <span className="font-bold text-lg text-rest-primary">
                   Pedido Actual
@@ -156,69 +143,13 @@ export default function CartPage() {
                 </button>
               </div>
 
-              {/* Contenedor del componente interno con scroll seguro */}
               <div className="h-[calc(100vh-120px)] lg:h-[calc(100vh-170px)] overflow-y-auto border rounded-xl shadow-sm bg-card">
                 <ShoppingCart />
               </div>
             </div>
           </>
         )}
-        {/* {isCartSideOpen && (
-          <div className="lg:col-span-1 animate-in fade-in slide-in-from-right-5 duration-200">
-            <div className="h-[calc(100vh-170px)] overflow-y-auto border rounded-xl shadow-sm bg-card">
-              <ShoppingCart />
-            </div>
-          </div>
-        )} */}
       </div>
-      {/* <ButtonGeneric
-        variant="primaryRed"
-        onClick={() => handleDebuugTest()}
-      >
-        joder
-      </ButtonGeneric> */}
     </div>
   );
-}
-
-{
-  /* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex flex-wrap md:flex-nowrap md:overflow-x-auto gap-2 pb-2 md:scrollbar-none">
-            <ButtonGeneric
-              variant={selectedCategory === null ? "red" : "primaryRed"}
-              onClick={() => handleCategoryFilter(null)}
-            >
-              Favoritos
-            </ButtonGeneric>
-            {categories.map((category) => (
-              <ButtonGeneric
-                key={category.id}
-                variant={
-                  selectedCategory === category.id ? "red" : "primaryRed"
-                }
-                onClick={() => handleCategoryFilter(category.id)}
-              >
-                {category.name}
-              </ButtonGeneric>
-            ))}
-          </div>
-          <ProductGrid products={filteredProducts} />
-        </div>
-        <div className="lg:col-span-1">
-          <div className="h-[calc(100vh-170px)] overflow-y-auto border rounded-xl shadow-sm">
-            <ShoppingCart />
-          </div>
-        </div>
-      </div> */
-}
-
-{
-  /* RESPONSIVE */
-}
-{
-  /* <div className="flex flex-row gap-2"> */
-}
-{
-  /* <div className="flex flex-nowrap overflow-x-auto md:flex-wrap md:overflow-x-visible gap-2 pb-2 scrollbar-none"> */
 }

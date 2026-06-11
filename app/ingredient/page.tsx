@@ -5,12 +5,11 @@ import { Plus, Edit, Trash2, Search, SlidersHorizontal, X } from "lucide-react";
 import { Ingredient, IngredientCategories } from "@/types";
 import {
     getIngredients,
-    getCategories,
     createIngredient,
     updateIngredient,
     deleteIngredient,
 } from "@/services/ingredientsService";
-
+import { getCategories } from "@/services/categoriesService";
 // Tipado básico para proveedores en el dropdown
 interface Supplier {
     id: number;
@@ -50,6 +49,7 @@ export default function IngredientsABM() {
         description: "",
         ingredientCategoriesId: 1,
         supplierId: 0, // 0 = Ninguno
+        groupId: 1,
         quantity: 0,
         price: 0,
         unitType: "kg",
@@ -109,6 +109,7 @@ export default function IngredientsABM() {
                 description: ingredient.description,
                 ingredientCategoriesId: ingredient.ingredientCategoriesId,
                 supplierId: ingredient.supplierId,
+                groupId: ingredient.groupId,
                 quantity: ingredient.quantity,
                 price: ingredient.price,
                 unitType: ingredient.unitType,

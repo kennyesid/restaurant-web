@@ -41,7 +41,6 @@ import { parameterService } from "@/services/parameterService";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
-  // const { user } = useAppSelector((state) => state.auth);
 
   const [showSummary, setShowSummary] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -50,22 +49,12 @@ export function ShoppingCart() {
   const [orderType, setOrderType] = useState<OrderTypeEnum>(
     OrderTypeEnum.CONSUMO_LOCAL,
   );
-
-  // REAZON INIT
   const [formReason, setFormReason] = useState("");
   const [formModifiedPrice, setFormModifiedPrice] = useState<number | "">("");
-  // REAZON FIN
-
-  // CHANGE FORM
-  // Estados locales para el mini-formulario dentro del modal
   const [formProductId, setFormProductId] = useState<number | "">("");
   const [formQuantity, setFormQuantity] = useState<number>(1);
-  const [selectedFittings, setSelectedFittings] = useState<number[]>([]); // Guarda los IDs [1, 2, 3] activos
+  const [selectedFittings, setSelectedFittings] = useState<number[]>([]);
 
-  // const { items, paymentType } = useAppSelector((state) => state.cart) as {
-  //   items: CartItem[];
-  //   paymentType: string;
-  // };
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
     paymentType: state.cart.paymentType,

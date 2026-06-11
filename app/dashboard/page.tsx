@@ -1,4 +1,7 @@
-// "use client";
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { createIngredient } from "@/services/ingredientsService";
 
 // import { ApiService } from "@/services/apiService"; // Ajusta la ruta a tu api.service
 // import { useEffect, useState } from "react";
@@ -75,8 +78,34 @@
 // }
 
 export default function DashboardRecap() {
+
+  const registrarNuevoIngrediente = async () => {
+    try {
+      const nuevoIngrediente = await createIngredient({
+        ingredientCategoriesId: 1, // bigint se pasa como number en JS/TS
+        supplierId: 5,
+        groupId: 2,
+        name: 'Pechuga de Pollo Desosada',
+        description: 'Filete de pechuga de pollo fresco para milanesas y hamburguesas',
+        quantity: 10.00,
+        price: 180.50,
+        unitType: 'Kilogramos',
+        currentStock: 45.50,
+        quantitypiecesOfChicken: 24, // Campo opcional mapeado
+        state: true
+      });
+
+      console.log('Ingrediente guardado con éxito en Supabase:', nuevoIngrediente);
+    } catch (error) {
+      console.error('Error al guardar desde el cliente:', error);
+    }
+  };
+
   return (
-    <div>hola</div>
+    <div className="container mx-auto p-4">
+      <h1>Dashboard</h1>
+      <Button onClick={registrarNuevoIngrediente}>Registrar Nuevo Ingrediente</Button>
+    </div>
   )
 }
 
