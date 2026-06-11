@@ -31,11 +31,12 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
     const fitingMasterList = await ProductFittingsService.getAll();
 
     // 2. Traemos todas las ventas con su detalle plano de la base de datos
+
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
         *,
-        detail:sales_details!saleId (*)
+        detail:sales_details(*)
       `)
       .eq("state", true)
       .order("createdAt", { ascending: false });
@@ -57,6 +58,8 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
           productFitting: updatedProductFitting // Inyectamos el array de objetos completos
         };
       });
+
+console.log('formattedDetail', {...sale, detail: formattedDetail})
 
       return {
         ...sale,
@@ -281,27 +284,25 @@ export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
 
 export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
   try {
-    // 1. Consultamos de manera ultra optimizada el ÚLTIMO registro insertado en la tabla de ventas
     const { data, error } = await supabase
-      .from('sales') // ⚠️ Reemplaza 'Sales' por el nombre exacto de tu tabla en Supabase si cambia
-      .select('orderNumber, createdAt') // Traemos solo las columnas que nos interesan
-      .order('id', { ascending: false }) // Ordenamos por ID descendente para capturar el último
-      .limit(1); // Forzamos a traer solo 1 fila
+      .from('sales') 
+      .select('orderNumber, createdAt') 
+      .order('id', { ascending: false }) 
+      .limit(1); 
+
+    console.log('data', data);
+    console.log('error', error);
 
     if (error) throw error;
 
-    // 2. Obtener la fecha de hoy en formato 'yyyy-MM-dd' usando la clase utilitaria de Bolivia
     const fechaActualBolivia = DateUtils.obtenerFechaBoliviaISO().substring(0, 10);
 
-    // 3. Si la tabla está completamente vacía (primer pedido histórico de la tienda)
     if (!data || data.length === 0) {
       return 1;
     }
 
     const ultimaVenta = data[0];
 
-    // 4. Extraer la fecha del último pedido (esperamos un timestamp de Postgres)
-    // Extraemos solo los primeros 10 caracteres 'yyyy-MM-dd'
     const fechaUltimaVenta = ultimaVenta.createdAt 
       ? ultimaVenta.createdAt.substring(0, 10) 
       : "";

@@ -2,6 +2,7 @@ export interface Ingredient {
   id: number;
   ingredientCategoriesId: number;
   supplierId: number;
+  groupId: number;
   name: string;
   description: string;
   quantity: number;

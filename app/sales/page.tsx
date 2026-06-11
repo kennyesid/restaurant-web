@@ -24,7 +24,8 @@ import React from "react";
 export default function SalesPage() {
   const today = new Date().toISOString().split("T")[0];
 
-  const [sales, setSales] = useState<any[]>([]); // Cambiado temporalmente a any para soportar la nueva estructura extendida
+  // const [sales, setSales] = useState<any[]>([]); 
+  const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -306,12 +307,12 @@ export default function SalesPage() {
                       <button
                         onClick={() =>
                           setExpandedRow(
-                            expandedRow === sale.saleId ? null : sale.saleId,
+                            expandedRow === sale.id ? null : sale.id,
                           )
                         }
                         className="p-1 rounded hover:bg-muted transition text-lg font-bold text-[#0b3f5c]"
                       >
-                        {expandedRow === sale.saleId ? "▾" : "▸"}
+                        {expandedRow === sale.id ? "▾" : "▸"}
                       </button>
                     </td>
                     <td className="px-6 py-2">
@@ -320,7 +321,7 @@ export default function SalesPage() {
                           #{sale.orderNumber}
                         </span>
                         <span className="text-[10px] text-muted-foreground font-mono">
-                          ID Venta: {sale.saleId}
+                          ID Venta: {sale.id}
                         </span>
                       </div>
                     </td>
@@ -364,11 +365,10 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${
-                          sale.orderType === "CONSUMO LOCAL"
-                            ? "bg-amber-50 text-amber-800 border border-amber-200"
-                            : "bg-teal-50 text-teal-800 border border-teal-200"
-                        }`}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${sale.orderType === "CONSUMO LOCAL"
+                          ? "bg-amber-50 text-amber-800 border border-amber-200"
+                          : "bg-teal-50 text-teal-800 border border-teal-200"
+                          }`}
                       >
                         {sale.orderType === "CONSUMO LOCAL" ? (
                           <Utensils size={10} />
@@ -391,13 +391,12 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
-                          sale.paymentType === "cash"
-                            ? "bg-green-100 text-green-700"
-                            : sale.paymentType === "qr"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-purple-100 text-purple-700"
-                        }`}
+                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
+                          ? "bg-green-100 text-green-700"
+                          : sale.paymentType === "qr"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-purple-100 text-purple-700"
+                          }`}
                       >
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
@@ -417,7 +416,7 @@ export default function SalesPage() {
                         </button> */}
                         <button
                           onClick={() =>
-                            deleteSale(sale.saleId).then(loadSales)
+                            deleteSale(sale.id).then(loadSales)
                           }
                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                           title="Eliminar"
@@ -429,7 +428,7 @@ export default function SalesPage() {
                   </tr>
 
                   {/* SECCIÓN EXPANDIBLE REDISEÑADA AL DETALLE */}
-                  {expandedRow === sale.saleId && (
+                  {expandedRow === sale.id && (
                     <tr className="bg-slate-50/70">
                       <td colSpan={9} className="px-6 py-4">
                         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-1">
@@ -439,9 +438,6 @@ export default function SalesPage() {
                               <h3 className="font-black text-sm text-[#052A3D] uppercase tracking-wide">
                                 Detalle — Pedido #{sale.orderNumber}
                               </h3>
-                              {/* <p className="text-xs text-muted-foreground font-medium">
-                                Entorno Multi-tenant ID: <span className="font-mono">{sale.tenantId}</span> | Estado del Registro: {sale.state ? "Activo" : "Inactivo"}
-                              </p> */}
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-gray-400 font-medium">
@@ -458,7 +454,6 @@ export default function SalesPage() {
                               <table className="min-w-full divide-y divide-slate-200 text-sm">
                                 <thead className="bg-slate-50/70">
                                   <tr>
-                                    {/* Nueva columna para el botón de expandir la promo interna */}
                                     <th
                                       scope="col"
                                       className="w-10 px-2 py-3 text-center"
@@ -497,11 +492,9 @@ export default function SalesPage() {
                                         item.isPromocion ||
                                         (item.productDetailProduct &&
                                           item.productDetailProduct.length > 0);
-
-                                      // Verificamos si este item específico está expandido
                                       const isPromoExpanded =
                                         !!expandedPromos[
-                                          `${sale.saleId}-${itemIdx}`
+                                        `${sale.id}-${itemIdx}`
                                         ];
 
                                       return (
@@ -512,12 +505,12 @@ export default function SalesPage() {
                                             {/* Celda del trigger interno */}
                                             <td className="px-2 py-3.5 text-center whitespace-nowrap">
                                               {tieneDesglose &&
-                                              !isModificado ? (
+                                                !isModificado ? (
                                                 <button
                                                   type="button"
                                                   onClick={() =>
                                                     togglePromo(
-                                                      sale.saleId,
+                                                      sale.id,
                                                       itemIdx,
                                                     )
                                                   }
@@ -561,7 +554,7 @@ export default function SalesPage() {
 
                                                 {item.productFitting &&
                                                   item.productFitting.length >
-                                                    0 && (
+                                                  0 && (
                                                     <p className="text-xs text-slate-400">
                                                       <span className="font-medium text-slate-500">
                                                         Acompañamientos:
