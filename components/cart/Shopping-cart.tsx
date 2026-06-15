@@ -261,7 +261,11 @@ export function ShoppingCart() {
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
         console.log("api_impresion: " + urlImpresion);
-        await ApiService.post(urlImpresion, printPayload);
+        // await ApiService.post(urlImpresion, printPayload);
+        await ApiService.post(
+          "http://localhost/restauranteapi/api/Print/PrintRestaurant",
+          printPayload,
+        );
 
         // console.log("printPayload: ", JSON.stringify(printPayload));
         // await ApiService.post("https://localhost:7175/api/Print/PrintRestaurant", printPayload);
