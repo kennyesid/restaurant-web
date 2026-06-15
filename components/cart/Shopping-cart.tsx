@@ -13,7 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Trash2, Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createSale, obtenerSiguienteOrdenDiariaSupabase } from "@/services/salesService";
+import {
+  createSale,
+  obtenerSiguienteOrdenDiariaSupabase,
+} from "@/services/salesService";
 import { toast } from "sonner";
 import { CartItem } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
@@ -223,19 +226,19 @@ export function ShoppingCart() {
             // Mapeamos también los subproductos internos si existieran con la misma lógica
             productDetailProduct: Array.isArray(item.productDetailProduct)
               ? item.productDetailProduct.map((sub: any) => ({
-                id: sub.id,
-                productId: sub.productId || 0,
-                name: sub.name,
-                // price: sub.price || 0,
-                price: 0,
-                reasonModification: sub.reasonModification || "",
-                quantity: sub.quantity || 0,
-                productFittings: Array.isArray(sub.productFittings)
-                  ? sub.productFittings.map((f: any) => f.name || f)
-                  : [],
-                state: sub.state ?? true
-              }))
-              : []
+                  id: sub.id,
+                  productId: sub.productId || 0,
+                  name: sub.name,
+                  // price: sub.price || 0,
+                  price: 0,
+                  reasonModification: sub.reasonModification || "",
+                  quantity: sub.quantity || 0,
+                  productFittings: Array.isArray(sub.productFittings)
+                    ? sub.productFittings.map((f: any) => f.name || f)
+                    : [],
+                  state: sub.state ?? true,
+                }))
+              : [],
           })),
           paymentType: paymentType,
           userId: user?.id || 1,
@@ -250,23 +253,23 @@ export function ShoppingCart() {
           orderType: orderType,
           shift: getCurrentShift(),
           createdAt: DateUtils.obtenerFechaBoliviaISO(),
-          updatedAt: DateUtils.obtenerFechaBoliviaISO()
+          updatedAt: DateUtils.obtenerFechaBoliviaISO(),
         };
 
-
         const urlImpresion = await parameterService.obtenerValorUrl(
-          'API_PRINT_URL',
-          'https://localhost:7175/api/Print/PrintRestaurant'
+          "API_PRINT_URL",
+          "https://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        console.log('api_impresion: ' + urlImpresion);
+        console.log("api_impresion: " + urlImpresion);
         await ApiService.post(urlImpresion, printPayload);
 
         // console.log("printPayload: ", JSON.stringify(printPayload));
         // await ApiService.post("https://localhost:7175/api/Print/PrintRestaurant", printPayload);
-
       } catch (printError) {
         console.error("Error en el servicio de impresión física:", printError);
-        toast.error("La venta se guardó, pero hubo un problema con la ticketera.");
+        toast.error(
+          "La venta se guardó, pero hubo un problema con la ticketera.",
+        );
       }
 
       dispatch(clearCart());
@@ -320,7 +323,7 @@ export function ShoppingCart() {
     };
 
     const updatedCartItems = items.map((cartItem) =>
-      cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem
+      cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem,
     );
 
     handleChangeSubTotal(updatedCartItems); // Notifica el cambio al estado global/padre
@@ -371,7 +374,9 @@ export function ShoppingCart() {
   };
 
   const handleAddProductToPromo = () => {
-    const selectedProduct = productsList.find((p: any) => p.id === formProductId);
+    const selectedProduct = productsList.find(
+      (p: any) => p.id === formProductId,
+    );
     if (!selectedProduct) return;
 
     const newSubProduct = {
@@ -383,8 +388,10 @@ export function ShoppingCart() {
         formModifiedPrice !== "" ? formModifiedPrice : selectedProduct.price,
       reasonModification: formReason.trim() || null,
       quantity: formQuantity,
-      productFittings: selectedFittings.map(id => CONSTANT_PRODUCT_FITTING.find(f => f.id === id)).filter(Boolean),
-      state: true
+      productFittings: selectedFittings
+        .map((id) => CONSTANT_PRODUCT_FITTING.find((f) => f.id === id))
+        .filter(Boolean),
+      state: true,
     };
     setSelectedPromo({
       ...selectedPromo,
@@ -406,7 +413,6 @@ export function ShoppingCart() {
       description: `Se agrego el producto ${selectedProduct.name} al combo`,
     };
     toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
-
   };
 
   const promoColumns: Column<any>[] = [
@@ -458,9 +464,9 @@ export function ShoppingCart() {
   ];
 
   const handleRemoveProductFromPromo = (itemToDelete: any) => {
-    const updatedSubProducts = (selectedPromo.productDetailProduct || []).filter(
-      (item: any) => item.id !== itemToDelete.id
-    );
+    const updatedSubProducts = (
+      selectedPromo.productDetailProduct || []
+    ).filter((item: any) => item.id !== itemToDelete.id);
 
     setSelectedPromo({
       ...selectedPromo,
@@ -501,10 +507,11 @@ export function ShoppingCart() {
                       //     setIsPromoModalOpen(true);
                       //   }
                       // }}
-                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
-                        ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
-                        : "border-border"
-                        }`}
+                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${
+                        item.isPromotion
+                          ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
+                          : "border-border"
+                      }`}
                     >
                       <Image
                         src={getImageUrl(item.imageUrl)}
@@ -623,10 +630,11 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
-                      ? "bg-[#facc15]  text-rest-primary"
-                      : "bg-muted text-foreground hover:bg-muted/80"
-                      }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
+                      paymentType === method
+                        ? "bg-[#facc15]  text-rest-primary"
+                        : "bg-muted text-foreground hover:bg-muted/80"
+                    }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -693,11 +701,12 @@ export function ShoppingCart() {
                   selectedPromo.price * (selectedPromo.quantity || 1)
                 }
                 onChange={(e) => {
-                  const raw = e.target.value.replace(/[^0-9.]/g, '');
-                  const parts = raw.split('.');
+                  const raw = e.target.value.replace(/[^0-9.]/g, "");
+                  const parts = raw.split(".");
                   let sanitized = parts[0];
-                  if (parts.length > 1) sanitized += '.' + parts.slice(1).join('');
-                  const newPrice = sanitized === '' ? 0 : parseFloat(sanitized);
+                  if (parts.length > 1)
+                    sanitized += "." + parts.slice(1).join("");
+                  const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
                   setSelectedPromo({
                     ...selectedPromo,
                     price: selectedPromo.price * (selectedPromo.quantity || 1),
@@ -756,8 +765,8 @@ export function ShoppingCart() {
                   pattern="[0-9]*"
                   value={formQuantity}
                   onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9]/g, '');
-                    const num = raw === '' ? 1 : Math.max(1, parseInt(raw, 10));
+                    const raw = e.target.value.replace(/[^0-9]/g, "");
+                    const num = raw === "" ? 1 : Math.max(1, parseInt(raw, 10));
                     setFormQuantity(num);
                   }}
                   className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
@@ -804,10 +813,11 @@ export function ShoppingCart() {
                       <img
                         src={fitting.imageUrl ?? ""}
                         alt={fitting.name}
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
-                          ? "border-yellow-400 opacity-100 scale-105"
-                          : "border-transparent opacity-30 grayscale"
-                          }`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${
+                          isActive
+                            ? "border-yellow-400 opacity-100 scale-105"
+                            : "border-transparent opacity-30 grayscale"
+                        }`}
                       />
                       <span
                         className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}
@@ -841,7 +851,7 @@ export function ShoppingCart() {
               data={selectedPromo?.productDetailProduct || []}
               showActions={true}
               actions={{
-                onDelete: handleRemoveProductFromPromo
+                onDelete: handleRemoveProductFromPromo,
               }}
               rowKey="id"
             />
