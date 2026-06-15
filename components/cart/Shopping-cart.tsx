@@ -258,7 +258,7 @@ export function ShoppingCart() {
 
         const urlImpresion = await parameterService.obtenerValorUrl(
           "API_PRINT_URL",
-          "https://localhost/restauranteapi/api/Print/PrintRestaurant",
+          "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
         console.log("api_impresion: " + urlImpresion);
         await ApiService.post(urlImpresion, printPayload);
