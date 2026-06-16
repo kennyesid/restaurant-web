@@ -58,6 +58,7 @@ export default function SalesPage() {
     try {
       setLoading(true);
       const data = await getSales();
+      console.log('data', JSON.stringify(data))
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
