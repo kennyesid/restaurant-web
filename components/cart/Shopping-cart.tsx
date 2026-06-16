@@ -260,7 +260,7 @@ export function ShoppingCart() {
           "API_PRINT_URL",
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        console.log("api_impresion: " + urlImpresion);
+        console.log("api_impresion: carajo" + urlImpresion);
         // await ApiService.post(urlImpresion, printPayload);
         await ApiService.post(
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
