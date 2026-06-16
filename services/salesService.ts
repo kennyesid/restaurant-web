@@ -59,8 +59,6 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
         };
       });
 
-console.log('formattedDetail', {...sale, detail: formattedDetail})
-
       return {
         ...sale,
         detail: formattedDetail
@@ -106,6 +104,7 @@ export async function createSale(
   saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
+    console.log("saleData", JSON.stringify(saleData));
     const { detail, ...headerVenta } = saleData;
 
     // 1. Insertar la cabecera de la venta (Sales)

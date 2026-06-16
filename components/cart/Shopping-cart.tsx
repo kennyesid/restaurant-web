@@ -115,6 +115,9 @@ export function ShoppingCart() {
     }
 
     setIsProcessing(true);
+
+    console.log("que cagada", JSON.stringify(items, null, 2));
+
     try {
       const saleItems = items.flatMap((item) => {
         const mainItem = {
@@ -123,6 +126,7 @@ export function ShoppingCart() {
           quantity: item.quantity,
           price: item.price,
           categoryId: item.categoryId,
+          productId: item.productId,
           productDetailProduct: item.productDetailProduct,
           modifiedSubtotal: item.modifiedSubtotal,
           reasonModification: item.reasonModification,
@@ -141,6 +145,7 @@ export function ShoppingCart() {
             quantity: 0,
             price: 0,
             categoryId: sub.categoryId || item.categoryId,
+            productId: sub.productId,
             productFittings: sub.productFittings ? sub.productFittings : [],
             modifiedSubtotal: sub.modifiedSubtotal,
             reasonModification: sub.reasonModification,

@@ -3,9 +3,10 @@ import { ProductFittings } from "../product/productFittings";
 
 export interface CartItem {
   id: number;
-  name: string; // Añadido
+  name: string; 
   price: number;
-  categoryId: number; // Añadido
+  categoryId: number; 
+  productId: number;
   quantity: number;
   modified?: boolean;
   modifiedSubtotal?: number;

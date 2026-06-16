@@ -29,6 +29,7 @@ const cartSlice = createSlice({
           isPromotion: product.isPromotion,
           isCountable: product.isCountable,
           productDetailProduct: product.productDetailProduct,
+          productId: product.id,
           quantity: 1,
         });
       }
