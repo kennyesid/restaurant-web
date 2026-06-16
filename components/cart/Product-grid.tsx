@@ -14,15 +14,13 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
   const dispatch = useAppDispatch();
 
   const handleAddToCart = (product: Product) => {
-
-    console.log('producto ' + product);
-
     dispatch(
       addToCart({
         id: product.id,
         name: product.name,
         price: product.price,
         categoryId: product.categoryId,
+        productId: product.id,
         quantity: 1,
         isPromotion: product.isPromotion,
         isCountable: false,
