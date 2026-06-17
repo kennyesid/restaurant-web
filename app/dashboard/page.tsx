@@ -636,6 +636,7 @@ import { getSales } from "@/services/salesService";
 import { getUsers } from "@/services/usersService";
 import { getProducts } from "@/services/productsSservice";
 import { getCategories } from "@/services/categoriesService";
+import PageHeader from "@/components/page/header/PageHeader";
 
 // ========== Tipos ==========
 interface DailyRevenue {
@@ -688,6 +689,12 @@ export default function DashboardRecap() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const RANGOS_HORARIOS = [
+    { label: "Mañana (6-12)", min: 6, max: 12 },
+    { label: "Tarde (12-18)", min: 12, max: 18 },
+    { label: "Noche (18-23)", min: 18, max: 23 },
+  ];
 
   const loadAllData = useCallback(async () => {
     setIsRefreshing(true);
@@ -784,18 +791,24 @@ export default function DashboardRecap() {
     });
   }, [filteredSales, dateRange, products, selectedCategoryId]);
 
-  // 2. Datos apilados por hora y categoría (GRÁFICO PRINCIPAL)
+  // En la sección de hourlyStackedData, reemplaza con esto:
+
   const hourlyStackedData = useMemo(() => {
-    // Inicializar estructura: para cada hora (0-23), un objeto con totales por categoría
+    const HORA_INICIO = 8;
+    const HORA_FIN = 23;
+
+    // Inicializar mapa para cada hora del rango
     const hourMap = new Map<number, Map<string, number>>();
-    for (let i = 0; i < 24; i++) {
-      hourMap.set(i, new Map());
+    for (let hour = HORA_INICIO; hour <= HORA_FIN; hour++) {
+      hourMap.set(hour, new Map());
     }
 
+    // Acumular ventas por hora y categoría
     filteredSales.forEach((sale) => {
       const saleDate = new Date(sale.createdAt);
       if (isNaN(saleDate.getTime())) return;
       const hour = saleDate.getHours();
+      if (hour < HORA_INICIO || hour > HORA_FIN) return;
 
       sale.detail?.forEach((item) => {
         const product = products.find((p) => p.id === item.productId);
@@ -809,21 +822,64 @@ export default function DashboardRecap() {
       });
     });
 
-    // Transformar a array de objetos para Recharts
+    // Convertir a array en orden ascendente (8:00 a 23:00)
     const result: any[] = [];
-    for (let hour = 0; hour < 24; hour++) {
+    for (let hour = HORA_INICIO; hour <= HORA_FIN; hour++) {
       const catMap = hourMap.get(hour)!;
       const dataPoint: any = {
         hour,
         formattedHour: `${hour.toString().padStart(2, "0")}:00`,
       };
-      for (const [catName, revenue] of catMap.entries()) {
-        dataPoint[catName] = revenue;
+      // Añadir cada categoría con su valor (0 si no tiene)
+      for (const cat of categories) {
+        const catName = cat.name;
+        dataPoint[catName] = catMap.get(catName) || 0;
       }
       result.push(dataPoint);
     }
     return result;
   }, [filteredSales, products, categories]);
+
+  // 2. Datos apilados por hora y categoría (GRÁFICO PRINCIPAL)
+  // const hourlyStackedData = useMemo(() => {
+  //   // Inicializar estructura: para cada hora (0-23), un objeto con totales por categoría
+  //   const hourMap = new Map<number, Map<string, number>>();
+  //   for (let i = 0; i < 24; i++) {
+  //     hourMap.set(i, new Map());
+  //   }
+
+  //   filteredSales.forEach((sale) => {
+  //     const saleDate = new Date(sale.createdAt);
+  //     if (isNaN(saleDate.getTime())) return;
+  //     const hour = saleDate.getHours();
+
+  //     sale.detail?.forEach((item) => {
+  //       const product = products.find((p) => p.id === item.productId);
+  //       if (!product) return;
+  //       const category = categories.find((c) => c.id === product.categoryId);
+  //       const categoryName = category?.name || "Sin categoría";
+  //       const itemRevenue = item.price * item.quantity;
+
+  //       const catMap = hourMap.get(hour)!;
+  //       catMap.set(categoryName, (catMap.get(categoryName) || 0) + itemRevenue);
+  //     });
+  //   });
+
+  //   // Transformar a array de objetos para Recharts
+  //   const result: any[] = [];
+  //   for (let hour = 0; hour < 24; hour++) {
+  //     const catMap = hourMap.get(hour)!;
+  //     const dataPoint: any = {
+  //       hour,
+  //       formattedHour: `${hour.toString().padStart(2, "0")}:00`,
+  //     };
+  //     for (const [catName, revenue] of catMap.entries()) {
+  //       dataPoint[catName] = revenue;
+  //     }
+  //     result.push(dataPoint);
+  //   }
+  //   return result;
+  // }, [filteredSales, products, categories]);
 
   // 3. Datos para PieChart (día seleccionado)
   const pieData: PieData[] = useMemo(() => {
@@ -892,6 +948,68 @@ export default function DashboardRecap() {
     if (date) setDateRange((prev) => ({ ...prev, to: date }));
   };
 
+  const categoryTotalData = useMemo(() => {
+    const totals = new Map<string, number>();
+
+    filteredSales.forEach((sale) => {
+      sale.detail?.forEach((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        if (!product) return;
+        const category = categories.find((c) => c.id === product.categoryId);
+        const categoryName = category?.name || "Sin categoría";
+        const itemRevenue = item.price * item.quantity;
+        totals.set(categoryName, (totals.get(categoryName) || 0) + itemRevenue);
+      });
+    });
+
+    return Array.from(totals.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredSales, products, categories]);
+
+
+
+  const stackedCategoryData = useMemo(() => {
+    // Inicializar mapa: categoría -> { mañana, tarde, noche }
+    const catMap = new Map<string, { morning: number; afternoon: number; night: number }>();
+
+    // Inicializar para todas las categorías
+    categories.forEach(cat => {
+      catMap.set(cat.name, { morning: 0, afternoon: 0, night: 0 });
+    });
+
+    // Procesar ventas filtradas
+    filteredSales.forEach((sale) => {
+      const saleDate = new Date(sale.createdAt);
+      if (isNaN(saleDate.getTime())) return;
+      const hour = saleDate.getHours();
+
+      sale.detail?.forEach((item) => {
+        const product = products.find((p) => p.id === item.productId);
+        if (!product) return;
+        const category = categories.find((c) => c.id === product.categoryId);
+        if (!category) return;
+        const catName = category.name;
+        const itemRevenue = item.price * item.quantity;
+
+        const data = catMap.get(catName)!;
+        // Asignar al rango correspondiente
+        if (hour >= 6 && hour < 12) data.morning += itemRevenue;
+        else if (hour >= 12 && hour < 18) data.afternoon += itemRevenue;
+        else if (hour >= 18 && hour < 23) data.night += itemRevenue;
+        // Si la hora está fuera de los rangos (ej. 0-5), ignorar o asignar a otro
+      });
+    });
+
+    // Convertir a array para Recharts
+    return Array.from(catMap.entries()).map(([category, values]) => ({
+      category,
+      morning: values.morning,
+      afternoon: values.afternoon,
+      night: values.night,
+    }));
+  }, [filteredSales, products, categories]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[70vh] gap-4">
@@ -905,10 +1023,22 @@ export default function DashboardRecap() {
   }
 
   return (
-    <div className="space-y-8 p-4 md:p-6 bg-gradient-to-br from-slate-50 to-slate-100/50 min-h-screen">
+    <div className="space-y-4 md:pt-0">
       {/* Header y filtros */}
-      <div className="flex flex-col lg:flex-row justify-between gap-4">
-        <div>
+      <div className="flex flex-row lg:flex-col gap-4">
+
+        <PageHeader
+          title="REPORTE"
+          subtitle="Gestion de Reporte"
+          action={
+            <Button onClick={loadAllData} disabled={isRefreshing} variant="outline" className="shadow-sm hover:shadow-md">
+              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              Actualizar
+            </Button>
+          }
+        />
+
+        {/* <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
             Monthly Recap Report
           </h1>
@@ -916,7 +1046,7 @@ export default function DashboardRecap() {
             {safeFormat(dateRange?.from, "dd MMM yyyy", { locale: es })} -{" "}
             {safeFormat(dateRange?.to, "dd MMM yyyy", { locale: es })}
           </p>
-        </div>
+        </div> */}
 
         <div className="flex flex-wrap gap-3">
           <Popover>
@@ -966,11 +1096,6 @@ export default function DashboardRecap() {
               ))}
             </SelectContent>
           </Select>
-
-          <Button onClick={loadAllData} disabled={isRefreshing} variant="outline" className="shadow-sm hover:shadow-md">
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
         </div>
       </div>
 
@@ -1009,42 +1134,39 @@ export default function DashboardRecap() {
         <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
           <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
-            Ventas por Hora (apilado por categorías)
+            Ventas por Categoría y Rango Horario
           </h3>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
-              data={hourlyStackedData}
-              layout="vertical"
-              margin={{ top: 20, right: 30, left: 50, bottom: 20 }}
+              data={stackedCategoryData}
+              layout="horizontal" // Valor por defecto, barras verticales
+              margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis type="number" tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`} stroke="#64748b" />
-              <YAxis type="category" dataKey="formattedHour" stroke="#64748b" fontSize={12} width={60} />
+              <XAxis
+                dataKey="category"
+                stroke="#64748b"
+                fontSize={12}
+                // tick={{ angle: -45, textAnchor: 'end' }}
+                height={80}
+              />
+              <YAxis
+                stroke="#64748b"
+                fontSize={12}
+                tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`}
+              />
               <Tooltip
                 contentStyle={{ backgroundColor: "#fff", border: "none", borderRadius: "12px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
                 formatter={(value: number, name: string) => [`$${value.toLocaleString("es-CO")}`, name]}
-                labelFormatter={(label) => `Hora: ${label}`}
               />
               <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
-              {categories.map((cat, idx) => {
-                const catName = cat.name;
-                const hasData = hourlyStackedData.some(hour => (hour[catName] || 0) > 0);
-                if (!hasData) return null;
-                return (
-                  <Bar
-                    key={cat.id}
-                    dataKey={catName}
-                    stackId="categoryStack"
-                    fill={CATEGORY_COLORS[idx % CATEGORY_COLORS.length]}
-                    name={catName}
-                    radius={[0, 4, 4, 0]}
-                  />
-                );
-              })}
+              <Bar dataKey="morning" stackId="a" fill="#3b82f6" name="Mañana (6-12)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="afternoon" stackId="a" fill="#10b981" name="Tarde (12-18)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="night" stackId="a" fill="#8b5cf6" name="Noche (18-23)" radius={[0, 0, 4, 4]} />
             </BarChart>
           </ResponsiveContainer>
           <p className="text-xs text-center text-muted-foreground mt-2">
-            📊 Cada barra horizontal representa una hora. Los colores muestran el aporte de cada categoría.
+            📊 Cada barra vertical representa una categoría. Los colores muestran el aporte por rango horario.
           </p>
         </Card>
       </div>

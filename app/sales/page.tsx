@@ -20,9 +20,12 @@ import {
 import { handleResponse } from "@/utils/api-helpers";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import React from "react";
+import PageHeader from "@/components/page/header/PageHeader";
+import { DateUtils } from "@/utils/date-utils";
 
 export default function SalesPage() {
-  const today = new Date().toISOString().split("T")[0];
+  // const today = new Date().toISOString().split("T")[0];
+  const today = DateUtils.obtenerTipoFechaBoliviaLocal();
 
   // const [sales, setSales] = useState<any[]>([]); 
   const [sales, setSales] = useState<Sale[]>([]);
@@ -121,34 +124,6 @@ export default function SalesPage() {
         Cargando historial...
       </div>
     );
-
-  // Comentado para respetar tu flujo actual
-  /*
-  const getOrderStatusBadge = (status: number) => {
-    const styles: Record<number, string> = {
-      1: "bg-emerald-100 text-emerald-700",
-      2: "bg-orange-100 text-orange-700",
-      3: "bg-blue-100 text-blue-700",
-      4: "bg-gray-200 text-gray-800",
-      5: "bg-red-100 text-red-700",
-    };
-
-    const labels: Record<number, string> = {
-      1: "Pagado",
-      2: "En cocina",
-      3: "Listo",
-      4: "Entregado",
-      5: "Cancelado",
-    };
-
-    return (
-      <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${styles[status]}`}>
-        {labels[status]}
-      </span>
-    );
-  };
-  */
-
   const togglePromo = (saleId: number, itemIdx: number) => {
     const key = `${saleId}-${itemIdx}`;
     setExpandedPromos((prev) => ({
@@ -157,23 +132,16 @@ export default function SalesPage() {
     }));
   };
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-[#052A3D] tracking-tight">
-            CONTROL DE VENTAS
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Gestiona y audita las transacciones del sistema
-          </p>
-        </div>
-        <div className="flex gap-2">
+    <div className="space-y-4 md:pt-0">
+      <PageHeader
+        title="CONTROL DE VENTAS"
+        subtitle="Gestiona y audita las transacciones del sistema"
+        action={
           <Button onClick={loadSales} variant="outline" size="sm">
             Actualizar Datos
           </Button>
-        </div>
-      </div>
-
+        }
+      />
       {/* TOOLBAR DE FILTROS */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
         <div className="lg:col-span-1">

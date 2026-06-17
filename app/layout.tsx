@@ -59,8 +59,6 @@ export default function RootLayout({
       className={`${nunito.variable} ${caveatBrush.variable}`}
       suppressHydrationWarning
     >
-      {/* <body className="font-sans antialiased"> */}
-      {/* <body className="font-caveat" suppressHydrationWarning> */}
       <body className="font-nunito" suppressHydrationWarning>
         <ReduxProvider>
           <div>

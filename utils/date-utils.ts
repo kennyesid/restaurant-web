@@ -28,4 +28,10 @@ export class DateUtils {
     const fechaBolivia = new Date(fecha.getTime() - desfaseBolivia);
     return fechaBolivia.toISOString().replace("Z", "-04:00");
   }
+
+  static obtenerTipoFechaBoliviaLocal(): string {
+    return new Date().toLocaleDateString("sv-SE", { 
+      timeZone: "America/La_Paz" 
+    });
+  }
 }

@@ -5,6 +5,7 @@ export interface ParameterEntity {
   id: number;
   groupKey: string;
   code: string;
+  value: string;
   name: string;
   description: string | null;
   sortOrder: number;
