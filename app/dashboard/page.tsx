@@ -681,6 +681,7 @@ export default function DashboardRecap() {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("all");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [selectedProduct, setSelectedProduct] = useState<number>(0);
 
   const [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -706,6 +707,11 @@ export default function DashboardRecap() {
           getCategories(),
           getProducts(),
         ]);
+
+      console.log("salesRes", JSON.stringify(salesRes));
+      console.log("usersRes", JSON.stringify(usersRes));
+      console.log("categoriesRes", JSON.stringify(categoriesRes));
+      console.log("productsRes", JSON.stringify(productsRes));
 
       setSales(salesRes.contenido || []);
       setUsers(usersRes || []);
@@ -948,24 +954,30 @@ export default function DashboardRecap() {
     if (date) setDateRange((prev) => ({ ...prev, to: date }));
   };
 
-  const categoryTotalData = useMemo(() => {
-    const totals = new Map<string, number>();
+  // const categoryTotalData = useMemo(() => {
+  //   const totals = new Map<string, number>();
 
-    filteredSales.forEach((sale) => {
-      sale.detail?.forEach((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) return;
-        const category = categories.find((c) => c.id === product.categoryId);
-        const categoryName = category?.name || "Sin categoría";
-        const itemRevenue = item.price * item.quantity;
-        totals.set(categoryName, (totals.get(categoryName) || 0) + itemRevenue);
-      });
-    });
+  //   filteredSales.forEach((sale) => {
+  //     sale.detail?.forEach((item) => {
+  //       if (
+  //         selectedProductId &&
+  //         item.productId !== selectedProductId
+  //       ) {
+  //         return;
+  //       }
+  //       const product = products.find((p) => p.id === item.productId);
+  //       if (!product) return;
+  //       const category = categories.find((c) => c.id === product.categoryId);
+  //       const categoryName = category?.name || "Sin categoría";
+  //       const itemRevenue = item.price * item.quantity;
+  //       totals.set(categoryName, (totals.get(categoryName) || 0) + itemRevenue);
+  //     });
+  //   });
 
-    return Array.from(totals.entries())
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
-  }, [filteredSales, products, categories]);
+  //   return Array.from(totals.entries())
+  //     .map(([name, value]) => ({ name, value }))
+  //     .sort((a, b) => b.value - a.value);
+  // }, [filteredSales, products, categories]);
 
 
 
@@ -1001,6 +1013,17 @@ export default function DashboardRecap() {
       });
     });
 
+    ///  PRUEBA BORRAR
+    filteredSales.forEach((sale) => {
+      console.log(
+        "VENTA",
+        sale.createdAt,
+        sale.total
+      );
+    });
+    ///
+
+
     // Convertir a array para Recharts
     return Array.from(catMap.entries()).map(([category, values]) => ({
       category,
@@ -1009,6 +1032,69 @@ export default function DashboardRecap() {
       night: values.night,
     }));
   }, [filteredSales, products, categories]);
+
+  const salesByProductHour = useMemo(() => {
+
+    const result: any[] = [];
+
+    filteredSales.forEach((sale) => {
+
+      const saleDate = new Date(sale.createdAt);
+
+      if (isNaN(saleDate.getTime()))
+        return;
+
+      const hour = saleDate.getHours();
+
+      sale.detail?.forEach((item) => {
+
+        if (
+          selectedProduct !== 0 &&
+          item.productId !== selectedProduct
+        )
+          return;
+
+        result.push({
+          product: item.name,
+          hour
+        });
+
+      });
+
+    });
+
+    return result;
+
+  }, [filteredSales, selectedProduct]);
+
+  const salesByHour = useMemo(() => {
+
+    const hourMap = new Map<string, number>();
+
+    filteredSales.forEach((sale) => {
+
+      const saleDate = new Date(sale.createdAt);
+
+      if (isNaN(saleDate.getTime())) return;
+
+      const hour = saleDate.toLocaleTimeString("es-CO", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      const currentTotal = hourMap.get(hour) || 0;
+
+      hourMap.set(hour, currentTotal + sale.total);
+
+    });
+
+    return Array.from(hourMap.entries()).map(([hour, total]) => ({
+      hour,
+      total,
+    }));
+
+  }, [filteredSales]);
 
   if (isLoading) {
     return (
@@ -1096,6 +1182,19 @@ export default function DashboardRecap() {
               ))}
             </SelectContent>
           </Select>
+
+          <select
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(Number(e.target.value))}
+          >
+            <option value={0}>Todos los productos</option>
+
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -1134,40 +1233,49 @@ export default function DashboardRecap() {
         <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
           <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
-            Ventas por Categoría y Rango Horario
+            Ventas por Producto y Rango Horario
           </h3>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
-              data={stackedCategoryData}
+              data={salesByProductHour}
               layout="horizontal" // Valor por defecto, barras verticales
               margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
-                dataKey="category"
+                dataKey="product"
                 stroke="#64748b"
                 fontSize={12}
-                // tick={{ angle: -45, textAnchor: 'end' }}
-                height={80}
+                interval={0}
+                angle={-20}
+                textAnchor="end"
               />
               <YAxis
-                stroke="#64748b"
-                fontSize={12}
-                tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`}
+                domain={[0, 23]}
+                ticks={[
+                  6, 7, 8, 9, 10, 11, 12,
+                  13, 14, 15, 16, 17, 18,
+                  19, 20, 21, 22, 23
+                ]}
+                tickFormatter={(h) => `${h}:00`}
               />
-              <Tooltip
-                contentStyle={{ backgroundColor: "#fff", border: "none", borderRadius: "12px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
-                formatter={(value: number, name: string) => [`$${value.toLocaleString("es-CO")}`, name]}
+              {/* <Tooltip
+                formatter={(value: number) => [
+                  value,
+                  "Cantidad Vendida"
+                ]}
+              /> */}
+              {/* <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} /> */}
+              <Bar
+                dataKey="hour"
+                fill="#3b82f6"
+                radius={[4, 4, 0, 0]}
               />
-              <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
-              <Bar dataKey="morning" stackId="a" fill="#3b82f6" name="Mañana (6-12)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="afternoon" stackId="a" fill="#10b981" name="Tarde (12-18)" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="night" stackId="a" fill="#8b5cf6" name="Noche (18-23)" radius={[0, 0, 4, 4]} />
             </BarChart>
           </ResponsiveContainer>
-          <p className="text-xs text-center text-muted-foreground mt-2">
+          {/* <p className="text-xs text-center text-muted-foreground mt-2">
             📊 Cada barra vertical representa una categoría. Los colores muestran el aporte por rango horario.
-          </p>
+          </p> */}
         </Card>
       </div>
 
