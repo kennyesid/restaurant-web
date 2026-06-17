@@ -124,7 +124,7 @@ export function ShoppingCart() {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
-          price: item.price,
+          price: item.price * item.quantity,
           categoryId: item.categoryId,
           productId: item.productId,
           productDetailProduct: item.productDetailProduct,
@@ -220,7 +220,7 @@ export function ShoppingCart() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price,
+            price: item.price * item.quantity,
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
             isCountable: item.isCountable,
@@ -231,18 +231,18 @@ export function ShoppingCart() {
             // Mapeamos también los subproductos internos si existieran con la misma lógica
             productDetailProduct: Array.isArray(item.productDetailProduct)
               ? item.productDetailProduct.map((sub: any) => ({
-                  id: sub.id,
-                  productId: sub.productId || 0,
-                  name: sub.name,
-                  // price: sub.price || 0,
-                  price: 0,
-                  reasonModification: sub.reasonModification || "",
-                  quantity: sub.quantity || 0,
-                  productFittings: Array.isArray(sub.productFittings)
-                    ? sub.productFittings.map((f: any) => f.name || f)
-                    : [],
-                  state: sub.state ?? true,
-                }))
+                id: sub.id,
+                productId: sub.productId || 0,
+                name: sub.name,
+                // price: sub.price || 0,
+                price: 0,
+                reasonModification: sub.reasonModification || "",
+                quantity: sub.quantity || 0,
+                productFittings: Array.isArray(sub.productFittings)
+                  ? sub.productFittings.map((f: any) => f.name || f)
+                  : [],
+                state: sub.state ?? true,
+              }))
               : [],
           })),
           paymentType: paymentType,
@@ -516,11 +516,10 @@ export function ShoppingCart() {
                       //     setIsPromoModalOpen(true);
                       //   }
                       // }}
-                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${
-                        item.isPromotion
-                          ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
-                          : "border-border"
-                      }`}
+                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
+                        ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
+                        : "border-border"
+                        }`}
                     >
                       <Image
                         src={getImageUrl(item.imageUrl)}
@@ -639,11 +638,10 @@ export function ShoppingCart() {
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${
-                      paymentType === method
-                        ? "bg-[#facc15]  text-rest-primary"
-                        : "bg-muted text-foreground hover:bg-muted/80"
-                    }`}
+                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
+                      ? "bg-[#facc15]  text-rest-primary"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                      }`}
                   >
                     {method === "cash"
                       ? "Efectivo"
@@ -822,11 +820,10 @@ export function ShoppingCart() {
                       <img
                         src={fitting.imageUrl ?? ""}
                         alt={fitting.name}
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${
-                          isActive
-                            ? "border-yellow-400 opacity-100 scale-105"
-                            : "border-transparent opacity-30 grayscale"
-                        }`}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
+                          ? "border-yellow-400 opacity-100 scale-105"
+                          : "border-transparent opacity-30 grayscale"
+                          }`}
                       />
                       <span
                         className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}
