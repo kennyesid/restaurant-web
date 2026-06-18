@@ -21,6 +21,13 @@ export interface GenericDataTableProps<T> {
     actions?: TableActions<T>;
     showActions?: boolean;
     rowKey: keyof T;
+    pagination?: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        itemsPerPage: number;
+        onPageChange: (page: number) => void;
+    };
 }
 
 export function GenericDataTable<T>({
@@ -29,6 +36,7 @@ export function GenericDataTable<T>({
     actions,
     showActions = false,
     rowKey,
+    pagination,
 }: GenericDataTableProps<T>) {
 
     return (
@@ -123,9 +131,35 @@ export function GenericDataTable<T>({
                             ))
                         )}
                     </tbody>
-
                 </table>
             </div>
+            {pagination && pagination.totalItems > 0 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-600">
+                    <div>
+                        Mostrando <span className="font-bold">{data.length}</span> de{" "}
+                        <span className="font-bold">{pagination.totalItems}</span> registros
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            disabled={pagination.currentPage === 1}
+                            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-md hover:bg-white bg-gray-100 transition text-gray-700 font-semibold disabled:opacity-50"
+                        >
+                            Anterior
+                        </button>
+                        <div className="flex items-center px-2 text-sm font-semibold text-[#052A3D]">
+                            Página {pagination.currentPage} de {pagination.totalPages || 1}
+                        </div>
+                        <button
+                            disabled={pagination.currentPage === pagination.totalPages || pagination.totalPages === 0}
+                            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-md hover:bg-white bg-gray-100 transition text-gray-700 font-semibold disabled:opacity-50"
+                        >
+                            Siguiente
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

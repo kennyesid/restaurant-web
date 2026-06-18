@@ -73,7 +73,8 @@ export default function AlertDialogComponent({
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative border-l-4 border-l-red-500 transition-all">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative transition-all">
+
                 {/* Botón cerrar */}
                 <button
                     onClick={onClose}
@@ -93,10 +94,10 @@ export default function AlertDialogComponent({
                     </div>
                 </div>
 
-                <div className="mt-6 flex justify-end gap-3">
+                <div className="mt-6 flex flex-row gap-2">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                        className="px-4 py-2 w-full text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
                     >
                         {cancelText}
                     </button>
@@ -106,7 +107,7 @@ export default function AlertDialogComponent({
                                 onConfirm();
                                 onClose();
                             }}
-                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition ${styles.buttonColor}`}
+                            className={`px-4 py-2 w-full text-sm font-medium text-white rounded-lg transition ${styles.buttonColor}`}
                         >
                             {confirmText}
                         </button>
