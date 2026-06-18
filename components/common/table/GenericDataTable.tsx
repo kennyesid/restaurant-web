@@ -32,13 +32,11 @@ export function GenericDataTable<T>({
 }: GenericDataTableProps<T>) {
 
     return (
-        // <div className="w-full border border-border rounded-xl overflow-hidden bg-white shadow-sm">
         <div className="w-full border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
             <div className="overflow-x-auto">
-                {/* <table className="w-full text-left border-collapse text-sm text-slate-600"> */}
                 <table className="w-full text-left border-separate border-spacing-0 text-sm text-slate-600">
                     <thead>
-                        <tr className="border-b border-border bg-slate-50 text-slate-500 font-semibold tracking-wide text-xs uppercase">
+                        <tr className="border-b border-border bg-rest-primary text-gray-300 font-semibold tracking-wide text-xs uppercase">
                             {columns.map((column, index) => (
                                 <th key={index} className="p-3.5 px-4">
                                     {column.header}
@@ -51,7 +49,6 @@ export function GenericDataTable<T>({
                         </tr>
                     </thead>
 
-                    {/* CUERPO DE LA TABLA */}
                     <tbody className="divide-y divide-border">
                         {data.length === 0 ? (
                             <tr>

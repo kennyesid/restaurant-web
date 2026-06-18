@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Fragment } from "react";
 import { Plus, Edit, Trash2, Search, SlidersHorizontal, X } from "lucide-react";
-import { Ingredient, IngredientCategories } from "@/types";
+import { Ingredient, IngredientCategories, RoleType } from "@/types";
 import {
     getIngredients,
     createIngredient,
@@ -10,18 +10,21 @@ import {
     deleteIngredient,
 } from "@/services/ingredientsService";
 import { getCategories } from "@/services/categoriesService";
-// Tipado básico para proveedores en el dropdown
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
+import PageHeader from "@/components/page/header/PageHeader";
+import { useAppSelector } from "@/store/store/hooks";
+import { MENU_BY_ROL, MenuConfig } from "@/lib/constants/menuByRol";
+
 interface Supplier {
     id: number;
     name: string;
 }
 
 export default function IngredientsABM() {
-    // Estados de datos maestros
+    const { user } = useAppSelector((state) => state.auth);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [categories, setCategories] = useState<IngredientCategories[]>([]);
 
-    // Proveedores de prueba basados en los datos iniciales
     const [suppliers] = useState<Supplier[]>([
         { id: 1, name: "Carnes Premium" },
         { id: 2, name: "Distribuidora General" },
@@ -30,25 +33,18 @@ export default function IngredientsABM() {
         { id: 5, name: "Panadería Local" },
     ]);
 
-    // Estados de filtros y búsqueda
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState<string>("all");
     const [selectedSupplier, setSelectedSupplier] = useState<string>("all");
-
-    // Estados de paginación
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-
-    // Estados del modal de formulario
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(null);
-
-    // Datos del formulario inicial
     const defaultFormState = {
         name: "",
         description: "",
         ingredientCategoriesId: 1,
-        supplierId: 0, // 0 = Ninguno
+        supplierId: 0,
         groupId: 1,
         quantity: 0,
         price: 0,
@@ -57,10 +53,12 @@ export default function IngredientsABM() {
         quantitypiecesOfChicken: undefined as number | undefined,
         state: true,
     };
-
     const [formData, setFormData] = useState(defaultFormState);
 
-    // Carga inicial de datos
+    const [userPermissions, setUserPermissions] = useState<MenuConfig>(
+        MENU_BY_ROL[(user?.role?.toUpperCase() as RoleType) || "VISITOR"],
+    );
+
     const loadData = async () => {
         const [fetchedIngredients, fetchedCategories] = await Promise.all([
             getIngredients(),
@@ -73,6 +71,15 @@ export default function IngredientsABM() {
     useEffect(() => {
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (user?.role) {
+            const role = user.role.toUpperCase() as RoleType;
+            setUserPermissions(MENU_BY_ROL[role] || MENU_BY_ROL["VISITOR"]);
+        } else {
+            setUserPermissions(MENU_BY_ROL["VISITOR"]);
+        }
+    }, [user]);
 
     // Filtrado y Ordenamiento
     const filteredIngredients = useMemo(() => {
@@ -150,20 +157,19 @@ export default function IngredientsABM() {
 
     return (
         <div className="space-y-6">
-            {/* HEADER SECTION */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold text-[#052A3D]">Ingredientes e Insumos</h2>
-                    <p className="text-sm text-gray-500">Gestión completa de artículos de cocina y costos.</p>
-                </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="flex items-center justify-center gap-2 bg-[#D12B2B] hover:bg-[#A81F1F] text-white px-4 py-2.5 rounded-md text-sm font-semibold transition-all shadow-sm"
-                >
-                    <Plus size={18} />
-                    Nuevo Ingrediente
-                </button>
-            </div>
+            <PageHeader
+                title="Ingredientes e Insumos"
+                subtitle="Gestión completa de artículos de cocina y costos."
+                action={
+                    <div className="w-100">
+                        <ButtonGeneric onClick={() => handleOpenModal()}>
+                            Nuevo Ingrediente
+                        </ButtonGeneric>
+                    </div>
+                }
+            >
+
+            </PageHeader>
 
             {/* FILTROS SECTION */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-white p-4 rounded-md border border-gray-100 shadow-sm">

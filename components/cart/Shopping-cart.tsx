@@ -41,6 +41,7 @@ import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { ApiService } from "@/services/apiService";
 import { DateUtils } from "@/utils/date-utils";
 import { parameterService } from "@/services/parameterService";
+import RoleGuard from "../auth/RoleGuard";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -692,59 +693,59 @@ export function ShoppingCart() {
           confirmText="Confirmar"
           size="lg"
         >
-          {/* 🌟 NUEVA SECCIÓN: Modificar Datos del Producto Principal (Combo) */}
-          <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1 md:col-span-1">
-              <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                Precio (Bs)
-              </label>
-              <input
-                onFocus={(e) => e.target.select()}
-                type="text"
-                inputMode="decimal"
-                pattern="[0-9]*\.?[0-9]*"
-                value={
-                  selectedPromo.modifiedSubtotal ??
-                  selectedPromo.price * (selectedPromo.quantity || 1)
-                }
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/[^0-9.]/g, "");
-                  const parts = raw.split(".");
-                  let sanitized = parts[0];
-                  if (parts.length > 1)
-                    sanitized += "." + parts.slice(1).join("");
-                  const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
-                  setSelectedPromo({
-                    ...selectedPromo,
-                    price: selectedPromo.price * (selectedPromo.quantity || 1),
-                    modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
-                  });
-                }}
-                className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
-              />
+          <RoleGuard allowedRoles="ADMIN">
+            <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-1 md:col-span-1">
+                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                  Precio (Bs)
+                </label>
+                <input
+                  onFocus={(e) => e.target.select()}
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  value={
+                    selectedPromo.modifiedSubtotal ??
+                    selectedPromo.price * (selectedPromo.quantity || 1)
+                  }
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = raw.split(".");
+                    let sanitized = parts[0];
+                    if (parts.length > 1)
+                      sanitized += "." + parts.slice(1).join("");
+                    const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
+                    setSelectedPromo({
+                      ...selectedPromo,
+                      price: selectedPromo.price * (selectedPromo.quantity || 1),
+                      modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
+                    });
+                  }}
+                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1 md:col-span-2">
+                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                  Motivo Cambio
+                </label>
+                <input
+                  type="text"
+                  value={selectedPromo.reasonModification || ""}
+                  onChange={(e) => {
+                    setSelectedPromo({
+                      ...selectedPromo,
+                      reasonModification: e.target.value,
+                    });
+                  }}
+                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
+                  placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
+                />
+              </div>
             </div>
-
-            <div className="flex flex-col gap-1 md:col-span-2">
-              <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                Motivo Cambio
-              </label>
-              <input
-                type="text"
-                value={selectedPromo.reasonModification || ""}
-                onChange={(e) => {
-                  setSelectedPromo({
-                    ...selectedPromo,
-                    reasonModification: e.target.value,
-                  });
-                }}
-                className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
-                placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
-              />
-            </div>
-          </div>
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+          </RoleGuard>
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-2 space-y-4">
             <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">
-              Agregar Plato al Combo
+              Seleccione un Producto
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="md:col-span-2">
@@ -848,20 +849,20 @@ export function ShoppingCart() {
           </div>
 
           {/* 📊 TABLA RESUMEN INFERIOR (Muestra los subproductos normales) */}
-          <div className="space-y-2">
-            <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">
+
+          {/* <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">
               Componentes del Combo actual
-            </p>
-            <GenericDataTable
-              columns={promoColumns}
-              data={selectedPromo?.productDetailProduct || []}
-              showActions={true}
-              actions={{
-                onDelete: handleRemoveProductFromPromo,
-              }}
-              rowKey="id"
-            />
-          </div>
+            </p> */}
+          <GenericDataTable
+            columns={promoColumns}
+            data={selectedPromo?.productDetailProduct || []}
+            showActions={true}
+            actions={{
+              onDelete: handleRemoveProductFromPromo,
+            }}
+            rowKey="id"
+          />
+
         </ResponsiveModal>
       )}
       {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
