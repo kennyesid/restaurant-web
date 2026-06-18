@@ -12,7 +12,7 @@ export default function PageHeader({ title, subtitle, action }: PageHeaderProps)
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 
             <div className="w-full text-center md:text-center flex flex-col items-center md:items-center">
-                <h1 className="w-full text-center md:text-center text-2xl font-black text-[#052A3D] tracking-normal sm:tracking-tight leading-normal pt-2">
+                <h1 className="w-full text-center md:text-center text-3xl font-black text-[#052A3D] tracking-normal sm:tracking-tight leading-normal pt-2">
                     {title}
                 </h1>
                 {subtitle && (

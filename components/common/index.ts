@@ -4,3 +4,4 @@ export { default as DropdownSearchable } from "@/components/common/dropdown/Drop
 // export { default as ButtonGeneric } from "@/components/common/button/ButtonGeneric";
 // export { default as GenericDataTable } from "@/components/common/table/GenericDataTable";
 // export { default as CustomNotification } from "@/components/common/toast/CustomNotification";
+export { default as AlertDialog } from "@/components/common/alert/AlertDialogComponent";

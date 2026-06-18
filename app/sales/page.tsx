@@ -22,6 +22,8 @@ import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import React from "react";
 import PageHeader from "@/components/page/header/PageHeader";
 import { DateUtils } from "@/utils/date-utils";
+import { AlertVariant } from "@/types/enum/alertVariant";
+import AlertDialogComponent from "@/components/common/alert/AlertDialogComponent";
 
 export default function SalesPage() {
   // const today = new Date().toISOString().split("T")[0];
@@ -42,7 +44,8 @@ export default function SalesPage() {
   const [expandedPromos, setExpandedPromos] = useState<Record<string, boolean>>(
     {},
   );
-
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [saleToDelete, setSaleToDelete] = useState<number | null>(null);
   const [appliedFilters, setAppliedFilters] = useState({
     startDate: today,
     endDate: today,
@@ -132,9 +135,9 @@ export default function SalesPage() {
     }));
   };
   return (
-    <div className="space-y-4 md:pt-0">
+    <div className="space-y-3">
       <PageHeader
-        title="CONTROL DE VENTAS"
+        title="Control De Ventas"
         subtitle="Gestiona y audita las transacciones del sistema"
         action={
           <Button onClick={loadSales} variant="outline" size="sm">
@@ -377,16 +380,11 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <div className="flex justify-center gap-2">
-                        {/* <button
-                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-full transition-colors"
-                          title="Editar venta"
-                        >
-                          <Edit size={18} />
-                        </button> */}
                         <button
-                          onClick={() =>
-                            deleteSale(sale.id).then(loadSales)
-                          }
+                          onClick={() => {
+                            setSaleToDelete(sale.id);
+                            setAlertOpen(true);
+                          }}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                           title="Eliminar"
                         >
@@ -693,9 +691,29 @@ export default function SalesPage() {
           </div>
         )}
       </Card>
+      <AlertDialogComponent
+        isOpen={alertOpen}
+        onClose={() => {
+          setAlertOpen(false);
+          setSaleToDelete(null);
+        }}
+        onConfirm={() => {
+          if (saleToDelete !== null) {
+            deleteSale(saleToDelete).then(loadSales);
+            setSaleToDelete(null);
+            setAlertOpen(false);
+          }
+        }}
+        variant={AlertVariant.DANGER}
+        title="Eliminar venta"
+        message="¿Estás seguro de que deseas eliminar esta venta? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+      />
     </div>
   );
 }
+
 
 // "use client";
 

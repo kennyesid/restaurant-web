@@ -11,6 +11,7 @@ import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import { cn } from "@/lib/utils";
 import { useAppDispatch, useAppSelector } from "@/store/store/hooks";
 import { setToggleCartFalse, toggleCartSide } from "@/store/store/slices/cartSlice";
+import PageHeader from "@/components/page/header/PageHeader";
 
 const getFeaturedProducts = (products: Product[]) => {
   return products
@@ -75,14 +76,18 @@ export default function CartPage() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col items-center justify-center text-center ">
+      <PageHeader
+        title="Gestión de Ventas"
+        subtitle="Punto de Venta (POS) y facturación de la sucursall"
+      />
+      {/* <div className="flex flex-col items-center justify-center text-center ">
         <h1 className="text-2xl sm:text-3xl text-rest-primary font-black tracking-tight uppercase">
           Gestión de Ventas
         </h1>
         <p className="text-xs sm:text-xs text-muted-foreground font-medium max-w-md">
           Punto de Venta (POS) y facturación de la sucursal
         </p>
-      </div>
+      </div> */}
       {/* 1. CONTENEDOR GRID DINÁMICO */}
       <div
         className={cn(
