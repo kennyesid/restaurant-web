@@ -284,6 +284,20 @@ export default function IngredientsABM() {
                     </select>
                 </div>
 
+                {/* <Select value={String(selectedProduct)} onValueChange={(val) => setSelectedProduct(Number(val))}>
+                    <SelectTrigger className="w-[180px] shadow-sm hover:shadow-md">
+                        <SelectValue placeholder="Todos los productos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="0">Todos los productos</SelectItem>
+                        {products.map((product) => (
+                            <SelectItem key={product.id} value={String(product.id)}>
+                                {product.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select> */}
+
                 <div className="relative">
                     <select
                         className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#D12B2B] focus:bg-white transition appearance-none cursor-pointer"

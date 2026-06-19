@@ -242,6 +242,7 @@ export function ShoppingCart() {
 
       // setCreatedSale(response.contenido as Sale);
       // setShowTicket(true);
+      console.log('REVISARR:: ', JSON.stringify(response.contenido));
       setSaleData(response.contenido as Sale);
       setIsTicketModalOpen(true);
 

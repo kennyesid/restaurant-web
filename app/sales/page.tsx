@@ -24,6 +24,7 @@ import PageHeader from "@/components/page/header/PageHeader";
 import { DateUtils } from "@/utils/date-utils";
 import { AlertVariant } from "@/types/enum/alertVariant";
 import AlertDialogComponent from "@/components/common/alert/AlertDialogComponent";
+import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 
 export default function SalesPage() {
   // const today = new Date().toISOString().split("T")[0];
@@ -337,12 +338,12 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${sale.orderType === "CONSUMO LOCAL"
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide ${sale.orderType === OrderTypeEnum.CONSUMO_LOCAL
                           ? "bg-amber-50 text-amber-800 border border-amber-200"
                           : "bg-teal-50 text-teal-800 border border-teal-200"
                           }`}
                       >
-                        {sale.orderType === "CONSUMO LOCAL" ? (
+                        {sale.orderType === OrderTypeEnum.CONSUMO_LOCAL ? (
                           <Utensils size={10} />
                         ) : (
                           <Package size={10} />
