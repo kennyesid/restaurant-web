@@ -47,8 +47,8 @@ export class ParameterService {
     const parametro = await this.obtenerPorCodigo(code);
 
     // Si el parámetro existe, está activo y tiene contenido en description, lo devuelve
-    if (parametro && parametro.state && parametro.description) {
-      return parametro.description;
+    if (parametro && parametro.state && parametro.value) {
+      return parametro.value;
     }
 
     // Si pasa algo, usamos el fallback seguro (localhost)

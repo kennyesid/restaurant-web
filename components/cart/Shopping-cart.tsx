@@ -18,7 +18,7 @@ import {
   obtenerSiguienteOrdenDiariaSupabase,
 } from "@/services/salesService";
 import { toast } from "sonner";
-import { CartItem } from "@/types";
+import { CartItem, Sale } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
@@ -36,12 +36,14 @@ import { ProductFittings } from "@/types/product/productFittings";
 import { ProductDetailProduct } from "@/types/product/productDetailProduct";
 import { getProducts } from "@/services/productsSservice";
 import { Product } from "@/types";
-import { DropdownSearchable } from "@/components/common";
+import { DropdownSearchable, RestaurantTicket } from "@/components/common";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { ApiService } from "@/services/apiService";
 import { DateUtils } from "@/utils/date-utils";
 import { parameterService } from "@/services/parameterService";
 import RoleGuard from "../auth/RoleGuard";
+import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
+import TicketModal from "../common/print/TicketModal";
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -58,6 +60,11 @@ export function ShoppingCart() {
   const [formProductId, setFormProductId] = useState<number | "">("");
   const [formQuantity, setFormQuantity] = useState<number>(1);
   const [selectedFittings, setSelectedFittings] = useState<number[]>([]);
+  const [showTicket, setShowTicket] = useState(false);
+  const [createdSale, setCreatedSale] = useState<Sale | null>(null);
+
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [saleData, setSaleData] = useState<Sale | null>(null);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
@@ -182,21 +189,41 @@ export function ShoppingCart() {
 
       const numeroOrdenCalculado = await obtenerSiguienteOrdenDiariaSupabase();
 
-      const response = await createSale({
+      // CAMBIOS
+      const newSaleData: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
         detail: saleItems,
-        paymentType: paymentType as any,
-        userId: user?.id || 1,
-        userCustomerId: userSendId,
+        paymentType: paymentType as PaymentTypeEnum,
+        userId: user?.id || 0,
+        userCustomerId: userSendId || 0,
         userName: selectedClient?.fullName ?? "SIN NOMBRE",
         userDocument: selectedClient?.nit ?? "0",
         orderNumber: numeroOrdenCalculado,
         orderStatus: OrderStatusEnum.EN_COCINA,
         tenantId: 1,
         state: true,
-        total,
-        orderType: orderType as any,
+        total: total,
+        orderType: orderType as OrderTypeEnum,
         shift: getCurrentShift(),
-      });
+      };
+
+      const response = await createSale(newSaleData);
+
+      // const response = await createSale({
+      //   detail: saleItems,
+      //   paymentType: paymentType as any,
+      //   userId: user?.id || 1,
+      //   userCustomerId: userSendId,
+      //   userName: selectedClient?.fullName ?? "SIN NOMBRE",
+      //   userDocument: selectedClient?.nit ?? "0",
+      //   orderNumber: numeroOrdenCalculado,
+      //   orderStatus: OrderStatusEnum.EN_COCINA,
+      //   tenantId: 1,
+      //   state: true,
+      //   total,
+      //   orderType: orderType as any,
+      //   shift: getCurrentShift(),
+      // });
+
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
         type: isSuccess ? ToastType.Successfully : ToastType.Fail,
@@ -213,6 +240,11 @@ export function ShoppingCart() {
         return;
       }
 
+      // setCreatedSale(response.contenido as Sale);
+      // setShowTicket(true);
+      setSaleData(response.contenido as Sale);
+      setIsTicketModalOpen(true);
+
       // ========================================================
       // 💡 NUEVO: CONSUMO DEL ENDPOINT DE IMPRESIÓN (.NET)
       try {
@@ -225,17 +257,14 @@ export function ShoppingCart() {
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
             isCountable: item.isCountable,
-            // Si el item tiene productFitting mapeado como objetos, extraemos solo sus nombres en texto plano
             productFittings: Array.isArray((item as any).productFittings)
               ? (item as any).productFittings.map((f: any) => f.name || f)
               : [],
-            // Mapeamos también los subproductos internos si existieran con la misma lógica
             productDetailProduct: Array.isArray(item.productDetailProduct)
               ? item.productDetailProduct.map((sub: any) => ({
                 id: sub.id,
                 productId: sub.productId || 0,
                 name: sub.name,
-                // price: sub.price || 0,
                 price: 0,
                 reasonModification: sub.reasonModification || "",
                 quantity: sub.quantity || 0,
@@ -266,12 +295,23 @@ export function ShoppingCart() {
           "API_PRINT_URL",
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        console.log("api_impresion: carajo" + urlImpresion);
+        console.log("api_impresion: " + urlImpresion);
         // await ApiService.post(urlImpresion, printPayload);
-        await ApiService.post(
-          "http://localhost/restauranteapi/api/Print/PrintRestaurant",
+        const response = await ApiService.post(
+          urlImpresion,
           printPayload,
         );
+        console.log("ℹ️ [Impresión] Solicitud enviada con éxito:", JSON.stringify(response));
+
+        // await ApiService.post(
+        //   "http://localhost/restauranteapi/api/Print/PrintRestaurant",
+        //   printPayload,
+        // );
+
+        // await ApiService.post(
+        //   "http://localhost:5182/api/Print/PrintRestaurant",
+        //   printPayload,
+        // );
 
         // console.log("printPayload: ", JSON.stringify(printPayload));
         // await ApiService.post("https://localhost:7175/api/Print/PrintRestaurant", printPayload);
@@ -282,9 +322,9 @@ export function ShoppingCart() {
         );
       }
 
-      dispatch(clearCart());
-      setShowSummary(false);
-      dispatch(toggleCartSide());
+      // dispatch(clearCart());
+      // setShowSummary(false);
+      // dispatch(toggleCartSide());
     } catch (error) {
       toast.error("Error al procesar la venta");
     } finally {
@@ -890,6 +930,46 @@ export function ShoppingCart() {
         orderType={orderType}
         setOrderType={setOrderType}
       />
+      {showTicket && createdSale && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="relative max-w-full max-h-full overflow-auto">
+            <button
+              onClick={() => setShowTicket(false)}
+              className="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-lg hover:bg-gray-100 transition"
+            >
+              ✕
+            </button>
+            <RestaurantTicket order={createdSale} />
+          </div>
+        </div>
+      )}
+
+      <ResponsiveModal
+        isOpen={isTicketModalOpen}
+        onClose={() => {
+          setIsTicketModalOpen(false);
+          setSaleData(null);
+          dispatch(clearCart());
+          setShowSummary(false);
+          dispatch(toggleCartSide());
+        }}
+        onConfirm={() => {
+          // No necesitamos confirmación, solo cerrar
+          setIsTicketModalOpen(false);
+          setSaleData(null);
+          dispatch(clearCart());
+          setShowSummary(false);
+          dispatch(toggleCartSide());
+        }}
+        title="Ticket de Venta"
+        subtitle={`Pedido #${saleData?.orderNumber || ''}`}
+        size="lg"  // o "xl" si el ticket es ancho
+        confirmText="Cerrar"
+        cancelText="" // ocultamos cancel
+        isProcessing={false}
+      >
+        {saleData && <RestaurantTicket order={saleData} />}
+      </ResponsiveModal>
     </>
   );
 }
