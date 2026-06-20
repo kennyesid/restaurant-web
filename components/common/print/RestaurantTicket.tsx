@@ -135,11 +135,25 @@ export default function RestaurantTicket({ order }: RestaurantTicketProps) {
                                 )} */}
 
                                 {/* Guarniciones (Fittings) del hijo */}
-                                {detail.productFittings?.map((fitting, idx) => (
+                                {/* {detail.productFittings?.map((fitting, idx) => (
                                     <div key={idx} className="pl-8 text-gray-600 font-bold">
                                         + {fitting.toUpperCase()}
                                     </div>
-                                ))}
+                                ))} */}
+
+                                {/* {Array.isArray(detail.productFittings) && detail.productFittings.length > 0 && (
+                                    <div className="pl-8 space-y-0.5">
+                                        {detail.productFittings.map((fitting, idx) => {
+                                            // Si cada fitting es un objeto, usamos fitting.name; si es string, usamos fitting directamente.
+                                            const fittingText = typeof fitting === 'string' ? fitting : fitting || '';
+                                            return (
+                                                <div key={idx} className="text-gray-600 font-bold">
+                                                    + {fittingText.toUpperCase()}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )} */}
                             </div>
                         ))}
 
