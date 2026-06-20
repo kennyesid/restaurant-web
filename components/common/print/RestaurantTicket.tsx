@@ -122,7 +122,8 @@ export default function RestaurantTicket({ order }: RestaurantTicketProps) {
                                             {(detail.name ?? "-").toUpperCase()}
                                         </span>
                                         <span className="w-16 text-right font-bold">
-                                            {Number(detail.price).toFixed(2)}
+                                            {/* {Number(detail.price).toFixed(2)} */}
+                                            0
                                         </span>
                                     </div>
                                 )}
@@ -141,11 +142,19 @@ export default function RestaurantTicket({ order }: RestaurantTicketProps) {
                                     </div>
                                 ))} */}
 
-                                {/* {Array.isArray(detail.productFittings) && detail.productFittings.length > 0 && (
+                                {/* Guarniciones (Fittings) del hijo */}
+                                {Array.isArray(detail.productFittings) && detail.productFittings.length > 0 && (
                                     <div className="pl-8 space-y-0.5">
                                         {detail.productFittings.map((fitting, idx) => {
-                                            // Si cada fitting es un objeto, usamos fitting.name; si es string, usamos fitting directamente.
-                                            const fittingText = typeof fitting === 'string' ? fitting : fitting || '';
+                                            // Extraer el nombre: si es objeto, tomar fitting.name; si es string, usarlo directamente
+                                            const fittingText =
+                                                typeof fitting === 'string'
+                                                    ? fitting
+                                                    : (fitting as any)?.name || '';
+
+                                            // Si no hay texto, no renderizar
+                                            if (!fittingText) return null;
+
                                             return (
                                                 <div key={idx} className="text-gray-600 font-bold">
                                                     + {fittingText.toUpperCase()}
@@ -153,7 +162,7 @@ export default function RestaurantTicket({ order }: RestaurantTicketProps) {
                                             );
                                         })}
                                     </div>
-                                )} */}
+                                )}
                             </div>
                         ))}
 

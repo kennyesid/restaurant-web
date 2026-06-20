@@ -259,7 +259,7 @@ export function ShoppingCart() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.price * item.quantity,
+            price: item.isCountable ? item.price * item.quantity : 0,
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
             isCountable: item.isCountable,
