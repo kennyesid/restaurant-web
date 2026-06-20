@@ -124,7 +124,7 @@ export function ShoppingCart() {
 
     setIsProcessing(true);
 
-    console.log("que cagada", JSON.stringify(items, null, 2));
+    console.log("PASO 1: ", JSON.stringify(items));
 
     try {
       const saleItems = items.flatMap((item) => {
@@ -164,6 +164,8 @@ export function ShoppingCart() {
         }
         return [mainItem];
       });
+
+      console.log("PASO 2: ", JSON.stringify(saleItems));
 
       if (selectedClient) {
         if (selectedClient.id === 0) {
@@ -206,8 +208,11 @@ export function ShoppingCart() {
         shift: getCurrentShift(),
       };
 
+      console.log("PASO 3: ", JSON.stringify(newSaleData));
+
       const response = await createSale(newSaleData);
 
+      console.log("PASO 4: ", JSON.stringify(response.contenido));
       // const response = await createSale({
       //   detail: saleItems,
       //   paymentType: paymentType as any,
@@ -242,8 +247,8 @@ export function ShoppingCart() {
 
       // setCreatedSale(response.contenido as Sale);
       // setShowTicket(true);
-      console.log('REVISARR:: ', JSON.stringify(response.contenido));
-      setSaleData(response.contenido as Sale);
+      // console.log('REVISARR:: ', JSON.stringify(response.contenido));
+      setSaleData(newSaleData as Sale);
       setIsTicketModalOpen(true);
 
       // ========================================================
@@ -296,7 +301,7 @@ export function ShoppingCart() {
           "API_PRINT_URL",
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        console.log("api_impresion: " + urlImpresion);
+        console.log("api_impresion: " + JSON.stringify(printPayload));
         // await ApiService.post(urlImpresion, printPayload);
         const response = await ApiService.post(
           urlImpresion,
