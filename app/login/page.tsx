@@ -51,7 +51,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const user = await authenticateUser(data.email, data.password);
-
       if (user) {
         sessionStorage.setItem("isAuthenticated", "true");
         sessionStorage.setItem("username", user.fullName || user.username);
@@ -60,7 +59,7 @@ export default function LoginPage() {
         if (user?.groupId) {
           configService.setGroupId(user.groupId);
         } else {
-          configService.setGroupId(1);
+          configService.setGroupId(1); // valor por defecto
         }
 
         dispatch(login(user));

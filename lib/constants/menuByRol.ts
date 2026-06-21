@@ -30,9 +30,10 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
       { label: "Ventas", icon: Beef, href: "/sales" },
       { label: "Productos", icon: Package, href: "/product" },
       { label: "Ingredientes", icon: Package, href: "/ingredient" },
+      { label: "Inventario", icon: Package, href: "/inventory" },
     ],
     second: [
-      // { label: "Usuarios", icon: Users, href: "/dashboard/admin/users" },
+      { label: "Usuarios", icon: Users, href: "/admin/users" },
       // { label: "Roles", icon: Settings, href: "/dashboard/admin/roles" },
       // { label: "Categorías", icon: Tag, href: "/dashboard/admin/categories" },
       // { label: "Promociones", icon: Gift, href: "/dashboard/admin/promotions" },

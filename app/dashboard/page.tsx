@@ -442,37 +442,73 @@ export default function DashboardRecap() {
 
   const salesByProductHour = useMemo(() => {
 
-    const result: any[] = [];
+    const productCount = new Map<string, number>();
+    const productData: any[] = [];
 
+    // 1. Primero, contar cuántas veces aparece cada producto
     filteredSales.forEach((sale) => {
-
       const saleDate = new Date(sale.createdAt);
-
-      if (isNaN(saleDate.getTime()))
-        return;
-
+      if (isNaN(saleDate.getTime())) return;
       const hour = saleDate.getHours();
 
       sale.detail?.forEach((item) => {
+        if (selectedProduct !== 0 && item.productId !== selectedProduct) return;
 
-        if (
-          selectedProduct !== 0 &&
-          item.productId !== selectedProduct
-        )
-          return;
+        const productName = item.name;
+        productCount.set(productName, (productCount.get(productName) || 0) + 1);
 
-        result.push({
-          product: item.name,
+        productData.push({
+          product: productName,
           hour
         });
-
       });
-
     });
 
-    return result;
+    // 2. Obtener los 20 productos más vendidos
+    const top20Products = Array.from(productCount.entries())
+      .sort((a, b) => b[1] - a[1]) // Ordenar por cantidad (mayor a menor)
+      .slice(0, 1) // Tomar solo los 20 primeros
+      .map(([name]) => name);
+
+    console.log('REVIEW: ' + JSON.stringify(top20Products))
+    // 3. Filtrar los datos para que solo incluyan esos 20 productos
+    return productData.filter(item => top20Products.includes(item.product));
 
   }, [filteredSales, selectedProduct]);
+
+  // const salesByProductHour = useMemo(() => {
+
+  //   const result: any[] = [];
+
+  //   filteredSales.forEach((sale) => {
+
+  //     const saleDate = new Date(sale.createdAt);
+
+  //     if (isNaN(saleDate.getTime()))
+  //       return;
+
+  //     const hour = saleDate.getHours();
+
+  //     sale.detail?.forEach((item) => {
+
+  //       if (
+  //         selectedProduct !== 0 &&
+  //         item.productId !== selectedProduct
+  //       )
+  //         return;
+
+  //       result.push({
+  //         product: item.name,
+  //         hour
+  //       });
+
+  //     });
+
+  //   });
+
+  //   return result;
+
+  // }, [filteredSales, selectedProduct]);
 
   const salesByHour = useMemo(() => {
 
@@ -524,29 +560,30 @@ export default function DashboardRecap() {
           title="REPORTE"
           subtitle="Gestion de Reporte"
           action={
-            <Button onClick={loadAllData} disabled={isRefreshing} variant="outline" className="shadow-sm hover:shadow-md">
-              <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <Button
+              onClick={loadAllData}
+              disabled={isRefreshing}
+              variant="outline"
+              className="hidden sm:flex shadow-sm hover:shadow-md items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
               Actualizar
             </Button>
           }
         />
 
-        {/* <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
-            Monthly Recap Report
-          </h1>
-          <p className="text-muted-foreground">
-            {safeFormat(dateRange?.from, "dd MMM yyyy", { locale: es })} -{" "}
-            {safeFormat(dateRange?.to, "dd MMM yyyy", { locale: es })}
-          </p>
-        </div> */}
-
-        <div className="flex flex-wrap gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          {/* Fecha Inicio */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2 min-w-[200px] justify-start text-left font-normal shadow-sm hover:shadow-md">
-                <CalendarIcon className="h-4 w-4" />
-                Inicio: {safeFormat(dateRange.from, "dd/MM/yyyy", { locale: es })}
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
+              >
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+                <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
+                <span className="truncate">Inicio: {safeFormat(dateRange.from, "dd/MM/yyyy", { locale: es })}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -554,11 +591,17 @@ export default function DashboardRecap() {
             </PopoverContent>
           </Popover>
 
+          {/* Fecha Fin */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2 min-w-[200px] justify-start text-left font-normal shadow-sm hover:shadow-md">
-                <CalendarIcon className="h-4 w-4" />
-                Fin: {safeFormat(dateRange.to, "dd/MM/yyyy", { locale: es })}
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
+              >
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+                <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
+                <span className="truncate">Fin: {safeFormat(dateRange.to, "dd/MM/yyyy", { locale: es })}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -566,9 +609,12 @@ export default function DashboardRecap() {
             </PopoverContent>
           </Popover>
 
+          {/* Usuario */}
           <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-            <SelectTrigger className="w-[180px] shadow-sm hover:shadow-md">
-              <SelectValue placeholder="Todos los usuarios" />
+            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+              <SelectValue placeholder="Todos los usuarios" className="text-white" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los usuarios</SelectItem>
@@ -578,8 +624,11 @@ export default function DashboardRecap() {
             </SelectContent>
           </Select>
 
+          {/* Categoría */}
           <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-            <SelectTrigger className="w-[180px] shadow-sm hover:shadow-md">
+            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
             <SelectContent>
@@ -590,8 +639,11 @@ export default function DashboardRecap() {
             </SelectContent>
           </Select>
 
+          {/* Producto */}
           <Select value={String(selectedProduct)} onValueChange={(val) => setSelectedProduct(Number(val))}>
-            <SelectTrigger className="w-[180px] shadow-sm hover:shadow-md">
+            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+              <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
               <SelectValue placeholder="Todos los productos" />
             </SelectTrigger>
             <SelectContent>
@@ -603,63 +655,259 @@ export default function DashboardRecap() {
               ))}
             </SelectContent>
           </Select>
-
-          {/* <select
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(Number(e.target.value))}
-          >
-            <option value={0}>Todos los productos</option>
-
-            {products.map((product) => (
-              <option key={product.id} value={product.id}>
-                {product.name}
-              </option>
-            ))}
-          </select> */}
         </div>
       </div>
 
-      {/* PRIMERA FILA: Área (evolución diaria) + Barras horizontales apiladas (ingresos por hora y categoría) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Gráfico 1: Área - Evolución diaria */}
-        <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
-          <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
-            Evolución de Ingresos (Diario)
-          </h3>
-          <ResponsiveContainer width="100%" height={380}>
-            <AreaChart data={dailyRevenueData} onClick={handleBarClick}>
-              <defs>
-                <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`} />
-              <Tooltip
-                contentStyle={{ backgroundColor: "#fff", border: "none", borderRadius: "12px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
-                formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, "Ingresos"]}
-                labelFormatter={(label) => `📅 ${label}`}
-              />
-              <Area type="natural" dataKey="revenue" stroke="#3b82f6" fill="url(#dailyGradient)" strokeWidth={3} activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }} />
-              <Line type="natural" dataKey="revenue" stroke="#1e40af" strokeWidth={2} dot={{ fill: "#1e40af", r: 4 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-          <p className="text-xs text-center text-muted-foreground mt-2">💡 Haz clic en un punto para ver el detalle del día</p>
-        </Card>
+      {/* ============================================
+   PRIMERA FILA: Área (3 columnas) + KPIs (1 columna)
+   ============================================ */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1">
+          {/* <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl h-full"> */}
+          <Card className="p-6 h-full border-0 shadow-none bg-transparent">
+            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+              Resumen de Ventas
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <div className="relative overflow-hidden rounded-xl p-4 text-[#052A3D] shadow-lg bg-gradient-to-br from-yellow-400 via-yellow-300 to-amber-400">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+                  <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/10 rounded-full blur-2xl"></div>
 
-        {/* Gráfico 2: Barras horizontales apiladas - Ingresos por hora, desglosados por categoría */}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <h2 className="text-lg font-black text-[#052A3D] text-center">
+                      {safeFormat(dateRange.from, "dd 'de' MMMM", { locale: es })} - {safeFormat(dateRange.to, "dd 'de' MMMM", { locale: es })}
+                    </h2>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xl p-5 text-white shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <p className="text-xs uppercase tracking-wider opacity-80">
+                    Saldo Total
+                  </p>
+                  <h2 className="text-3xl font-black text-[#facc15]">
+                    Bs. {totalRevenue.toLocaleString()}
+                  </h2>
+                  <div className="flex items-center gap-1 text-xs text-blue-200">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>Libre de Impuestos</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xl p-5 text-[#052A3D] shadow-[0_8px_30px_rgba(0,0,0,0.12)] bg-gradient-to-br from-[#FDFDFD] via-[#f0f0f0] to-[#e3e3e3]">
+                {/* Sombra 3D inferior - efecto de profundidad */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
+
+                {/* Brillo superior para efecto 3D */}
+                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent pointer-events-none rounded-t-xl"></div>
+
+                {/* Borde iluminado superior */}
+                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
+
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/40 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/5 rounded-full blur-2xl"></div>
+
+                <div className="relative z-10 flex flex-col items-center">
+                  <p className="text-xs uppercase tracking-wider opacity-70 text-[#052A3D]">
+                    Productos
+                  </p>
+                  <h2 className="text-3xl font-black text-[#052A3D] drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)]">
+                    {filteredSales.reduce((acc, sale) => acc + (sale.detail?.length || 0), 0).toLocaleString()}
+                  </h2>
+                  <div className="flex items-center gap-1 text-xs text-[#052A3D]/60">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>+15% vs mes anterior</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xl p-5 text-[#052A3D] shadow-lg bg-gradient-to-br from-[#FFEF4D] via-[#fde047] to-[#facc15]">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/10 rounded-full blur-2xl"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <p className="text-xs uppercase tracking-wider opacity-80 text-[#052A3D]">
+                    Clientes
+                  </p>
+                  <h2 className="text-3xl font-black text-[#052A3D]">
+                    156
+                  </h2>
+                  <div className="flex items-center gap-1 text-xs text-[#052A3D]/70">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>+8% vs mes anterior</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xl p-5 text-[#052A3D] shadow-[0_8px_30px_rgba(219,230,76,0.5)] bg-gradient-to-br from-[#DBE64C] via-[#d0d93e] to-[#c5cc30] transform transition-all duration-300 ">
+                {/* Sombra 3D inferior - efecto de profundidad */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+
+                {/* Brillo superior para efecto 3D */}
+                <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none rounded-t-xl"></div>
+
+                {/* Borde iluminado superior */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
+
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/10 rounded-full blur-2xl"></div>
+
+                <div className="relative z-10 flex flex-col items-center">
+                  <p className="text-xs uppercase tracking-wider opacity-80 text-[#052A3D]">
+                    Ticket Promedio
+                  </p>
+                  <h2 className="text-3xl font-black text-[#052A3D] drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                    ${(totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0).toLocaleString("es-CO")}
+                  </h2>
+                  <div className="flex items-center gap-1 text-xs text-[#052A3D]/70">
+                    <TrendingUp className="h-3 w-3" />
+                    <span>+5% vs mes anterior</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </Card>
+        </div>
+        <div className="lg:col-span-3">
+          <Card className="p-6 rounded-2xl border-1 bg-white/90 backdrop-blur-sm transition-all ">
+            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+              Evolución de Ingresos (Diario)
+            </h3>
+            <ResponsiveContainer width="100%" height={290}>
+              <AreaChart data={dailyRevenueData} onClick={handleBarClick}>
+                <defs>
+                  <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#fff", border: "none", borderRadius: "12px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                  formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, "Ingresos"]}
+                  labelFormatter={(label) => `📅 ${label}`}
+                />
+                <Area type="natural" dataKey="revenue" stroke="#3b82f6" fill="url(#dailyGradient)" strokeWidth={3} activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }} />
+                <Line type="natural" dataKey="revenue" stroke="#1e40af" strokeWidth={2} dot={{ fill: "#1e40af", r: 4 }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+      </div>
+
+      {/* SEGUNDA FILA: Ventas por Producto + PieChart en una fila */}
+      {/* <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3">
+          <Card className="p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm">
+            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+              Ventas por Producto y Rango Horario
+            </h3>
+            <ResponsiveContainer width="100%" height={450}>
+              <BarChart
+                data={salesByProductHour}
+                layout="horizontal"
+                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="product"
+                  stroke="#64748b"
+                  fontSize={12}
+                  interval={0}
+                  angle={-20}
+                  textAnchor="end"
+                />
+                <YAxis
+                  domain={[0, 23]}
+                  ticks={[
+                    6, 7, 8, 9, 10, 11, 12,
+                    13, 14, 15, 16, 17, 18,
+                    19, 20, 21, 22, 23
+                  ]}
+                  tickFormatter={(h) => `${h}:00`}
+                />
+                <Bar
+                  dataKey="hour"
+                  fill="#3b82f6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+        <div className="lg:col-span-1">
+          <Card className="p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm h-full">
+            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+              {selectedDate
+                ? `${selectedCategoryId === "all" ? "Detalle por Categorías" : "Top Productos"}`
+                : "Selecciona un día"}
+            </h3>
+
+            {selectedDate && (
+              <div className="flex justify-center mb-4">
+                <Badge variant="secondary" className="text-sm font-mono">
+                  ${pieData.reduce((sum, item) => sum + item.value, 0).toLocaleString("es-CO")}
+                </Badge>
+              </div>
+            )}
+
+            {pieData.length > 0 ? (
+              <div className="relative">
+                <ResponsiveContainer width="100%" height={320}>
+                  <PieChart>
+                    <defs>
+                      {pieData.map((_, idx) => (
+                        <filter key={`shadow-${idx}`} id={`pie-shadow-${idx}`} x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={PIE_COLORS[idx % PIE_COLORS.length]} floodOpacity="0.4" />
+                        </filter>
+                      ))}
+                    </defs>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} dataKey="value" paddingAngle={2}>
+                      {pieData.map((entry, idx) => (
+                        <Cell key={`cell-${idx}`} fill={entry.fill} filter={`url(#pie-shadow-${idx})`} stroke="#fff" strokeWidth={2} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, ""]} contentStyle={{ backgroundColor: "#fff", borderRadius: "12px", border: "none", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[320px] flex items-center justify-center text-muted-foreground">
+                No hay ventas para el día seleccionado
+              </div>
+            )}
+
+            <div className="mt-4 space-y-2 max-h-[150px] overflow-y-auto pr-2">
+              {pieData.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between text-xs p-1 rounded-md hover:bg-slate-50 transition-colors cursor-default">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.fill }} />
+                    <span className="truncate max-w-[120px]">{item.name}</span>
+                  </div>
+                  <span className="font-medium">${item.value.toLocaleString("es-CO")}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </div> */}
+
+      {/* <div className="grid grid-cols-1 gap-6">
         <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
-          <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
-            <span className="w-1 h-6 bg-emerald-500 rounded-full"></span>
+          <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
             Ventas por Producto y Rango Horario
           </h3>
           <ResponsiveContainer width="100%" height={500}>
             <BarChart
               data={salesByProductHour}
-              layout="horizontal" // Valor por defecto, barras verticales
+              layout="horizontal"
               margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -680,13 +928,6 @@ export default function DashboardRecap() {
                 ]}
                 tickFormatter={(h) => `${h}:00`}
               />
-              {/* <Tooltip
-                formatter={(value: number) => [
-                  value,
-                  "Cantidad Vendida"
-                ]}
-              /> */}
-              {/* <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} /> */}
               <Bar
                 dataKey="hour"
                 fill="#3b82f6"
@@ -694,13 +935,9 @@ export default function DashboardRecap() {
               />
             </BarChart>
           </ResponsiveContainer>
-          {/* <p className="text-xs text-center text-muted-foreground mt-2">
-            📊 Cada barra vertical representa una categoría. Los colores muestran el aporte por rango horario.
-          </p> */}
         </Card>
       </div>
 
-      {/* SEGUNDA FILA: PieChart del día seleccionado */}
       <div className="flex justify-center">
         <Card className="w-full max-w-3xl p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
           <div className="flex justify-between items-center mb-6">
@@ -753,15 +990,15 @@ export default function DashboardRecap() {
             ))}
           </div>
         </Card>
-      </div>
+      </div> */}
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <KpiCard title="INGRESOS TOTALES" value={`$${totalRevenue.toLocaleString("es-CO")}`} change="+17%" isPositive={true} icon={<DollarSign className="h-8 w-8" />} />
         <KpiCard title="COSTO TOTAL" value={`$${totalCost.toLocaleString("es-CO")}`} change="+10%" isPositive={false} icon={<TrendingDown className="h-8 w-8" />} />
         <KpiCard title="GANANCIA NETA" value={`$${totalProfit.toLocaleString("es-CO")}`} change={`+${profitMargin}%`} isPositive={true} icon={<TrendingUp className="h-8 w-8" />} />
-      </div>
-    </div>
+      </div> */}
+    </div >
   );
 }
 
@@ -786,6 +1023,3 @@ function KpiCard({ title, value, change, isPositive, icon }: { title: string; va
     </Card>
   );
 }
-
-
-

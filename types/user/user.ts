@@ -26,6 +26,7 @@ export interface Role {
   name: string;
   description: string;
   tenantId: string;
+  state?: boolean;
 }
 
 export interface Permission {
