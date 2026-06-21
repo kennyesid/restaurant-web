@@ -1,8 +1,10 @@
 import { DatabaseService } from "@/lib/dataBase/databaseService";
 import { ProductFittings } from "@/types/product/productFittings";
+import { configService } from "./configService";
 
 // 1. Instanciamos el servicio genérico pasándole el tipo y el nombre exacto de la tabla
-const repository = new DatabaseService<ProductFittings>("product_fittings");
+const groupId = configService.getGroupId(); 
+const repository = new DatabaseService<ProductFittings>("product_fittings", groupId);
 
 export class ProductFittingsService {
   

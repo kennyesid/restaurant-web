@@ -6,19 +6,21 @@ interface BaseEntity {
 
 export class DatabaseService<T> {
   private tableName: string;
+  private groupId: number;
 
-  constructor(tableName: string) {
+  constructor(tableName: string, groupId: number = 1) { // valor por defecto 1
     this.tableName = tableName;
+    this.groupId = groupId;
   }
 
   // Obtener todos los registros con orden opcional
-async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
+  async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
     const { data, error } = await supabase
       .from(this.tableName)
       .select('*')
-      .eq('state', true) 
+      .eq('state', true)
+      .eq('groupId', this.groupId)
       .order(orderBy, { ascending });
-
 
     if (error) {
       console.error(`Error en getAll de la tabla ${this.tableName}:`, error.message);
@@ -26,23 +28,52 @@ async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = t
     }
     return data as T[];
   }
+// async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
+//     const { data, error } = await supabase
+//       .from(this.tableName)
+//       .select('*')
+//       .eq('state', true) 
+//       .order(orderBy, { ascending });
+
+
+//     if (error) {
+//       console.error(`Error en getAll de la tabla ${this.tableName}:`, error.message);
+//       throw error;
+//     }
+//     return data as T[];
+//   }
 
   // Obtener un solo registro por un campo y valor específico (ej: id, 1)
 // Obtener un solo registro por un campo y valor específico
-async getByField(column: keyof T & string, value: any): Promise<T | null> {
-  const { data, error } = await (supabase
-    .from(this.tableName) as any)
-    .select('*')
-    .eq(column as any, value) // 💡 Forzamos 'as any' aquí para calmar el tipado interno de Supabase
-    .single();
+// async getByField(column: keyof T & string, value: any): Promise<T | null> {
+//   const { data, error } = await (supabase
+//     .from(this.tableName) as any)
+//     .select('*')
+//     .eq(column as any, value) // 💡 Forzamos 'as any' aquí para calmar el tipado interno de Supabase
+//     .single();
 
-  if (error) {
-    if (error.code === 'PGRST116') return null; // Registro no encontrado
-    console.error(`Error en getByField en ${this.tableName} [${column}=${value}]:`, error.message);
-    throw error;
+//   if (error) {
+//     if (error.code === 'PGRST116') return null; // Registro no encontrado
+//     console.error(`Error en getByField en ${this.tableName} [${column}=${value}]:`, error.message);
+//     throw error;
+//   }
+//   return data as T;
+// }
+  async getByField(column: keyof T & string, value: any): Promise<T | null> {
+    const { data, error } = await (supabase
+      .from(this.tableName) as any)
+      .select('*')
+      .eq(column as any, value)
+      .eq('groupId', this.groupId) 
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return null;
+      console.error(`Error en getByField en ${this.tableName} [${column}=${value}]:`, error.message);
+      throw error;
+    }
+    return data as T;
   }
-  return data as T;
-}
 
   // Crear un nuevo registro
 async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
@@ -66,6 +97,7 @@ async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
       .from(this.tableName) as any)
       .update(updates as any)
       .eq(column as any, value)
+      .eq('groupId', this.groupId)
       .select()
       .single();
 
@@ -82,7 +114,8 @@ async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
     const { error } = await (supabase
       .from(this.tableName) as any)
       .delete()
-      .eq(column as any, value);
+      .eq(column as any, value)
+      .eq('groupId', this.groupId);
 
     if (error) {
       console.error(`Error en delete de la tabla ${this.tableName}:`, error.message);

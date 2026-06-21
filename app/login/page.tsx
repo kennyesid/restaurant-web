@@ -16,6 +16,7 @@ import { authenticateUser } from "@/services/usersService";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import { ToastType } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
+import { configService } from "@/services/configService";
 
 // const loginSchema = z.object({
 //   email: z.string().min(1, "Email requerido"),
@@ -55,6 +56,13 @@ export default function LoginPage() {
         sessionStorage.setItem("isAuthenticated", "true");
         sessionStorage.setItem("username", user.fullName || user.username);
         sessionStorage.setItem("userId", user.id.toString());
+
+        if (user?.groupId) {
+          configService.setGroupId(user.groupId);
+        } else {
+          configService.setGroupId(1);
+        }
+
         dispatch(login(user));
         toast.success(`¡Bienvenido, ${user.fullName}!`);
         router.push("/dashboard");

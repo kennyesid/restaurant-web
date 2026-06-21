@@ -8,6 +8,7 @@ export interface Sale {
   id: number;
   detail: CartItem[]; 
   userId?: number;
+  groupId: number;
   userName?: string;
   userDocument?: string;
   user?: User;

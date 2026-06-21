@@ -1,6 +1,7 @@
 export interface Ingredient {
   id: number;
   ingredientCategoriesId: number;
+  categoryName?: string;
   supplierId: number;
   groupId: number;
   name: string;
@@ -10,7 +11,7 @@ export interface Ingredient {
   unitType: string;
   currentStock: number;
   quantitypiecesOfChicken?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   state: boolean;
 }

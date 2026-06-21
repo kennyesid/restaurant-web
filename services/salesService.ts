@@ -2,6 +2,7 @@ import { supabase } from "@/lib/dataBase/supabaseClient"; // Asegúrate de tener
 import { CartItem, Sale, RespuestaGenericaDto } from "@/types";
 import { ProductFittingsService } from "./productFittingsService"; // Ajusta la ruta a tu archivo de servicio
 import { DateUtils } from "@/utils/date-utils";
+import { configService } from "./configService";
 
 const responderExito = <T>(
   contenido: T,
@@ -27,10 +28,8 @@ const responderFalla = <T>(
 
 export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
-    // 1. Obtenemos la lista limpia de guarniciones activas desde el nuevo servicio
+    const groupId = configService.getGroupId(); 
     const fitingMasterList = await ProductFittingsService.getAll();
-
-    // 2. Traemos todas las ventas con su detalle plano de la base de datos
 
     const { data: sales, error } = await supabase
       .from("sales")
@@ -38,24 +37,23 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
         *,
         detail:sales_details(*)
       `)
+      .eq("groupId", groupId)
       .eq("state", true)
       .order("createdAt", { ascending: false });
 
     if (error) throw error;
 
-    // 3. Recorremos el historial e hidratamos los IDs de cada detalle
     const formattedSales = (sales || []).map((sale: any) => {
       const formattedDetail = (sale.detail || []).map((item: any) => {
-        // Mapeamos el array de enteros de la base de datos a los objetos completos
         const updatedProductFitting = Array.isArray(item.productFitting)
           ? item.productFitting
               .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
-              .filter(Boolean) // Limpia nulos por si algún ID ya no existiera
+              .filter(Boolean) 
           : [];
 
         return {
           ...item,
-          productFitting: updatedProductFitting // Inyectamos el array de objetos completos
+          productFitting: updatedProductFitting
         };
       });
 
@@ -65,7 +63,6 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
       };
     });
 
-    // 4. Retornamos la respuesta exitosa con la estructura que el frontend espera
     return responderExito(formattedSales as unknown as Sale[]);
   } catch (error) {
     console.error(error);
@@ -104,10 +101,7 @@ export async function createSale(
   saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
-    console.log("saleData", JSON.stringify(saleData));
     const { detail, ...headerVenta } = saleData;
-
-    // 1. Insertar la cabecera de la venta (Sales)
     const { data: newSale, error: saleError } = await supabase
       .from("sales")
       .insert([headerVenta])
@@ -194,29 +188,29 @@ export async function deleteSale(id: number): Promise<RespuestaGenericaDto<boole
 // ========================================================
 // MÉTRICA: TOTAL DE VENTAS POR TURNO
 // ========================================================
-export async function getTotalSalesByShift(): Promise<RespuestaGenericaDto<Record<string, number>>> {
-  try {
-    // Traemos solo las columnas necesarias para no sobrecargar ancho de banda
-    const { data: sales, error } = await supabase
-      .from("sales")
-      .select("shift, total")
-      .eq("state", true);
+// export async function getTotalSalesByShift(): Promise<RespuestaGenericaDto<Record<string, number>>> {
+//   try {
+//     // Traemos solo las columnas necesarias para no sobrecargar ancho de banda
+//     const { data: sales, error } = await supabase
+//       .from("sales")
+//       .select("shift, total")
+//       .eq("state", true);
 
-    if (error) throw error;
+//     if (error) throw error;
 
-    const shifts: Record<string, number> = {};
-    sales.forEach((sale) => {
-      const shiftName = sale.shift || "Sin Turno";
-      if (!shifts[shiftName]) shifts[shiftName] = 0;
-      shifts[shiftName] += Number(sale.total);
-    });
+//     const shifts: Record<string, number> = {};
+//     sales.forEach((sale) => {
+//       const shiftName = sale.shift || "Sin Turno";
+//       if (!shifts[shiftName]) shifts[shiftName] = 0;
+//       shifts[shiftName] += Number(sale.total);
+//     });
 
-    return responderExito(shifts);
-  } catch (error) {
-    console.error(error);
-    return responderFalla("Error al calcular ventas por turno");
-  }
-}
+//     return responderExito(shifts);
+//   } catch (error) {
+//     console.error(error);
+//     return responderFalla("Error al calcular ventas por turno");
+//   }
+// }
 
 // ========================================================
 // MÉTRICA: RANKING DE PRODUCTOS MÁS VENDIDOS
@@ -266,9 +260,11 @@ export async function getTopProducts(limit: number = 5): Promise<RespuestaGeneri
 // ========================================================
 export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
   try {
+    const groupId = configService.getGroupId(); 
     const { data: sales, error } = await supabase
       .from("sales")
       .select("total")
+      .eq("groupId", groupId)
       .eq("state", true);
 
     if (error) throw error;
@@ -283,9 +279,11 @@ export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
 
 export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
   try {
+    const groupId = configService.getGroupId(); 
     const { data, error } = await supabase
       .from('sales') 
       .select('orderNumber, createdAt') 
+      .eq("groupId", groupId)
       .order('id', { ascending: false }) 
       .limit(1); 
 

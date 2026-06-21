@@ -5,12 +5,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LogOut, Menu, Settings, ChevronDown } from "lucide-react";
-import { useAppSelector } from "@/store/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/store/hooks";
 import { MENU_BY_ROL, MenuConfig } from "@/lib/constants/menuByRol";
 import { RoleType } from "@/types";
 import Image from "next/image";
+import { configService } from "@/services/configService";
+import { logout } from "@/store/store/slices/authSlice";
 
 export function Sidebar() {
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const router = useRouter();
 
@@ -24,9 +27,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const cn = (...classes: any[]) => classes.filter(Boolean).join(" ");
   const handleLogout = () => {
-    sessionStorage.removeItem("isAuthenticated");
-    sessionStorage.removeItem("username");
-    sessionStorage.removeItem("userId");
+    dispatch(logout());
+    configService.clearGroupId();
     toast.success("Sesión cerrada correctamente");
     router.push("/login");
   };

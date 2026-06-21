@@ -45,6 +45,7 @@ import RoleGuard from "../auth/RoleGuard";
 import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
 import TicketModal from "../common/print/TicketModal";
 
+
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
 
@@ -137,7 +138,7 @@ export function ShoppingCart() {
           productId: item.productId,
           productDetailProduct: item.productDetailProduct,
           modifiedSubtotal: item.modifiedSubtotal,
-          reasonModification: item.reasonModification,
+          reasonModification: item.reasonModification?.includes('Precio de Combo Modificado') ? undefined : item.reasonModification,
           isCountable: true,
           // isCountable: item.isCountable ?? false,
         };
@@ -156,7 +157,7 @@ export function ShoppingCart() {
             productId: sub.productId,
             productFittings: sub.productFittings ? sub.productFittings : [],
             modifiedSubtotal: sub.modifiedSubtotal,
-            reasonModification: sub.reasonModification,
+            reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
             isCountable: false,
             productDetailProduct: undefined,
           }));
@@ -182,6 +183,8 @@ export function ShoppingCart() {
             nit: selectedClient.nit,
             avatarUrl: "S/N",
             branchId: 1,
+            groupId: user?.groupId ?? 1,
+            groupCode: user?.groupCode ?? "",
           });
           userSendId = selectedClientResponse.id;
         } else {
@@ -191,11 +194,11 @@ export function ShoppingCart() {
 
       const numeroOrdenCalculado = await obtenerSiguienteOrdenDiariaSupabase();
 
-      // CAMBIOS
       const newSaleData: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
         detail: saleItems,
         paymentType: paymentType as PaymentTypeEnum,
         userId: user?.id || 0,
+        groupId: user?.groupId || 0,
         userCustomerId: userSendId || 0,
         userName: selectedClient?.fullName ?? "SIN NOMBRE",
         userDocument: selectedClient?.nit ?? "0",
