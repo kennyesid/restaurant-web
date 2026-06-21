@@ -1,7 +1,7 @@
 import { DatabaseService } from '@/lib/dataBase/databaseService';
 import { IngredientCategories } from '@/types';
 
-const ingredientCategoryService = new DatabaseService<IngredientCategories>('ingredientCategories');
+const ingredientCategoryService = new DatabaseService<IngredientCategories>('ingredientCategories', 1, false);
 
 // ========================================================
 // INGREDIENT CATEGORIES SERVICES

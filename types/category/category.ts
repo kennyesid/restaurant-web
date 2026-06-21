@@ -5,4 +5,5 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
   state: boolean;
+  groupId: number;
 }

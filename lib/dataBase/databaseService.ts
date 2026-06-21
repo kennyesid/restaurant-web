@@ -7,20 +7,35 @@ interface BaseEntity {
 export class DatabaseService<T> {
   private tableName: string;
   private groupId: number;
+  private hasGroupId: boolean; // 👈 Nuevo
 
-  constructor(tableName: string, groupId: number = 1) { // valor por defecto 1
+  constructor(tableName: string, groupId: number = 1, hasGroupId: boolean = false) { // valor por defecto 1
     this.tableName = tableName;
     this.groupId = groupId;
+    this.hasGroupId = hasGroupId;
   }
 
   // Obtener todos los registros con orden opcional
   async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
-    const { data, error } = await supabase
+    let query = supabase
       .from(this.tableName)
       .select('*')
-      .eq('state', true)
-      .eq('groupId', this.groupId)
-      .order(orderBy, { ascending });
+      .eq('state', true);
+
+    // 👇 Solo si la tabla tiene groupId, agregamos el filtro
+    if (this.hasGroupId) {
+      query = query.eq('groupId', this.groupId);
+    }
+
+
+console.log("Tabla:", this.tableName);
+console.log("Tiene groupId:", this.hasGroupId);
+console.log("GroupId:", this.groupId);
+
+    const { data, error } = await query.order(orderBy, { ascending });
+
+console.log(`DATA: ${this.tableName} :`, data);
+console.log(`ERROR: ${this.tableName} :`, error);
 
     if (error) {
       console.error(`Error en getAll de la tabla ${this.tableName}:`, error.message);
@@ -28,6 +43,21 @@ export class DatabaseService<T> {
     }
     return data as T[];
   }
+  // async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
+  //   const { data, error } = await supabase
+  //     .from(this.tableName)
+  //     .select('*')
+  //     .eq('state', true)
+  //     .eq('groupId', this.groupId)
+  //     .order(orderBy, { ascending });
+
+  //   if (error) {
+  //     console.error(`Error en getAll de la tabla ${this.tableName}:`, error.message);
+  //     throw error;
+  //   }
+  //   return data as T[];
+  // }
+
 // async getAll(orderBy: keyof T & string = 'id' as keyof T & string, ascending = true): Promise<T[]> {
 //     const { data, error } = await supabase
 //       .from(this.tableName)
@@ -59,47 +89,56 @@ export class DatabaseService<T> {
 //   }
 //   return data as T;
 // }
-  async getByField(column: keyof T & string, value: any): Promise<T | null> {
-    const { data, error } = await (supabase
-      .from(this.tableName) as any)
+
+  async getByField(column: keyof T, value: any): Promise<T | null> {
+    let query = supabase
+      .from(this.tableName)
       .select('*')
-      .eq(column as any, value)
-      .eq('groupId', this.groupId) 
-      .single();
+      .eq(column as string, value);
+
+    if (this.hasGroupId) {
+      query = query.eq('groupId', this.groupId);
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       if (error.code === 'PGRST116') return null;
-      console.error(`Error en getByField en ${this.tableName} [${column}=${value}]:`, error.message);
+      console.error(`Error en getByField en ${this.tableName}:`, error.message);
       throw error;
     }
     return data as T;
   }
 
   // Crear un nuevo registro
-async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
-  const { data, error } = await supabase
-    .from(this.tableName)
-    // 💡 Casteamos [item] como any[] para saltar la validación estricta de exceso de propiedades de Supabase
-    .insert([item] as any) 
-    .select()
-    .single();
+  async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
+    const itemToInsert = this.hasGroupId ? { ...item, groupId: this.groupId } : item;
 
-  if (error) {
-    console.error(`Error en create de la tabla ${this.tableName}:`, error.message);
-    throw error;
-  }
-  return data as T;
-}
-
-  // Actualizar un registro buscando por una columna (ej: id)
-  async update(column: keyof T & string, value: any, updates: Partial<Omit<T, 'id'>>): Promise<T | null> {
-    const { data, error } = await (supabase
-      .from(this.tableName) as any)
-      .update(updates as any)
-      .eq(column as any, value)
-      .eq('groupId', this.groupId)
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .insert([itemToInsert] as any)
       .select()
       .single();
+
+    if (error) {
+      console.error(`Error en create de la tabla ${this.tableName}:`, error.message);
+      throw error;
+    }
+    return data as T;
+  }
+
+  // Actualizar un registro buscando por una columna (ej: id)
+  async update(column: keyof T, value: any, updates: Partial<Omit<T, 'id'>>): Promise<T | null> {
+    let query = supabase
+      .from(this.tableName)
+      .update(updates as any)
+      .eq(column as string, value);
+
+    if (this.hasGroupId) {
+      query = query.eq('groupId', this.groupId);
+    }
+
+    const { data, error } = await query.select().single();
 
     if (error) {
       if (error.code === 'PGRST116') return null;
@@ -110,12 +149,17 @@ async create(item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>): Promise<T> {
   }
 
   // Eliminar un registro buscando por una columna
-  async delete(column: keyof T & string, value: any): Promise<boolean> {
-    const { error } = await (supabase
-      .from(this.tableName) as any)
+  async delete(column: keyof T, value: any): Promise<boolean> {
+    let query = supabase
+      .from(this.tableName)
       .delete()
-      .eq(column as any, value)
-      .eq('groupId', this.groupId);
+      .eq(column as string, value);
+
+    if (this.hasGroupId) {
+      query = query.eq('groupId', this.groupId);
+    }
+
+    const { error } = await query;
 
     if (error) {
       console.error(`Error en delete de la tabla ${this.tableName}:`, error.message);

@@ -1,7 +1,9 @@
 import { DatabaseService } from '@/lib/dataBase/databaseService';
 import { Category } from '@/types';
+import { configService } from './configService';
 
-const categoryService = new DatabaseService<Category>('categories');
+const groupId = configService.getGroupId(); 
+const categoryService = new DatabaseService<Category>('categories', groupId);
 
 export async function getCategories(): Promise<Category[]> {
   console.log("hola: " + (await categoryService.getAll('id', true)));

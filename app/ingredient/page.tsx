@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, Fragment } from "react";
 import { Plus, Edit, Trash2, Search, SlidersHorizontal, X } from "lucide-react";
-import { Ingredient, IngredientCategories, Product, RoleType } from "@/types";
+import { Ingredient, IngredientCategories, Product, RoleType, ToastType } from "@/types";
 import {
     getIngredients,
     createIngredient,
@@ -26,6 +26,9 @@ import AlertDialogComponent from "@/components/common/alert/AlertDialogComponent
 import { AlertVariant } from "@/types/enum/alertVariant";
 import { getProducts } from "@/services/productsSservice";
 import { getIngredientCategories } from "@/services/ingredientCategoriesService";
+import { ResponsiveModal } from "@/components/common/modal/ResponsiveModal";
+import CustomNotification from "@/components/common/toast/CustomNotification";
+import { toast } from "sonner";
 
 interface Supplier {
     id: number;
@@ -156,14 +159,31 @@ export default function IngredientsABM() {
         } else {
             await createIngredient(formData);
         }
+
+        const currentToastBody = {
+            type: ToastType.Successfully,
+            message: "Exito",
+            description: "El ingrediente se guardo correctamente",
+            image: null,
+        };
+        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+
         await loadData();
         handleCloseModal();
     };
 
-    const handleDeleteIngredient = async (id: number) => {
-        if (confirm("¿Estás seguro de que deseas eliminar este ingrediente?")) {
-            await deleteIngredient(id);
-            await loadData();
+    const handleDeleteIngredient = (id: number) => {
+        setIngredientToDelete(id);
+        setAlertOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (ingredientToDelete !== null) {
+            deleteIngredient(ingredientToDelete).then(() => {
+                loadData();
+                setIngredientToDelete(null);
+                setAlertOpen(false);
+            });
         }
     };
 
@@ -174,19 +194,18 @@ export default function IngredientsABM() {
 
     const columns: Column<Ingredient>[] = [
         {
-            header: "ID",
-            accessor: (item) => <span className="font-bold text-gray-500">#{item.id}</span>,
-        },
-        {
             header: "Nombre",
             accessor: (item) => (
                 <div className="flex flex-col">
                     <span className="font-semibold text-[#052A3D]">{item.name}</span>
-                    {item.description && (
-                        <span className="text-xs text-gray-400 font-normal truncate max-w-[200px]">
-                            {item.description}
-                        </span>
-                    )}
+                </div>
+            ),
+        },
+        {
+            header: "Descripción",
+            accessor: (item) => (
+                <div className="flex flex-col">
+                    <span className="font-semibold text-[#052A3D]">{item.description}</span>
                 </div>
             ),
         },
@@ -201,48 +220,7 @@ export default function IngredientsABM() {
                 );
             },
         },
-        {
-            header: "Proveedor",
-            accessor: (item) => {
-                const supplierName = suppliers.find((s) => s.id === item.supplierId)?.name || "Ninguno";
-                return <span className="text-gray-600">{supplierName}</span>;
-            },
-        },
-        {
-            header: "Stock actual",
-            accessor: (item) => (
-                <span className="font-medium text-gray-700">
-                    {item.currentStock} {item.unitType}
-                </span>
-            ),
-        },
-        {
-            header: "Precio unitario",
-            accessor: (item) => (
-                <span className="font-bold text-gray-900 text-right">
-                    Bs {item.price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-            ),
-        },
-        {
-            header: "Estado",
-            accessor: (item) => (
-                <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${item.state ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                        }`}
-                >
-                    {item.state ? "Activo" : "Inactivo"}
-                </span>
-            ),
-        },
     ];
-
-    const handleConfirmDelete = () => {
-        if (ingredientToDelete !== null) {
-            deleteIngredient(ingredientToDelete).then(loadData);
-            setIngredientToDelete(null);
-        }
-    };
 
     return (
         <div className="space-y-6">
@@ -331,7 +309,194 @@ export default function IngredientsABM() {
                 />
             </div>
 
-            {isModalOpen && (
+            <ResponsiveModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onConfirm={() => {
+                    if (!formData.name.trim()) {
+                        const currentToastBody = {
+                            type: ToastType.Fail,
+                            message: "Error",
+                            description: "El nombre es obligatorio",
+                            image: null,
+                        };
+                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+
+                        return;
+                    }
+                    if (formData.description.trim().length < 3) {
+                        const currentToastBody = {
+                            type: ToastType.Fail,
+                            message: "Error",
+                            description: "La descripción debe tener al menos 3 caracteres",
+                            image: null,
+                        };
+                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+                        return;
+                    }
+                    if (!formData.ingredientCategoriesId) {
+                        const currentToastBody = {
+                            type: ToastType.Fail,
+                            message: "Error",
+                            description: "Debes seleccionar una categoría",
+                            image: null,
+                        };
+                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+                        return;
+                    }
+                    if (formData.price <= 0) {
+                        const currentToastBody = {
+                            type: ToastType.Fail,
+                            message: "Error",
+                            description: "El precio no puede ser negativo",
+                            image: null,
+                        };
+                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+                        return;
+                    }
+                    if (!formData.unitType.trim()) {
+                        const currentToastBody = {
+                            type: ToastType.Fail,
+                            message: "Error",
+                            description: "El tipo de unidad es obligatorio",
+                            image: null,
+                        };
+                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+                        return;
+                    }
+
+                    const fakeEvent = { preventDefault: () => { } } as React.FormEvent;
+                    handleSaveIngredient(fakeEvent);
+                }}
+                title={editingIngredient ? "Editar Ingrediente" : "Crear Nuevo Ingrediente"}
+                subtitle={editingIngredient ? "Modifica los datos del ingrediente" : "Completa los datos del nuevo ingrediente"}
+                size="lg"
+                confirmText={editingIngredient ? "Guardar Cambios" : "Guardar Ingrediente"}
+                cancelText="Cancelar"
+                isProcessing={false}
+            >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Nombre */}
+                    <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Nombre <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            required
+                            type="text"
+                            placeholder="Ej. Carne Molida Premium"
+                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] ${!formData.name.trim() && isModalOpen ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            value={formData.name}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^a-zA-ZáéíóúñÑ0-9\s\-_.,]/g, '');
+                                setFormData({ ...formData, name: value });
+                            }}
+                        />
+                        {!formData.name.trim() && isModalOpen && (
+                            <p className="text-xs text-red-500 mt-1">El nombre es obligatorio</p>
+                        )}
+                        {formData.name.trim().length > 0 && formData.name.trim().length < 3 && (
+                            <p className="text-xs text-red-500 mt-1">El nombre debe tener al menos 3 caracteres</p>
+                        )}
+                    </div>
+
+                    {/* Descripción */}
+                    <div className="sm:col-span-2">
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Descripción</label>
+                        <input
+                            type="text"
+                            placeholder="Detalles sobre el ingrediente (opcional)"
+                            className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
+                            value={formData.description}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^a-zA-ZáéíóúñÑ0-9\s\-_.,]/g, '');
+                                setFormData({ ...formData, description: value });
+                            }}
+                        />
+                    </div>
+
+                    {/* Categoría */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Categoría <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            required
+                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] bg-white ${!formData.ingredientCategoriesId && isModalOpen ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            value={formData.ingredientCategoriesId}
+                            onChange={(e) => setFormData({ ...formData, ingredientCategoriesId: parseInt(e.target.value) })}
+                        >
+                            <option value="">Seleccionar categoría</option>
+                            {ingredientCategories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                        {!formData.ingredientCategoriesId && isModalOpen && (
+                            <p className="text-xs text-red-500 mt-1">Debes seleccionar una categoría</p>
+                        )}
+                    </div>
+
+                    {/* Precio Unitario */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Precio Unitario (Bs) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            required
+                            type="number"
+                            step="any"
+                            min="0"
+                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] ${(formData.price < 0 || isNaN(formData.price)) && isModalOpen ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            value={formData.price}
+                            onChange={(e) => {
+                                let value = parseFloat(e.target.value);
+                                if (value < 0 || isNaN(value)) {
+                                    value = 0;
+                                }
+                                setFormData({ ...formData, price: value });
+                            }}
+                            onBlur={(e) => {
+                                const value = parseFloat(e.target.value);
+                                if (isNaN(value) || value < 0) {
+                                    setFormData({ ...formData, price: 0 });
+                                }
+                            }}
+                        />
+                        {(formData.price < 0 || isNaN(formData.price)) && isModalOpen && (
+                            <p className="text-xs text-red-500 mt-1">El precio no puede ser negativo</p>
+                        )}
+                    </div>
+
+                    {/* Tipo de Unidad */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
+                            Tipo de Unidad <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            required
+                            type="text"
+                            placeholder="kg, liters, units..."
+                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] ${!formData.unitType.trim() && isModalOpen ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                            value={formData.unitType}
+                            onChange={(e) => {
+                                const value = e.target.value.replace(/[^a-zA-Z0-9\s]/g, '');
+                                setFormData({ ...formData, unitType: value });
+                            }}
+                        />
+                        {!formData.unitType.trim() && isModalOpen && (
+                            <p className="text-xs text-red-500 mt-1">El tipo de unidad es obligatorio</p>
+                        )}
+                    </div>
+                </div>
+            </ResponsiveModal>
+
+            {/* {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
                     <div className="bg-white w-full max-w-xl rounded-md shadow-xl border border-gray-100 flex flex-col max-h-[90vh]">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
@@ -472,7 +637,7 @@ export default function IngredientsABM() {
                         </form>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     );
 }
