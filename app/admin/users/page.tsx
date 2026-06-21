@@ -234,7 +234,7 @@ export default function UsersABM() {
 
     const actions: TableActions<User> = {
         onEdit: (item) => handleOpenModal(item),
-        onDelete: (item) => handleDeleteUser(item.id),
+        // onDelete: (item) => handleDeleteUser(item.id),
     };
 
     const columns: Column<User>[] = [
@@ -276,14 +276,14 @@ export default function UsersABM() {
                 );
             },
         },
-        {
-            header: "Estado",
-            accessor: (item) => (
-                <span className={`px-2 py-1 rounded text-xs font-medium ${item.state ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    {item.state ? "Activo" : "Inactivo"}
-                </span>
-            ),
-        },
+        // {
+        //     header: "Estado",
+        //     accessor: (item) => (
+        //         <span className={`px-2 py-1 rounded text-xs font-medium ${item.state ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+        //             {item.state ? "Activo" : "Inactivo"}
+        //         </span>
+        //     ),
+        // },
     ];
 
     if (loading) {

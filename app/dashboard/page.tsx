@@ -441,38 +441,23 @@ export default function DashboardRecap() {
   }, [filteredSales, products, categories]);
 
   const salesByProductHour = useMemo(() => {
-
     const productCount = new Map<string, number>();
-    const productData: any[] = [];
 
-    // 1. Primero, contar cuántas veces aparece cada producto
+    const EXCLUDED_WORDS = ['Almuerzo'];
+
     filteredSales.forEach((sale) => {
-      const saleDate = new Date(sale.createdAt);
-      if (isNaN(saleDate.getTime())) return;
-      const hour = saleDate.getHours();
-
       sale.detail?.forEach((item) => {
         if (selectedProduct !== 0 && item.productId !== selectedProduct) return;
-
-        const productName = item.name;
+        const productName = item.name.trim();
+        if (EXCLUDED_WORDS.some(word => productName.toLowerCase().includes(word.toLowerCase()))) return;
         productCount.set(productName, (productCount.get(productName) || 0) + 1);
-
-        productData.push({
-          product: productName,
-          hour
-        });
       });
     });
 
-    // 2. Obtener los 20 productos más vendidos
-    const top20Products = Array.from(productCount.entries())
-      .sort((a, b) => b[1] - a[1]) // Ordenar por cantidad (mayor a menor)
-      .slice(0, 1) // Tomar solo los 20 primeros
-      .map(([name]) => name);
-
-    console.log('REVIEW: ' + JSON.stringify(top20Products))
-    // 3. Filtrar los datos para que solo incluyan esos 20 productos
-    return productData.filter(item => top20Products.includes(item.product));
+    return Array.from(productCount.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([name, count]) => ({ product: name, hour: count })); // Usamos 'hour' como alias para 'count'
 
   }, [filteredSales, selectedProduct]);
 
@@ -803,7 +788,7 @@ export default function DashboardRecap() {
       </div>
 
       {/* SEGUNDA FILA: Ventas por Producto + PieChart en una fila */}
-      {/* <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-3">
           <Card className="p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm">
             <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
@@ -897,7 +882,7 @@ export default function DashboardRecap() {
             </div>
           </Card>
         </div>
-      </div> */}
+      </div>
 
       {/* <div className="grid grid-cols-1 gap-6">
         <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl">
