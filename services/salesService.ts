@@ -28,7 +28,7 @@ const responderFalla = <T>(
 
 export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
-    const groupId = configService.getGroupId(); 
+    const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
 
     const { data: sales, error } = await supabase
@@ -47,8 +47,8 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
       const formattedDetail = (sale.detail || []).map((item: any) => {
         const updatedProductFitting = Array.isArray(item.productFitting)
           ? item.productFitting
-              .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
-              .filter(Boolean) 
+            .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+            .filter(Boolean)
           : [];
 
         return {
@@ -115,32 +115,32 @@ export async function createSale(
     const finalDetail: any[] = [];
 
     if (detail && detail.length > 0) {
-    for (const item of detail) {
-      // 1. Extraemos los campos que no van directo al spread o necesitan transformación
-      const { id: frontId, productFittings, productDetailProduct, ...cartItemData } = item;
+      for (const item of detail) {
+        // 1. Extraemos los campos que no van directo al spread o necesitan transformación
+        const { id: frontId, productFittings, productDetailProduct, ...cartItemData } = item;
 
-      // 2. Transformamos la lista de objetos de guarniciones en un array limpio de IDs numéricos [2, 3]
-      const fittingIds = Array.isArray(productFittings)
-        ? productFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
-        : [];
+        // 2. Transformamos la lista de objetos de guarniciones en un array limpio de IDs numéricos [2, 3]
+        const fittingIds = Array.isArray(productFittings)
+          ? productFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
+          : [];
 
-      // 3. Insertamos directamente todo el producto aplanado en "sales_details"
-      const { data: insertedDetail, error: itemError } = await supabase
-        .from("sales_details")
-        .insert([{ 
-          ...cartItemData, 
-          saleId,
-          productFittings: fittingIds // Guardamos el array de enteros [2, 3] directo en la columna
-        }]) 
-        .select()
-        .single();
+        // 3. Insertamos directamente todo el producto aplanado en "sales_details"
+        const { data: insertedDetail, error: itemError } = await supabase
+          .from("sales_details")
+          .insert([{
+            ...cartItemData,
+            saleId,
+            productFittings: fittingIds // Guardamos el array de enteros [2, 3] directo en la columna
+          }])
+          .select()
+          .single();
 
-      if (itemError) throw itemError;
+        if (itemError) throw itemError;
 
-      // 4. Agregamos el registro procesado al array de respuesta
-      finalDetail.push(insertedDetail);
+        // 4. Agregamos el registro procesado al array de respuesta
+        finalDetail.push(insertedDetail);
+      }
     }
-  }
 
     const responsePayload: Sale = {
       ...newSale,
@@ -157,7 +157,7 @@ export async function createSale(
       codigo: error?.code,
       objetoCompleto: error
     });
-    
+
     return responderFalla(`No se pudo procesar la venta: ${error?.message || 'Error de datos'}`);
   }
 }
@@ -229,7 +229,7 @@ export async function getTopProducts(limit: number = 5): Promise<RespuestaGeneri
 
     items.forEach((item) => {
       const price = Number(item.price);
-      const quantity = Number(item.quantity); 
+      const quantity = Number(item.quantity);
 
       if (productMap.has(item.name)) {
         const existing = productMap.get(item.name)!;
@@ -260,7 +260,7 @@ export async function getTopProducts(limit: number = 5): Promise<RespuestaGeneri
 // ========================================================
 export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
   try {
-    const groupId = configService.getGroupId(); 
+    const groupId = configService.getGroupId();
     const { data: sales, error } = await supabase
       .from("sales")
       .select("total")
@@ -279,13 +279,13 @@ export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
 
 export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
   try {
-    const groupId = configService.getGroupId(); 
+    const groupId = configService.getGroupId();
     const { data, error } = await supabase
-      .from('sales') 
-      .select('orderNumber, createdAt') 
+      .from('sales')
+      .select('orderNumber, createdAt')
       .eq("groupId", groupId)
-      .order('id', { ascending: false }) 
-      .limit(1); 
+      .order('id', { ascending: false })
+      .limit(1);
 
     console.log('data', data);
     console.log('error', error);
@@ -300,8 +300,8 @@ export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
 
     const ultimaVenta = data[0];
 
-    const fechaUltimaVenta = ultimaVenta.createdAt 
-      ? ultimaVenta.createdAt.substring(0, 10) 
+    const fechaUltimaVenta = ultimaVenta.createdAt
+      ? ultimaVenta.createdAt.substring(0, 10)
       : "";
 
     // 5. Comparación lógica
@@ -317,172 +317,61 @@ export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
   } catch (error: any) {
     console.error("Error al calcular el número de orden diario en Supabase:", error.message);
     // Fallback seguro: si falla la red, devolvemos 1 para no congelar la experiencia del cliente
-    return 1; 
+    return 1;
   }
 }
 
-//  INICIO
+// ========================================================
+// MÉTRICA: VENTAS POR USUARIO (userDocument)
+// ========================================================
+export async function getSalesByUserDocument(): Promise<RespuestaGenericaDto<{ userDocument: string; count: number; totalAmount: number; userName?: string }[]>> {
+  try {
+    const groupId = configService.getGroupId();
 
-// import { storage } from "@/lib/storage";
-// import { CartItem, Product, Sale, RespuestaGenericaDto } from "@/types";
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select("userDocument, total, userName")
+      .eq("groupId", groupId)
+      .eq("state", true);
 
-// const SALES_KEY = "sales";
+    if (error) throw error;
 
-// function getRandomAprilDate(): Date {
-//   const day = Math.floor(Math.random() * 30) + 1; // Días del 1 al 30
-//   const hour = Math.floor(Math.random() * 14) + 8; // Horario laboral entre 08:00 y 22:00
-//   const minute = Math.floor(Math.random() * 60);
-//   const second = Math.floor(Math.random() * 60);
+    // Agrupar por userDocument
+    const userMap = new Map<string, {
+      userDocument: string;
+      count: number;
+      totalAmount: number;
+      userName?: string
+    }>();
 
-//   return new Date(2026, 3, day, hour, minute, second); // Mes 3 es Abril en JS
-// }
+    (sales || []).forEach((sale) => {
+      const doc = sale.userDocument || "SIN_DOCUMENTO";
+      const total = Number(sale.total) || 0;
 
-// const salesMockData: Sale[] = [];
+      if (userMap.has(doc)) {
+        const existing = userMap.get(doc)!;
+        existing.count += 1;
+        existing.totalAmount += total;
+        // Si no tiene nombre, intentar asignar el primero que aparezca
+        if (!existing.userName && sale.userName) {
+          existing.userName = sale.userName;
+        }
+      } else {
+        userMap.set(doc, {
+          userDocument: doc,
+          count: 1,
+          totalAmount: total,
+          userName: sale.userName || undefined
+        });
+      }
+    });
 
-// const responderExito = <T>(
-//   contenido: T,
-//   mensaje = "Operación exitosa",
-// ): RespuestaGenericaDto<T> => ({
-//   codigo: 200,
-//   mensaje,
-//   contenido,
-// });
+    const result = Array.from(userMap.values())
+      .sort((a, b) => b.count - a.count); // Ordenar por cantidad descendente
 
-// const responderFalla = <T>(
-//   mensaje: string,
-//   codigo = 400,
-// ): RespuestaGenericaDto<T> => ({
-//   codigo,
-//   mensaje,
-//   contenido: null,
-// });
-
-// export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
-//   try {
-//     let data = storage.getCollection<Sale>(SALES_KEY);
-
-//     if (!data || data.length === 0) {
-//       salesMockData.forEach((sale) => {
-//         storage.addToCollection(SALES_KEY, sale, "saleId");
-//       });
-//       data = storage.getCollection<Sale>(SALES_KEY);
-//     }
-
-//     return responderExito(data);
-//   } catch (error) {
-//     return responderFalla("Error al obtener el historial de ventas");
-//   }
-// }
-
-// export async function getSaleById(
-//   id: number,
-// ): Promise<RespuestaGenericaDto<Sale>> {
-//   try {
-//     const sale = storage.getFromCollection<Sale>(SALES_KEY, id, "id");
-//     if (!sale) return responderFalla(`Venta #${id} no encontrada`, 404);
-//     return responderExito(sale);
-//   } catch (error) {
-//     return responderFalla("Error al buscar la venta");
-//   }
-// }
-
-// export async function createSale(
-//   sale: Omit<Sale, "id" | "createdAt" | "updatedAt">
-// ): Promise<RespuestaGenericaDto<Sale>> {
-//   try {
-//     const currentSales = storage.getCollection<Sale>(SALES_KEY);
-//     const maxId = currentSales.length > 0 ? Math.max(...currentSales.map(s => s.id)) : 0;
-
-//     const newSale: Sale = {
-//       ...sale,
-//       id: maxId + 1,
-//       createdAt: new Date(),
-//       updatedAt: new Date(),
-//     };
-
-//     storage.addToCollection(SALES_KEY, newSale, "id");
-//     return responderExito(newSale, "Venta registrada con éxito");
-//   } catch (error) {
-//     return responderFalla("No se pudo procesar la venta");
-//   }
-// }
-
-// export async function deleteSale(
-//   id: number,
-// ): Promise<RespuestaGenericaDto<boolean>> {
-//   try {
-//     const deleted = storage.removeFromCollection(SALES_KEY, id, "id");
-//     return deleted 
-//       ? responderExito(true, "Venta eliminada") 
-//       : responderFalla("No se encontró la venta para eliminar");
-//   } catch (error) {
-//     return responderFalla("Error al intentar eliminar el registro");
-//   }
-// }
-
-// export async function getTotalSalesByShift(): Promise<
-//   RespuestaGenericaDto<Record<string, number>>
-// > {
-//   try {
-//     const sales = storage.getCollection<Sale>(SALES_KEY);
-//     const shifts: Record<string, number> = {};
-
-//     sales.forEach((sale) => {
-//       const shiftName = sale.shift || "Sin Turno";
-//       if (!shifts[shiftName]) {
-//         shifts[shiftName] = 0;
-//       }
-//       shifts[shiftName] += sale.total;
-//     });
-
-//     return responderExito(shifts);
-//   } catch (error) {
-//     return responderFalla("Error al calcular ventas por turno");
-//   }
-// }
-
-// export async function getTopProducts(
-//   limit: number = 5,
-// ): Promise<RespuestaGenericaDto<any[]>> {
-//   try {
-//     const sales = storage.getCollection<Sale>(SALES_KEY);
-//     const productMap = new Map<
-//       number,
-//       { name: string; quantity: number; revenue: number }
-//     >();
-
-//     sales.forEach((sale) => {
-//       sale.detail?.forEach((item) => {
-//         if (productMap.has(item.id)) {
-//           const existing = productMap.get(item.id)!;
-//           existing.quantity += item.quantity;
-//           existing.revenue += item.price * item.quantity;
-//         } else {
-//           productMap.set(item.id, {
-//             name: item.name,
-//             quantity: item.quantity,
-//             revenue: item.price * item.quantity,
-//           });
-//         }
-//       });
-//     });
-
-//     const result = Array.from(productMap.values())
-//       .sort((a, b) => b.revenue - a.revenue)
-//       .slice(0, limit);
-
-//     return responderExito(result);
-//   } catch (error) {
-//     return responderFalla("Error al generar ranking de productos");
-//   }
-// }
-
-// export async function getTotalRevenue(): Promise<RespuestaGenericaDto<number>> {
-//   try {
-//     const sales = storage.getCollection<Sale>(SALES_KEY);
-//     const total = sales.reduce((sum, sale) => sum + sale.total, 0);
-//     return responderExito(total);
-//   } catch (error) {
-//     return responderFalla("Error al calcular ingresos totales");
-//   }
-// }
+    return responderExito(result);
+  } catch (error) {
+    console.error(error);
+    return responderFalla("Error al obtener ventas por usuario");
+  }
+}

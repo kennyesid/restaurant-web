@@ -295,13 +295,13 @@ export default function UsersABM() {
             <PageHeader
                 title="Gestión de Usuarios"
                 subtitle="Administración de cuentas, credenciales, contactos y roles de acceso."
-                action={
-                    <div className="w-50">
-                        <ButtonGeneric onClick={() => handleOpenModal()}>
-                            Nuevo Usuario
-                        </ButtonGeneric>
-                    </div>
-                }
+            // action={
+            //     <div className="w-50">
+            //         <ButtonGeneric onClick={() => handleOpenModal()}>
+            //             Nuevo Usuario
+            //         </ButtonGeneric>
+            //     </div>
+            // }
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

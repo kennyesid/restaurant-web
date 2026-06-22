@@ -671,10 +671,10 @@ export default function DashboardRecap() {
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
                 <div className="relative z-10 flex flex-col items-center">
-                  <p className="text-xs uppercase tracking-wider opacity-80">
+                  <p className="text-xs xs:text-sm md:text-xs  md:normal-case tracking-wider opacity-80">
                     Saldo Total
                   </p>
-                  <h2 className="text-3xl font-black text-[#facc15]">
+                  <h2 className="text-3xl font-black md:text-xs text-[#facc15]">
                     Bs. {totalRevenue.toLocaleString()}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-blue-200">
