@@ -279,10 +279,9 @@ export default function SalesPage() {
             <thead className="bg-[#052A3D] text-white text-xs uppercase tracking-wider">
               <tr>
                 <th className="px-4 py-3"></th>
-                <th className="px-6 py-3 font-semibold">Pedido / ID</th>
-                {/* <th className="px-6 py-3 font-semibold">Estado</th> */}
+                <th className="px-6 py-3 font-semibold">Pedido</th>
                 <th className="px-6 py-3 font-semibold">Fecha y Hora</th>
-                <th className="px-6 py-3 font-semibold">Cliente / Datos</th>
+                <th className="px-6 py-3 font-semibold">Cliente</th>
                 <th className="px-6 py-3 font-semibold">Tipo Orden</th>
                 <th className="px-6 py-3 font-semibold">Operador</th>
                 <th className="px-6 py-3 font-semibold">Pago</th>
@@ -338,9 +337,9 @@ export default function SalesPage() {
                     </td>
                     <td className="px-6 py-2">
                       <div className="flex flex-col">
-                        {sale.userName ? (
+                        {sale.userCustomerName ? (
                           <span className="text-xs font-bold uppercase text-gray-800">
-                            {sale.userName}
+                            {sale.userCustomerName}
                           </span>
                         ) : (
                           <span className="text-xs italic text-gray-400">
@@ -372,7 +371,7 @@ export default function SalesPage() {
                     <td className="px-6 py-2">
                       <div className="flex flex-col gap-0.5">
                         <span className="text-xs text-gray-600 font-medium">
-                          #{sale.userId}
+                          {sale.userName}
                         </span>
                         {/* <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500">
                           {sale.shift === "night" ? <Moon size={10} className="text-indigo-500" /> : <Sun size={10} className="text-amber-500" />}
