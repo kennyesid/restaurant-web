@@ -3,12 +3,13 @@ import { ProductFittings } from "../product/productFittings";
 
 export interface CartItem {
   id: number;
-  name: string; 
+  name: string;
   price: number;
-  categoryId: number; 
+  categoryId: number;
   productId: number;
   quantity: number;
   modified?: boolean;
+  subTotal?: number;
   modifiedSubtotal?: number;
   reasonModification?: string;
   isPromotion?: boolean;

@@ -131,12 +131,14 @@ export function ShoppingCart() {
     // console.log("PASO 1: ", JSON.stringify(items));
 
     try {
+      console.log('revisar::', JSON.stringify(items));
       const saleItems = items.flatMap((item) => {
         const mainItem = {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
-          price: item.price * item.quantity,
+          // price: item.subTotal,
+          price: (typeof item.subTotal === 'number' ? item.subTotal : 0),
           categoryId: item.categoryId,
           productId: item.productId,
           productDetailProduct: item.productDetailProduct,
@@ -265,7 +267,8 @@ export function ShoppingCart() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.isCountable ? item.price * item.quantity : 0,
+            // price: item.isCountable ? item.price * item.quantity : 0,
+            price: item.isCountable ? item.price : 0,
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
             isCountable: item.isCountable,
@@ -588,16 +591,6 @@ export function ShoppingCart() {
                         </span>
                       )}
                     </div>
-                    {/* <div className="relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border border-border">
-                      <Image
-                        src={getImageUrl(item.imageUrl)}
-                        alt={item.name}
-                        fill
-                        sizes="48px"
-                        priority
-                        className="object-cover"
-                      />
-                    </div> */}
 
                     <div className="min-w-0">
                       <p className="font-medium text-sm leading-tight truncate">
@@ -668,11 +661,12 @@ export function ShoppingCart() {
                       <Trash2 size={14} />
                     </button>
                     <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
-                      {/* Bs {(item.price * item.quantity).toString()} */}
-                      Bs{" "}
+                      {/* Bs{" "}
                       {(
                         item.modifiedSubtotal ?? item.price * item.quantity
-                      ).toString()}
+                      ).toString()} */}
+                      {/* Bs {(item.modifiedSubtotal ?? item.subTotal).toString()} */}
+                      Bs {(item.modifiedSubtotal ?? item.subTotal ?? 0).toString()}
                     </p>
                   </div>
                 </div>

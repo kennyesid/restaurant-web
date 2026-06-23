@@ -18,6 +18,7 @@ const cartSlice = createSlice({
       );
       if (existingItem) {
         existingItem.quantity += action.payload.quantity;
+        existingItem.subTotal = existingItem.price * action.payload.quantity;
       } else {
         // state.items.push(action.payload);
         state.items.push({
@@ -31,6 +32,7 @@ const cartSlice = createSlice({
           productDetailProduct: product.productDetailProduct,
           productId: product.id,
           quantity: 1,
+          subTotal: product.price * 1
         });
       }
     },
@@ -48,6 +50,7 @@ const cartSlice = createSlice({
       );
       if (item) {
         item.quantity = action.payload.quantity;
+        item.subTotal = item.price * action.payload.quantity;
       }
     },
     clearCart: (state) => {
