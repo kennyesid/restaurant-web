@@ -61,11 +61,10 @@ export default function LoginPage() {
         if (user?.groupId) {
           configService.setGroupId(user.groupId);
         } else {
-          configService.setGroupId(1); // valor por defecto
+          configService.setGroupId(1);
         }
 
         dispatch(login(user));
-        // toast.success(`¡Bienvenido, ${user.fullName}!`);
         messageLogin = `¡Bienvenido, ${user.fullName}!`;
 
         router.push("/dashboard");

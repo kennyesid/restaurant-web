@@ -128,7 +128,7 @@ export function ShoppingCart() {
 
     setIsProcessing(true);
 
-    console.log("PASO 1: ", JSON.stringify(items));
+    // console.log("PASO 1: ", JSON.stringify(items));
 
     try {
       const saleItems = items.flatMap((item) => {
@@ -169,7 +169,7 @@ export function ShoppingCart() {
         return [mainItem];
       });
 
-      console.log("PASO 2: ", JSON.stringify(saleItems));
+      // console.log("PASO 2: ", JSON.stringify(saleItems));
 
       if (selectedClient) {
         if (selectedClient.id === 0) {
@@ -216,7 +216,7 @@ export function ShoppingCart() {
         orderType: orderType as OrderTypeEnum,
         shift: getCurrentShift(),
       };
-
+      console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
       const response = await createSale(newSaleData);
 
       // const response = await createSale({
@@ -313,7 +313,7 @@ export function ShoppingCart() {
           urlImpresion,
           printPayload,
         );
-        console.log("ℹ️ [Impresión] Solicitud enviada con éxito:", JSON.stringify(response));
+        // console.log("ℹ️ [Impresión] Solicitud enviada con éxito:", JSON.stringify(response));
 
         // await ApiService.post(
         //   "http://localhost/restauranteapi/api/Print/PrintRestaurant",
