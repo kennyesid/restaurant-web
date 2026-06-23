@@ -20,4 +20,5 @@ export type { Inventory } from "@/types/inventory/inventory";
 export type { UnitMeasurement } from "@/types/ingredient/UnitMeasurement";
 
 export { ToastType } from "@/types/enum/toasType";
+export {BolivianCashCuts} from "@/types/enum/bolivianCashCuts";
 

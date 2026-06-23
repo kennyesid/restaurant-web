@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { getSales, deleteSale } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
-import { Sale } from "@/types";
+import { Sale, User } from "@/types";
 import { Card } from "@/components/ui/card";
 import {
   Trash2,
@@ -25,6 +25,7 @@ import { DateUtils } from "@/utils/date-utils";
 import { AlertVariant } from "@/types/enum/alertVariant";
 import AlertDialogComponent from "@/components/common/alert/AlertDialogComponent";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
+import { getUsers } from "@/services/usersService";
 
 export default function SalesPage() {
   // const today = new Date().toISOString().split("T")[0];
@@ -36,6 +37,8 @@ export default function SalesPage() {
   const [selectedSale, setSelectedSale] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<number>(0);
 
   // Estados de Filtros
   const [startDate, setStartDate] = useState(today);
@@ -59,6 +62,7 @@ export default function SalesPage() {
 
   useEffect(() => {
     loadSales();
+    loadAll();
   }, []);
 
   const loadSales = async () => {
@@ -67,6 +71,20 @@ export default function SalesPage() {
       const data = await getSales();
       console.log('data', JSON.stringify(data))
       handleResponse(data, setSales);
+    } catch (error) {
+      console.error("Error loading sales:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadAll = async () => {
+    try {
+      const [usersRes] =
+        await Promise.all([
+          getUsers(),
+        ]);
+      setUsers(usersRes || []);
     } catch (error) {
       console.error("Error loading sales:", error);
     } finally {
@@ -104,7 +122,7 @@ export default function SalesPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
+  // const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
   const uniquePaymentTypes = ["cash", "qr", "mixed"];
 
   const qrSales = sales.filter((s) => s.paymentType === "qr");
@@ -190,9 +208,9 @@ export default function SalesPage() {
                 className="w-full border rounded-md p-2"
               >
                 <option value="all">Todos</option>
-                {uniqueUsers.map((user) => (
-                  <option key={user} value={user}>
-                    Usuario {user}
+                {users.map((user) => (
+                  <option key={user.id} value={user.id.toString()}>
+                    {user.fullName || `Usuario ${user.id}`}
                   </option>
                 ))}
               </select>
@@ -714,475 +732,3 @@ export default function SalesPage() {
     </div>
   );
 }
-
-
-// "use client";
-
-// import { Fragment, useEffect, useState } from "react";
-// import { getSales, deleteSale } from "@/services/salesService";
-// import { Button } from "@/components/ui/button";
-// import { Sale } from "@/types";
-// import { Card } from "@/components/ui/card";
-// import { Trash2, Eye, Edit, Key } from "lucide-react";
-// import { handleResponse } from "@/utils/api-helpers";
-// import ButtonGeneric from "@/components/common/button/ButtonGeneric";
-
-// export default function SalesPage() {
-//   const today = new Date().toISOString().split("T")[0];
-
-//   const [sales, setSales] = useState<Sale[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
-//   const [isDialogOpen, setIsDialogOpen] = useState(false);
-//   const [expandedRow, setExpandedRow] = useState<number | null>(null);
-
-//   const [startDate, setStartDate] = useState(today);
-//   const [endDate, setEndDate] = useState(today);
-//   const [filterUser, setFilterUser] = useState("all");
-//   const [filterPaymentType, setFilterPaymentType] = useState("all");
-
-//   const [appliedFilters, setAppliedFilters] = useState({
-//     startDate: today,
-//     endDate: today,
-//     filterUser: "all",
-//     filterPaymentType: "all",
-//   });
-
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 10;
-
-//   useEffect(() => {
-//     loadSales();
-//   }, []);
-
-//   const loadSales = async () => {
-//     try {
-//       setLoading(true);
-//       const data = await getSales();
-//       handleResponse(data, setSales);
-//     } catch (error) {
-//       console.error("Error loading sales:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const filteredSales = sales
-//     .filter((sale) => {
-//       if (!sale.createdAt) return false;
-
-//       const dateObject = new Date(sale.createdAt);
-//       const saleDate = dateObject.toISOString().split("T")[0];
-
-//       // Usamos appliedFilters para las fechas
-//       const dateMatch =
-//         (!appliedFilters.startDate || saleDate >= appliedFilters.startDate) &&
-//         (!appliedFilters.endDate || saleDate <= appliedFilters.endDate);
-
-//       // Usamos los filtros directos para los dropdowns (así filtran al instante si se cambian después)
-//       const userMatch =
-//         filterUser === "all" || sale.userId?.toString() === filterUser;
-
-//       const paymentMatch =
-//         filterPaymentType === "all" || sale.paymentType === filterPaymentType;
-
-//       return dateMatch && userMatch && paymentMatch;
-//     })
-//     .sort(
-//       (a, b) =>
-//         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-//     );
-
-//   // === AQUÍ COLOCAS LAS NUEVAS CONSTANTES ===
-//   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
-
-//   const paginatedSales = filteredSales.slice(
-//     (currentPage - 1) * itemsPerPage,
-//     currentPage * itemsPerPage
-//   );
-//   const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
-//   const uniquePaymentTypes = ["cash", "qr", "mixed"];
-
-//   const qrSales = sales.filter((s) => s.paymentType === "qr");
-//   const cashSales = sales.filter((s) => s.paymentType === "cash");
-//   const mixedSales = sales.filter((s) => s.paymentType === "mixed");
-
-//   const totalSales = filteredSales.reduce((acc, sale) => acc + sale.total, 0);
-
-//   const getPaymentTypeLabel = (type: string) => {
-//     const labels: Record<string, string> = {
-//       cash: "Efectivo",
-//       qr: "QR",
-//       mixed: "Mixto",
-//     };
-//     return labels[type] || type;
-//   };
-
-//   if (loading)
-//     return (
-//       <div className="p-6 text-center font-medium text-[#052A3D]">
-//         Cargando historial...
-//       </div>
-//     );
-
-//   const getOrderStatusBadge = (status: number) => {
-//     const styles: Record<number, string> = {
-//       1: "bg-emerald-100 text-emerald-700",
-//       2: "bg-orange-100 text-orange-700",
-//       3: "bg-blue-100 text-blue-700",
-//       4: "bg-gray-200 text-gray-800",
-//       5: "bg-red-100 text-red-700",
-//     };
-
-//     const labels: Record<number, string> = {
-//       1: "Pagado",
-//       2: "En cocina",
-//       3: "Listo",
-//       4: "Entregado",
-//       5: "Cancelado",
-//     };
-
-//     return (
-//       <span
-//         className={`px-2 py-1 rounded-full text-[10px] font-bold ${styles[status]}`}
-//       >
-//         {labels[status]}
-//       </span>
-//     );
-//   };
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-//         <div>
-//           <h1 className="text-2xl font-black text-[#052A3D] tracking-tight">
-//             CONTROL DE VENTAS
-//           </h1>
-//           <p className="text-sm text-muted-foreground">
-//             Gestiona y audita las transacciones del sistema
-//           </p>
-//         </div>
-//         <div className="flex gap-2">
-//           <Button onClick={loadSales} variant="outline" size="sm">
-//             Actualizar Datos
-//           </Button>
-//         </div>
-//       </div>
-
-//       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
-//         {/* segunda parte */}
-//         <div className="lg:col-span-1">
-//           <div
-//             className="
-//                         relative overflow-hidden
-//                         rounded-lg
-//                         p-5
-//                         text-white
-//                         shadow-lg
-//                         bg-gradient-to-br
-//                         from-[#052A3D]
-//                         via-[#0b3f5c]
-//                         to-[#052A3D]
-//                       "
-//           >
-//             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-//             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
-
-//             <div className="relative z-10 mb-2 flex flex-col items-center">
-//               <p className="text-xs uppercase tracking-wider opacity-80">
-//                 Resumen de Ventas
-//               </p>
-
-//               <h2 className="text-3xl font-black text-[#facc15]">
-//                 Bs {totalSales.toLocaleString()}
-//               </h2>
-//             </div>
-//             <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
-//               <div>
-//                 <p className="text-[10px] uppercase opacity-70">Efectivo</p>
-
-//                 <p className="text-lg font-bold text-[#facc15]">
-//                   {cashSales.length}
-//                 </p>
-//               </div>
-//               <div>
-//                 <p className="text-[10px] uppercase opacity-70">QR</p>
-
-//                 <p className="text-lg font-bold">{qrSales.length}</p>
-//               </div>
-
-//               <div>
-//                 <p className="text-[10px] uppercase opacity-70">Mixto</p>
-
-//                 <p className="text-lg font-bold">{mixedSales.length}</p>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="lg:col-span-3 space-y-4">
-
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-//             <div>
-//               <label className="text-sm font-medium">Usuario</label>
-//               <select
-//                 value={filterUser}
-//                 onChange={(e) => setFilterUser(e.target.value)}
-//                 className="w-full border rounded-md p-2"
-//               >
-//                 <option value="all">Todos</option>
-//                 {uniqueUsers.map((user) => (
-//                   <option key={user} value={user}>
-//                     Usuario {user}
-//                   </option>
-//                 ))}
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="text-sm font-medium">Tipo de pago</label>
-//               <select
-//                 value={filterPaymentType}
-//                 onChange={(e) => setFilterPaymentType(e.target.value)}
-//                 className="w-full border rounded-md p-2"
-//               >
-//                 <option value="all">Todos</option>
-//                 {uniquePaymentTypes.map((type) => (
-//                   <option key={type} value={type}>
-//                     {getPaymentTypeLabel(type)}
-//                   </option>
-//                 ))}
-//               </select>
-//             </div>
-//           </div>
-
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-
-//             <div>
-//               <label className="text-sm font-medium">Fecha inicio</label>
-//               <input
-//                 type="date"
-//                 value={startDate}
-//                 onChange={(e) => setStartDate(e.target.value)}
-//                 className="w-full border rounded-md p-2"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="text-sm font-medium">Fecha fin</label>
-//               <input
-//                 type="date"
-//                 value={endDate}
-//                 onChange={(e) => setEndDate(e.target.value)}
-//                 className="w-full border rounded-md p-2"
-//               />
-//             </div>
-//             <ButtonGeneric
-//               variant="primaryRed"
-//               onClick={() => {
-//                 setFilterUser("all");
-//                 setFilterPaymentType("all");
-//                 setCurrentPage(1);
-
-//                 setAppliedFilters({
-//                   startDate: startDate,
-//                   endDate: endDate,
-//                   filterUser: "all",
-//                   filterPaymentType: "all",
-//                 });
-//               }}
-//             >
-//               Buscar
-//             </ButtonGeneric>
-//           </div>
-//         </div>
-//       </div>
-
-//       <Card className="overflow-hidden border-none rounded-md shadow-sm">
-//         <div className="overflow-x-auto">
-//           <table className="w-full text-sm text-left">
-//             <thead className="bg-[#052A3D] text-white text-xs uppercase tracking-wider">
-//               <tr>
-//                 <th className="px-4 py-3"></th>
-//                 <th className="px-6 py-3 font-semibold">Pedido</th>
-
-//                 <th className="px-6 py-3 font-semibold">Fecha</th>
-//                 <th className="px-6 py-3 font-semibold">Usuario</th>
-//                 <th className="px-6 py-3 font-semibold">Pago</th>
-//                 <th className="px-6 py-3 font-semibold text-right">Total</th>
-//                 <th className="px-6 py-3 text-center">Acciones</th>
-//               </tr>
-//             </thead>
-//             <tbody className="divide-y divide-gray-100 bg-white">
-//               {paginatedSales.map((sale, index) => (
-//                 <Fragment key={index}>
-//                   <tr className="hover:bg-muted/40 transition-colors">
-//                     <td className="px-4 py-2">
-//                       <button
-//                         onClick={() =>
-//                           setExpandedRow(
-//                             expandedRow === sale.saleId ? null : sale.saleId,
-//                           )
-//                         }
-//                         className="p-1 rounded hover:bg-muted transition"
-//                       >
-//                         {expandedRow === sale.saleId ? "▾" : "▸"}
-//                       </button>
-//                     </td>
-//                     <td className="px-6 py-2">
-//                       <div className="flex flex-col">
-//                         <span className="font-bold text-[#052A3D]">
-//                           #{sale.orderNumber}
-//                         </span>
-//                         <span className="text-[10px] text-muted-foreground">
-//                           Venta #{sale.saleId}
-//                         </span>
-//                       </div>
-//                     </td>
-
-//                     <td className="px-6 py-2">
-//                       <div className="flex flex-col">
-//                         <span className="font-medium">
-//                           {new Date(sale.createdAt).toLocaleDateString()}
-//                         </span>
-//                         <span className="text-xs text-muted-foreground">
-//                           {new Date(sale.createdAt).toLocaleTimeString()}
-//                         </span>
-//                       </div>
-//                     </td>
-//                     <td className="px-6 py-2">
-//                       <div className="flex flex-col">
-//                         <span className="text-xs font-semibold">
-//                           Usuario #{sale.userId}
-//                         </span>
-//                         {sale.userCustomerId && (
-//                           <span className="text-[10px] text-muted-foreground">
-//                             Cliente #{sale.userCustomerId}
-//                           </span>
-//                         )}
-//                       </div>
-//                     </td>
-//                     <td className="px-6 py-2">
-//                       <span
-//                         className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${sale.paymentType === "cash"
-//                           ? "bg-green-100 text-green-700"
-//                           : sale.paymentType === "qr"
-//                             ? "bg-blue-100 text-blue-700"
-//                             : "bg-purple-100 text-purple-700"
-//                           }`}
-//                       >
-//                         {getPaymentTypeLabel(sale.paymentType)}
-//                       </span>
-//                     </td>
-//                     <td className="px-6 py-2 text-right">
-//                       <span className="font-bold text-lg text-[#052A3D]">
-//                         Bs {sale.total.toLocaleString()}
-//                       </span>
-//                     </td>
-//                     <td className="px-6 py-2">
-//                       <div className="flex justify-center gap-2">
-//                         <button
-//                           onClick={() =>
-//                             deleteSale(sale.saleId).then(loadSales)
-//                           }
-//                           className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-//                           title="Eliminar"
-//                         >
-//                           <Trash2 size={18} />
-//                         </button>
-//                       </div>
-//                     </td>
-//                   </tr>
-//                   {expandedRow === sale.saleId && (
-//                     <tr className="bg-muted/30">
-//                       <td colSpan={8} className="px-6 py-6">
-//                         <div className="rounded-lg border bg-white p-4 shadow-sm">
-//                           <div className="flex justify-between mb-4">
-//                             <div>
-//                               <p className="font-semibold text-[#052A3D]">
-//                                 Detalle del Pedido #{sale.orderNumber}
-//                               </p>
-//                               <p className="text-xs text-muted-foreground">
-//                                 {sale.detail.length} productos
-//                               </p>
-//                             </div>
-
-//                             <span className="font-bold text-lg">
-//                               Bs {sale.total.toLocaleString()}
-//                             </span>
-//                           </div>
-
-//                           <div className="divide-y">
-//                             {sale.detail.map((item) => (
-//                               <div
-//                                 key={item.productId}
-//                                 className="flex justify-between items-center py-2"
-//                               >
-//                                 <div className="flex flex-col">
-//                                   <span className="font-medium">
-//                                     {item.name}
-//                                   </span>
-//                                   <span className="text-xs text-muted-foreground">
-//                                     Bs {item.price} x {item.quantity}
-//                                   </span>
-//                                 </div>
-
-//                                 <span className="font-semibold">
-//                                   Bs{" "}
-//                                   {(
-//                                     item.price * item.quantity
-//                                   ).toLocaleString()}
-//                                 </span>
-//                               </div>
-//                             ))}
-//                           </div>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   )}
-//                 </Fragment>
-//               ))}
-//             </tbody>
-//           </table>
-//           {filteredSales.length === 0 && (
-//             <div className="p-10 text-center text-gray-400">
-//               No se encontraron registros con los filtros aplicados.
-//             </div>
-//           )}
-//         </div>
-//         {filteredSales.length > 0 && (
-//           <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-700">
-//             <div>
-//               Mostrando <span className="font-bold">{paginatedSales.length}</span> de{" "}
-//               <span className="font-bold">{filteredSales.length}</span> ventas
-//             </div>
-//             <div className="flex gap-2">
-//               <Button
-//                 variant="outline"
-//                 size="sm"
-//                 disabled={currentPage === 1}
-//                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-//                 className="h-8 px-3"
-//               >
-//                 Anterior
-//               </Button>
-//               <div className="flex items-center px-2 text-sm font-semibold text-[#052A3D]">
-//                 Página {currentPage} de {totalPages || 1}
-//               </div>
-//               <Button
-//                 variant="outline"
-//                 size="sm"
-//                 disabled={currentPage === totalPages || totalPages === 0}
-//                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-//                 className="h-8 px-3"
-//               >
-//                 Siguiente
-//               </Button>
-//             </div>
-//           </div>
-//         )}
-//       </Card>
-//     </div>
-//   );
-// }

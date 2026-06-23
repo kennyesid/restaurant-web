@@ -324,54 +324,74 @@ export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
 // ========================================================
 // MÉTRICA: VENTAS POR USUARIO (userDocument)
 // ========================================================
-export async function getSalesByUserDocument(): Promise<RespuestaGenericaDto<{ userDocument: string; count: number; totalAmount: number; userName?: string }[]>> {
-  try {
-    const groupId = configService.getGroupId();
+// export async function getSalesByUserDocument(): Promise<RespuestaGenericaDto<{ userDocument: string; count: number; totalAmount: number; userName?: string }[]>> {
+//   try {
+//     const groupId = configService.getGroupId();
 
-    const { data: sales, error } = await supabase
-      .from("sales")
-      .select("userDocument, total, userName")
-      .eq("groupId", groupId)
-      .eq("state", true);
+//     const { data: sales, error } = await supabase
+//       .from("sales")
+//       .select("userDocument, total, userName")
+//       .eq("groupId", groupId)
+//       .eq("state", true);
 
-    if (error) throw error;
+//     if (error) throw error;
 
-    // Agrupar por userDocument
-    const userMap = new Map<string, {
-      userDocument: string;
-      count: number;
-      totalAmount: number;
-      userName?: string
-    }>();
+//     // Agrupar por userDocument
+//     const userMap = new Map<string, {
+//       userDocument: string;
+//       count: number;
+//       totalAmount: number;
+//       userName?: string
+//     }>();
 
-    (sales || []).forEach((sale) => {
-      const doc = sale.userDocument || "SIN_DOCUMENTO";
-      const total = Number(sale.total) || 0;
+//     (sales || []).forEach((sale) => {
+//       const doc = sale.userDocument || "SIN_DOCUMENTO";
+//       const total = Number(sale.total) || 0;
 
-      if (userMap.has(doc)) {
-        const existing = userMap.get(doc)!;
-        existing.count += 1;
-        existing.totalAmount += total;
-        // Si no tiene nombre, intentar asignar el primero que aparezca
-        if (!existing.userName && sale.userName) {
-          existing.userName = sale.userName;
-        }
-      } else {
-        userMap.set(doc, {
-          userDocument: doc,
-          count: 1,
-          totalAmount: total,
-          userName: sale.userName || undefined
-        });
-      }
-    });
+//       if (userMap.has(doc)) {
+//         const existing = userMap.get(doc)!;
+//         existing.count += 1;
+//         existing.totalAmount += total;
+//         // Si no tiene nombre, intentar asignar el primero que aparezca
+//         if (!existing.userName && sale.userName) {
+//           existing.userName = sale.userName;
+//         }
+//       } else {
+//         userMap.set(doc, {
+//           userDocument: doc,
+//           count: 1,
+//           totalAmount: total,
+//           userName: sale.userName || undefined
+//         });
+//       }
+//     });
 
-    const result = Array.from(userMap.values())
-      .sort((a, b) => b.count - a.count); // Ordenar por cantidad descendente
+//     const result = Array.from(userMap.values())
+//       .sort((a, b) => b.count - a.count); // Ordenar por cantidad descendente
 
-    return responderExito(result);
-  } catch (error) {
-    console.error(error);
-    return responderFalla("Error al obtener ventas por usuario");
-  }
-}
+//     return responderExito(result);
+//   } catch (error) {
+//     console.error(error);
+//     return responderFalla("Error al obtener ventas por usuario");
+//   }
+// }
+
+// Cantidad total de ventas
+// export async function getTotalSalesCount(): Promise<RespuestaGenericaDto<number>> {
+//   try {
+//     const groupId = configService.getGroupId();
+
+//     const { count, error } = await supabase
+//       .from("sales")
+//       .select("*", { count: "exact", head: true })
+//       .eq("groupId", groupId)
+//       .eq("state", true);
+
+//     if (error) throw error;
+
+//     return responderExito(count || 0);
+//   } catch (error) {
+//     console.error(error);
+//     return responderFalla("Error al obtener el total de ventas");
+//   }
+// }

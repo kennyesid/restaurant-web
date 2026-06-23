@@ -17,6 +17,7 @@ import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 import { ToastType } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { configService } from "@/services/configService";
+import { Eye, EyeOff } from "lucide-react";
 
 // const loginSchema = z.object({
 //   email: z.string().min(1, "Email requerido"),
@@ -38,7 +39,7 @@ export default function LoginPage() {
 
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -49,6 +50,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
+    let messageLogin = "";
     try {
       const user = await authenticateUser(data.email, data.password);
       if (user) {
@@ -63,20 +65,24 @@ export default function LoginPage() {
         }
 
         dispatch(login(user));
-        toast.success(`¡Bienvenido, ${user.fullName}!`);
+        // toast.success(`¡Bienvenido, ${user.fullName}!`);
+        messageLogin = `¡Bienvenido, ${user.fullName}!`;
+
         router.push("/dashboard");
       } else {
-        const currentToastBody = {
-          type: ToastType.Fail,
-          message: "Error",
-          description: "Usuario o contraseña incorrectos.",
-          image: null,
-        };
-        toast.custom((t) => (
-          <CustomNotification t={t} body={currentToastBody} />
-        ));
+        messageLogin = "Usuario o contraseña incorrectos.";
         setIsLoading(false);
       }
+
+      const currentToastBody = {
+        type: user ? ToastType.Successfully : ToastType.Fail,
+        message: user ? "Exito" : "Error",
+        description: messageLogin,
+        image: null,
+      };
+
+      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />, { position: "top-center" });
+
     } catch (error) {
       console.error("Login Error:", error);
       toast.error("Ocurrió un error al intentar iniciar sesión");
@@ -144,17 +150,38 @@ export default function LoginPage() {
                 <label className="text-xs font-semibold text-rest-primary tracking-wider">
                   Password
                 </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    {...register("password")}
+                    className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 pr-10 ${errors.password ? "border-red-400" : ""}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 transition"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500">{errors.password.message}</p>
+                )}
+              </div>
+
+              {/* <div className="space-y-2">
+                <label className="text-xs font-semibold text-rest-primary tracking-wider">
+                  Password
+                </label>
                 <Input
                   type="password"
                   placeholder="••••••••"
                   {...register("password")}
-                  // {...register("password", {
-                  //   required: "La contraseña es obligatoria",
-                  //   minLength: {
-                  //     value: 4,
-                  //     message: "Mínimo 4 caracteres",
-                  //   },
-                  // })}
                   className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.password ? "border-red-400" : ""
                     }`}
                 />
@@ -163,7 +190,7 @@ export default function LoginPage() {
                     {errors.password.message}
                   </p>
                 )}
-              </div>
+              </div> */}
               <ButtonGeneric
                 type="submit"
                 variant="primaryRed"

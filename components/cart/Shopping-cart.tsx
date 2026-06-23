@@ -66,6 +66,7 @@ export function ShoppingCart() {
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [saleData, setSaleData] = useState<Sale | null>(null);
+  const [amountPaid, setAmountPaid] = useState<number>(0);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
@@ -108,6 +109,8 @@ export function ShoppingCart() {
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
     0,
   );
+
+  const changeReturned = amountPaid > total ? amountPaid - total : 0;
 
   const getCurrentShift = (): "morning" | "afternoon" | "night" => {
     const hour = new Date().getHours();
@@ -199,23 +202,23 @@ export function ShoppingCart() {
         paymentType: paymentType as PaymentTypeEnum,
         userId: user?.id || 0,
         groupId: user?.groupId || 0,
-        userCustomerId: userSendId || 0,
-        userName: selectedClient?.fullName ?? "SIN NOMBRE",
+        userName: user?.fullName,
+        userCustomerId: 1,
+        userCustomerName: selectedClient?.fullName ?? "S/N",
         userDocument: selectedClient?.nit ?? "0",
         orderNumber: numeroOrdenCalculado,
         orderStatus: OrderStatusEnum.EN_COCINA,
         tenantId: 1,
         state: true,
         total: total,
+        amountPaid: amountPaid,
+        changeReturned: changeReturned,
         orderType: orderType as OrderTypeEnum,
         shift: getCurrentShift(),
       };
 
-      console.log("PASO 3: ", JSON.stringify(newSaleData));
-
       const response = await createSale(newSaleData);
 
-      console.log("PASO 4: ", JSON.stringify(response.contenido));
       // const response = await createSale({
       //   detail: saleItems,
       //   paymentType: paymentType as any,
@@ -242,7 +245,7 @@ export function ShoppingCart() {
         image: null,
       };
 
-      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
+      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />, { position: "top-center" });
 
       if (!isSuccess) {
         return;
@@ -924,6 +927,9 @@ export function ShoppingCart() {
         }}
         items={items}
         total={total}
+        amountPaid={amountPaid}
+        changeReturned={changeReturned}
+        setAmountPaid={setAmountPaid}
         onConfirm={handleCheckout}
         isProcessing={isProcessing}
         needsInvoice={needsInvoice}
@@ -972,9 +978,9 @@ export function ShoppingCart() {
         }}
         title="Ticket de Venta"
         subtitle={`Pedido #${saleData?.orderNumber || ''}`}
-        size="lg"  // o "xl" si el ticket es ancho
+        size="md"
         confirmText="Cerrar"
-        cancelText="" // ocultamos cancel
+        cancelText=""
         isProcessing={false}
       >
         {saleData && <RestaurantTicket order={saleData} />}

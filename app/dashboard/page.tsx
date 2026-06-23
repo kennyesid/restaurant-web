@@ -100,7 +100,7 @@ export default function DashboardRecap() {
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-
+  const [salesByUserDocument, setSalesByUserDocument] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -524,6 +524,14 @@ export default function DashboardRecap() {
 
   }, [filteredSales]);
 
+  const qrSales = useMemo(() => {
+    return filteredSales.filter(sale => sale.paymentType === "qr");
+  }, [filteredSales]);
+
+  const cashSales = useMemo(() => {
+    return filteredSales.filter(sale => sale.paymentType === "cash");
+  }, [filteredSales]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[70vh] gap-4">
@@ -536,25 +544,15 @@ export default function DashboardRecap() {
     );
   }
 
+
   return (
     <div className="space-y-4 md:pt-0">
       {/* Header y filtros */}
-      <div className="flex flex-row lg:flex-col gap-4">
+      <div className="flex flex-col gap-4">
 
         <PageHeader
           title="REPORTE"
           subtitle="Gestion de Reporte"
-          action={
-            <Button
-              onClick={loadAllData}
-              disabled={isRefreshing}
-              variant="outline"
-              className="hidden sm:flex shadow-sm hover:shadow-md items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              Actualizar
-            </Button>
-          }
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -649,20 +647,24 @@ export default function DashboardRecap() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
           {/* <Card className="p-6 shadow-xl rounded-2xl border-0 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-2xl h-full"> */}
-          <Card className="p-6 h-full border-0 shadow-none bg-transparent">
+          <Card className=" h-full border-0 shadow-none bg-transparent">
             <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
               Resumen de Ventas
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <div className="relative overflow-hidden rounded-xl p-4 text-[#052A3D] shadow-lg bg-gradient-to-br from-yellow-400 via-yellow-300 to-amber-400">
+                <div className="relative overflow-hidden rounded-xl p-3 md:p-4 text-[#052A3D] shadow-lg bg-gradient-to-br from-yellow-400 via-yellow-300 to-amber-400">
+
                   <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-2xl"></div>
                   <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/10 rounded-full blur-2xl"></div>
 
                   <div className="relative z-10 flex flex-col items-center">
-                    <h2 className="text-lg font-black text-[#052A3D] text-center">
-                      {safeFormat(dateRange.from, "dd 'de' MMMM", { locale: es })} - {safeFormat(dateRange.to, "dd 'de' MMMM", { locale: es })}
+
+                    <h2 className="text-sm md:text-lg font-black text-[#052A3D] text-center leading-tight">
+                      {safeFormat(dateRange.from, "dd 'de' MMMM", { locale: es })} -{" "}
+                      {safeFormat(dateRange.to, "dd 'de' MMMM", { locale: es })}
                     </h2>
+
                   </div>
                 </div>
               </div>
@@ -670,28 +672,31 @@ export default function DashboardRecap() {
               <div className="relative overflow-hidden rounded-xl p-5 text-white shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+
                 <div className="relative z-10 flex flex-col items-center">
-                  <p className="text-xs xs:text-sm md:text-xs  md:normal-case tracking-wider opacity-80">
+
+                  {/* LABEL (igual que “Productos”) */}
+                  <p className="text-xs uppercase tracking-wider opacity-80 text-white">
                     Saldo Total
                   </p>
-                  <h2 className="text-3xl font-black md:text-xs text-[#facc15]">
-                    Bs. {totalRevenue.toLocaleString()}
+
+                  {/* VALUE (mismo estilo jerárquico) */}
+                  <h2 className="text-3xl font-black text-[#facc15] drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
+                    {totalRevenue.toLocaleString()}
                   </h2>
-                  <div className="flex items-center gap-1 text-xs text-blue-200">
+
+                  {/* FOOTER (igual estructura que el otro panel) */}
+                  <div className="flex items-center gap-1 text-xs text-blue-200/80">
                     <TrendingUp className="h-3 w-3" />
                     <span>Libre de Impuestos</span>
                   </div>
+
                 </div>
               </div>
 
               <div className="relative overflow-hidden rounded-xl p-5 text-[#052A3D] shadow-[0_8px_30px_rgba(0,0,0,0.12)] bg-gradient-to-br from-[#FDFDFD] via-[#f0f0f0] to-[#e3e3e3]">
-                {/* Sombra 3D inferior - efecto de profundidad */}
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
-
-                {/* Brillo superior para efecto 3D */}
                 <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/50 to-transparent pointer-events-none rounded-t-xl"></div>
-
-                {/* Borde iluminado superior */}
                 <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent"></div>
 
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/40 rounded-full blur-2xl"></div>
@@ -699,14 +704,15 @@ export default function DashboardRecap() {
 
                 <div className="relative z-10 flex flex-col items-center">
                   <p className="text-xs uppercase tracking-wider opacity-70 text-[#052A3D]">
-                    Productos
+                    Ventas
                   </p>
                   <h2 className="text-3xl font-black text-[#052A3D] drop-shadow-[0_2px_4px_rgba(0,0,0,0.06)]">
-                    {filteredSales.reduce((acc, sale) => acc + (sale.detail?.length || 0), 0).toLocaleString()}
+                    {/* {filteredSales.reduce((acc, sale) => acc + (sale.detail?.length || 0), 0).toLocaleString()} */}
+                    {filteredSales.length}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-[#052A3D]/60">
                     <TrendingUp className="h-3 w-3" />
-                    <span>+15% vs mes anterior</span>
+                    <span>Total</span>
                   </div>
                 </div>
               </div>
@@ -716,14 +722,14 @@ export default function DashboardRecap() {
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#052A3D]/10 rounded-full blur-2xl"></div>
                 <div className="relative z-10 flex flex-col items-center">
                   <p className="text-xs uppercase tracking-wider opacity-80 text-[#052A3D]">
-                    Clientes
+                    QR
                   </p>
                   <h2 className="text-3xl font-black text-[#052A3D]">
-                    156
+                    {qrSales.length}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-[#052A3D]/70">
                     <TrendingUp className="h-3 w-3" />
-                    <span>+8% vs mes anterior</span>
+                    <span>+Pago</span>
                   </div>
                 </div>
               </div>
@@ -743,14 +749,14 @@ export default function DashboardRecap() {
 
                 <div className="relative z-10 flex flex-col items-center">
                   <p className="text-xs uppercase tracking-wider opacity-80 text-[#052A3D]">
-                    Ticket Promedio
+                    Efectivo
                   </p>
                   <h2 className="text-3xl font-black text-[#052A3D] drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                    ${(totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0).toLocaleString("es-CO")}
+                    {cashSales.length}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-[#052A3D]/70">
                     <TrendingUp className="h-3 w-3" />
-                    <span>+5% vs mes anterior</span>
+                    <span>+Pago</span>
                   </div>
                 </div>
               </div>
@@ -763,7 +769,7 @@ export default function DashboardRecap() {
             <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
               Evolución de Ingresos (Diario)
             </h3>
-            <ResponsiveContainer width="100%" height={290}>
+            <ResponsiveContainer width="100%" height={260}>
               <AreaChart data={dailyRevenueData} onClick={handleBarClick}>
                 <defs>
                   <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">
@@ -788,100 +794,162 @@ export default function DashboardRecap() {
       </div>
 
       {/* SEGUNDA FILA: Ventas por Producto + PieChart en una fila */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
-          <Card className="p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
-              Ventas por Producto y Rango Horario
-            </h3>
-            <ResponsiveContainer width="100%" height={450}>
-              <BarChart
-                data={salesByProductHour}
-                layout="horizontal"
-                margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis
-                  dataKey="product"
-                  stroke="#64748b"
-                  fontSize={12}
-                  interval={0}
-                  angle={-20}
-                  textAnchor="end"
-                />
-                <YAxis
-                  domain={[0, 23]}
-                  ticks={[
-                    6, 7, 8, 9, 10, 11, 12,
-                    13, 14, 15, 16, 17, 18,
-                    19, 20, 21, 22, 23
-                  ]}
-                  tickFormatter={(h) => `${h}:00`}
-                />
-                <Bar
-                  dataKey="hour"
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+
+        {/* PIE CHART */}
         <div className="lg:col-span-1">
-          <Card className="p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm h-full">
-            <h3 className="text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+          <Card className="p-4 md:p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm h-full">
+
+            <h3 className="text-xs md:text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-3 md:mb-4 text-center">
               {selectedDate
                 ? `${selectedCategoryId === "all" ? "Detalle por Categorías" : "Top Productos"}`
                 : "Selecciona un día"}
             </h3>
 
-            {selectedDate && (
-              <div className="flex justify-center mb-4">
-                <Badge variant="secondary" className="text-sm font-mono">
+            {/* {selectedDate && (
+              <div className="flex justify-center mb-3 md:mb-4">
+                <Badge variant="secondary" className="text-xs md:text-sm font-mono">
                   ${pieData.reduce((sum, item) => sum + item.value, 0).toLocaleString("es-CO")}
                 </Badge>
               </div>
-            )}
+            )} */}
 
             {pieData.length > 0 ? (
               <div className="relative">
-                <ResponsiveContainer width="100%" height={320}>
+                <ResponsiveContainer width="100%" height={260}>
+
                   <PieChart>
                     <defs>
                       {pieData.map((_, idx) => (
-                        <filter key={`shadow-${idx}`} id={`pie-shadow-${idx}`} x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor={PIE_COLORS[idx % PIE_COLORS.length]} floodOpacity="0.4" />
+                        <filter
+                          key={`shadow-${idx}`}
+                          id={`pie-shadow-${idx}`}
+                          x="-20%"
+                          y="-20%"
+                          width="140%"
+                          height="140%"
+                        >
+                          <feDropShadow
+                            dx="0"
+                            dy="2"
+                            stdDeviation="3"
+                            floodColor={PIE_COLORS[idx % PIE_COLORS.length]}
+                            floodOpacity="0.4"
+                          />
                         </filter>
                       ))}
                     </defs>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} dataKey="value" paddingAngle={2}>
+
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={85}
+                      dataKey="value"
+                      paddingAngle={2}
+                    >
                       {pieData.map((entry, idx) => (
-                        <Cell key={`cell-${idx}`} fill={entry.fill} filter={`url(#pie-shadow-${idx})`} stroke="#fff" strokeWidth={2} />
+                        <Cell
+                          key={`cell-${idx}`}
+                          fill={entry.fill}
+                          filter={`url(#pie-shadow-${idx})`}
+                          stroke="#fff"
+                          strokeWidth={2}
+                        />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, ""]} contentStyle={{ backgroundColor: "#fff", borderRadius: "12px", border: "none", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }} />
+
+                    <Tooltip
+                      formatter={(value: number) => [`$${value.toLocaleString("es-CO")}`, ""]}
+                      contentStyle={{
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)"
+                      }}
+                    />
                   </PieChart>
+
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[320px] flex items-center justify-center text-muted-foreground">
+              <div className="h-[260px] flex items-center justify-center text-muted-foreground text-xs md:text-sm">
                 No hay ventas para el día seleccionado
               </div>
             )}
 
-            <div className="mt-4 space-y-2 max-h-[150px] overflow-y-auto pr-2">
+            <div className="mt-3 md:mt-4 space-y-2 max-h-[120px] md:max-h-[150px] overflow-y-auto pr-1 md:pr-2">
               {pieData.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between text-xs p-1 rounded-md hover:bg-slate-50 transition-colors cursor-default">
+                <div
+                  key={idx}
+                  className="flex items-center justify-between text-[11px] md:text-xs p-1 rounded-md hover:bg-slate-50 transition-colors cursor-default"
+                >
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.fill }} />
-                    <span className="truncate max-w-[120px]">{item.name}</span>
+                    <div
+                      className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: item.fill }}
+                    />
+                    <span className="truncate max-w-[90px] md:max-w-[120px]">
+                      {item.name}
+                    </span>
                   </div>
-                  <span className="font-medium">${item.value.toLocaleString("es-CO")}</span>
+                  <span className="font-medium">
+                    ${item.value.toLocaleString("es-CO")}
+                  </span>
                 </div>
               ))}
             </div>
+
           </Card>
         </div>
+
+        {/* BAR CHART */}
+        <div className="lg:col-span-3">
+          <Card className="p-4 md:p-6 rounded-2xl border-0 bg-white/90 backdrop-blur-sm">
+
+            <h3 className="text-xs md:text-sm font-bold text-[#052A3D] uppercase tracking-widest mb-4 text-center">
+              Ventas por Producto y Rango Horario
+            </h3>
+
+            <ResponsiveContainer width="100%" height={320}>
+
+              <BarChart
+                data={salesByProductHour}
+                margin={{ top: 10, right: 10, left: 0, bottom: 80 }}
+              >
+
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+
+                <XAxis
+                  dataKey="product"
+                  stroke="#64748b"
+                  fontSize={10}
+                  interval={0}
+                  angle={-25}
+                  textAnchor="end"
+                />
+
+                <YAxis
+                  domain={[0, 23]}
+                  ticks={[6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]}
+                  tickFormatter={(h) => `${h}:00`}
+                  fontSize={10}
+                />
+
+                <Bar
+                  dataKey="hour"
+                  fill="#3b82f6"
+                  radius={[4, 4, 0, 0]}
+                />
+
+              </BarChart>
+
+            </ResponsiveContainer>
+
+          </Card>
+        </div>
+
       </div>
 
       {/* <div className="grid grid-cols-1 gap-6">

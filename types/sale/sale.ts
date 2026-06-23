@@ -14,6 +14,11 @@ export interface Sale {
   user?: User;
   userCustomerId?: number;
   userCustomer?: User;
+  userCustomerName?: string;
+  amountPaid?: number;
+  changeReturned?: number;
+
+
   orderNumber: number; 
   orderStatus: OrderStatusEnum; 
   orderType: OrderTypeEnum;

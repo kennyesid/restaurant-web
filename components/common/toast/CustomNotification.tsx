@@ -82,7 +82,8 @@ export const CustomNotification = ({ t, body }: CustomToastProps) => {
         </div>
 
         {/* CONTENT */}
-        <div className="flex flex-col pr-6 py-4">
+        {/* <div className="flex flex-col pr-6 py-4"> */}
+        <div className="flex-1 flex flex-col pr-2 py-4">
           <span className={`font-semibold ${style.titleColor}`}>{message}</span>
 
           {description && (
