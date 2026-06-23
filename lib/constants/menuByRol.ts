@@ -13,7 +13,7 @@ import {
 
 export type MenuItem = {
   label: string;
-  icon: any; // luego si quieres lo afinamos
+  icon: any; 
   href: string;
 };
 
@@ -29,10 +29,10 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
       { label: "Carrito de Compras", icon: ShoppingCart, href: "/cart" },
       { label: "Ventas", icon: Beef, href: "/sales" },
       { label: "Productos", icon: Package, href: "/product" },
-      { label: "Ingredientes", icon: Package, href: "/ingredient" },
-      { label: "Inventario", icon: Package, href: "/inventory" },
     ],
     second: [
+      { label: "Ingredientes", icon: Package, href: "/ingredient" },
+      { label: "Inventario", icon: Package, href: "/inventory" },
       { label: "Usuarios", icon: Users, href: "/admin/users" },
       // { label: "Roles", icon: Settings, href: "/dashboard/admin/roles" },
       // { label: "Categorías", icon: Tag, href: "/dashboard/admin/categories" },
