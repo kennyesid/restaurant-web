@@ -29,12 +29,21 @@ import { ResponsiveModal } from "@/components/common/modal/ResponsiveModal";
 import CustomNotification from "@/components/common/toast/CustomNotification";
 import { toast } from "sonner";
 import { DropdownSearchable } from "@/components/common";
+import { DateUtils } from "@/utils/date-utils";
 
 export default function InventoryABM() {
     const { user } = useAppSelector((state) => state.auth);
     const [inventoryList, setInventoryList] = useState<Inventory[]>([]);
     const [ingredients, setIngredients] = useState<Ingredient[]>([]);
     const [unitMeasurements, setUnitMeasurements] = useState<UnitMeasurement[]>([]);
+
+    const today = DateUtils.obtenerTipoFechaBoliviaLocal();
+    const [startDate, setStartDate] = useState(today);
+    const [endDate, setEndDate] = useState(today);
+    const [appliedFilters, setAppliedFilters] = useState({
+        startDate: today,
+        endDate: today,
+    });
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedIngredientFilter, setSelectedIngredientFilter] = useState<number>(0);
@@ -105,12 +114,20 @@ export default function InventoryABM() {
     const filteredInventory = useMemo(() => {
         return inventoryList
             .filter((item) => {
+                if (!item.createdat) return false;
+                const itemDate = item.createdat.split("T")[0];
+
+                const dateMatch =
+                    (!appliedFilters.startDate || itemDate >= appliedFilters.startDate) &&
+                    (!appliedFilters.endDate || itemDate <= appliedFilters.endDate);
+
                 const matchesSearch = item.ingredientname.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesIngredient = selectedIngredientFilter === 0 || item.ingredientid === selectedIngredientFilter;
-                return matchesSearch && matchesIngredient;
+
+                return dateMatch && matchesSearch && matchesIngredient;
             })
             .sort((a, b) => b.id - a.id);
-    }, [inventoryList, searchTerm, selectedIngredientFilter]);
+    }, [inventoryList, searchTerm, selectedIngredientFilter, appliedFilters]);
 
     const totalPages = Math.ceil(filteredInventory.length / itemsPerPage);
     const paginatedInventory = useMemo(() => {
@@ -119,6 +136,18 @@ export default function InventoryABM() {
             currentPage * itemsPerPage
         );
     }, [filteredInventory, currentPage]);
+
+    const totalCost = useMemo(() => {
+        return filteredInventory.reduce((acc, item) => acc + (item.cost * item.currentstock), 0);
+    }, [filteredInventory]);
+
+    const lowStockCount = useMemo(() => {
+        return filteredInventory.filter(item => item.currentstock <= (item.minstock || 0)).length;
+    }, [filteredInventory]);
+
+    const totalStock = useMemo(() => {
+        return filteredInventory.reduce((acc, item) => acc + item.currentstock, 0);
+    }, [filteredInventory]);
 
     const handleOpenModal = (item?: Inventory) => {
         if (item) {
@@ -290,41 +319,123 @@ export default function InventoryABM() {
                 }
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="relative sm:col-span-2">
-                    <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Buscar por ingrediente..."
-                        className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#D12B2B] focus:bg-white transition"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                    />
+            {/* TOOLBAR DE FILTROS Y RESUMEN */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                {/* PANEL INFORMATIVO (1 columna en lg) */}
+                <div className="lg:col-span-1">
+                    <div className="relative overflow-hidden rounded-lg p-5 text-white shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
+                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
+
+                        <div className="relative z-10 mb-2 flex flex-col items-center">
+                            <p className="text-xs uppercase tracking-wider opacity-80">
+                                Costo Total del Inventario
+                            </p>
+                            <h2 className="text-3xl font-black text-[#facc15]">
+                                Bs {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </h2>
+                        </div>
+                        <div className="relative z-10 grid grid-cols-1 gap-2 text-center">
+                            <div>
+                                <p className="text-[10px] uppercase opacity-70">Items</p>
+                                <p className="text-lg font-bold text-[#facc15]">
+                                    {filteredInventory.length}
+                                </p>
+                            </div>
+                            {/* <div>
+                                <p className="text-[10px] uppercase opacity-70">Stock Bajo</p>
+                                <p className="text-lg font-bold text-red-400">
+                                    {lowStockCount}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] uppercase opacity-70">Stock Total</p>
+                                <p className="text-lg font-bold">
+                                    {totalStock}
+                                </p>
+                            </div> */}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="sm:col-span-1">
-                    <Select
-                        value={String(selectedIngredientFilter)}
-                        onValueChange={(val) => {
-                            setSelectedIngredientFilter(parseInt(val));
-                            setCurrentPage(1);
-                        }}
-                    >
-                        <SelectTrigger className="w-full shadow-sm hover:shadow-md">
-                            <SelectValue placeholder="Filtrar por ingrediente" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="0">Todos los ingredientes</SelectItem>
-                            {ingredients.map((ing) => (
-                                <SelectItem key={ing.id} value={String(ing.id)}>
-                                    {ing.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                {/* FILTROS (3 columnas en lg) */}
+                <div className="lg:col-span-3 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Buscador de texto */}
+                        <div className="relative">
+                            <label className="text-sm font-medium block mb-1">Buscar Ingrediente</label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por ingrediente..."
+                                    className="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#D12B2B] focus:bg-white transition"
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Select de filtro por ingrediente */}
+                        <div>
+                            <label className="text-sm font-medium block mb-1">Filtrar por Ingrediente</label>
+                            <Select
+                                value={String(selectedIngredientFilter)}
+                                onValueChange={(val) => {
+                                    setSelectedIngredientFilter(parseInt(val));
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-full shadow-sm hover:shadow-md">
+                                    <SelectValue placeholder="Filtrar por ingrediente" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Todos los ingredientes</SelectItem>
+                                    {ingredients.map((ing) => (
+                                        <SelectItem key={ing.id} value={String(ing.id)}>
+                                            {ing.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label className="text-sm font-medium">Fecha inicio</label>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full border rounded-md p-2 bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium">Fecha fin</label>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full border rounded-md p-2 bg-gray-50 text-sm focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
+                            />
+                        </div>
+                        <ButtonGeneric
+                            variant="primaryRed"
+                            onClick={() => {
+                                setCurrentPage(1);
+                                setAppliedFilters({
+                                    startDate: startDate,
+                                    endDate: endDate,
+                                });
+                            }}
+                        >
+                            Buscar
+                        </ButtonGeneric>
+                    </div>
                 </div>
             </div>
 

@@ -28,19 +28,11 @@ import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { getUsers } from "@/services/usersService";
 
 export default function SalesPage() {
-  // const today = new Date().toISOString().split("T")[0];
   const today = DateUtils.obtenerTipoFechaBoliviaLocal();
-
-  // const [sales, setSales] = useState<any[]>([]); 
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSale, setSelectedSale] = useState<any | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<number>(0);
-
-  // Estados de Filtros
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [filterUser, setFilterUser] = useState("all");
@@ -69,7 +61,7 @@ export default function SalesPage() {
     try {
       setLoading(true);
       const data = await getSales();
-      console.log('data', JSON.stringify(data))
+      console.log('data:: ', JSON.stringify(data))
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
