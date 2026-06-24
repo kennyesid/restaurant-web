@@ -13,6 +13,8 @@ interface DropdownSearchableProps {
     onChange: (value: number | "") => void;
     placeholder?: string;
     label?: string;
+    required?: boolean;
+    error?: boolean;
 }
 
 export default function DropdownSearchable({
@@ -21,6 +23,8 @@ export default function DropdownSearchable({
     onChange,
     placeholder = "-- Seleccionar --",
     label,
+    required = false,
+    error = false,
 }: DropdownSearchableProps) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState("");

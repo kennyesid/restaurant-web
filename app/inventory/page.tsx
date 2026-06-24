@@ -28,6 +28,7 @@ import { AlertVariant } from "@/types/enum/alertVariant";
 import { ResponsiveModal } from "@/components/common/modal/ResponsiveModal";
 import CustomNotification from "@/components/common/toast/CustomNotification";
 import { toast } from "sonner";
+import { DropdownSearchable } from "@/components/common";
 
 export default function InventoryABM() {
     const { user } = useAppSelector((state) => state.auth);
@@ -39,7 +40,7 @@ export default function InventoryABM() {
     const [selectedIngredientFilter, setSelectedIngredientFilter] = useState<number>(0);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
-    
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<Inventory | null>(null);
 
@@ -151,11 +152,9 @@ export default function InventoryABM() {
 
     const handleSaveItem = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // Find selected names to keep DB consistent
         const selectedIng = ingredients.find(ing => ing.id === formData.ingredientid);
         const selectedUnit = unitMeasurements.find(um => um.id === formData.unitmeasurementid);
-        
+
         const finalFormData = {
             ...formData,
             ingredientname: selectedIng ? selectedIng.name : "",
@@ -246,7 +245,7 @@ export default function InventoryABM() {
             ),
         },
         {
-            header: "Stock Actual",
+            header: "Stock",
             accessor: (item) => (
                 <span className={`font-semibold ${item.currentstock <= (item.minstock || 0) ? 'text-red-600' : 'text-slate-800'}`}>
                     {item.currentstock}
@@ -268,26 +267,10 @@ export default function InventoryABM() {
             ),
         },
         {
-            header: "Límites (Mín/Máx)",
-            accessor: (item) => (
-                <span className="text-xs text-gray-500">
-                    Min: {item.minstock !== null ? item.minstock : "-"} / Max: {item.maxstock !== null ? item.maxstock : "-"}
-                </span>
-            ),
-        },
-        {
             header: "Últ. Compra",
             accessor: (item) => (
                 <span className="text-[#052A3D]">
                     {item.lastpurchaseprice !== null ? `${item.lastpurchaseprice.toFixed(2)} Bs` : "-"}
-                </span>
-            ),
-        },
-        {
-            header: "Estado",
-            accessor: (item) => (
-                <span className={`px-2 py-1 rounded text-xs font-medium ${item.state ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                    {item.state ? "Activo" : "Inactivo"}
                 </span>
             ),
         },
@@ -308,7 +291,6 @@ export default function InventoryABM() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* Búsqueda por ingrediente */}
                 <div className="relative sm:col-span-2">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                     <input
@@ -323,7 +305,6 @@ export default function InventoryABM() {
                     />
                 </div>
 
-                {/* Filtro por ingrediente select */}
                 <div className="sm:col-span-1">
                     <Select
                         value={String(selectedIngredientFilter)}
@@ -402,17 +383,7 @@ export default function InventoryABM() {
                         toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
                         return;
                     }
-                    if (formData.currentstock < 0) {
-                        const currentToastBody = {
-                            type: ToastType.Fail,
-                            message: "Error",
-                            description: "El stock actual no puede ser negativo",
-                            image: null,
-                        };
-                        toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
-                        return;
-                    }
-                    if (formData.cost < 0) {
+                    if (formData.cost <= 0) {
                         const currentToastBody = {
                             type: ToastType.Fail,
                             message: "Error",
@@ -444,69 +415,70 @@ export default function InventoryABM() {
                 isProcessing={false}
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Ingrediente */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Ingrediente <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            required
-                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] bg-white ${!formData.ingredientid && isModalOpen ? 'border-red-500' : 'border-gray-300'}`}
-                            value={formData.ingredientid}
-                            onChange={(e) => setFormData({ ...formData, ingredientid: parseInt(e.target.value) })}
-                        >
-                            <option value="0">Seleccionar ingrediente</option>
-                            {ingredients.map((ing) => (
-                                <option key={ing.id} value={ing.id}>
-                                    {ing.name}
-                                </option>
-                            ))}
-                        </select>
+                        <DropdownSearchable
+                            placeholder="-- Seleccionar ingrediente --"
+                            value={formData.ingredientid || 0}
+                            onChange={(id) => {
+                                setFormData({
+                                    ...formData,
+                                    ingredientid: typeof id === 'number' ? id : parseInt(id as string)
+                                });
+                            }}
+                            options={ingredients.map((ing) => ({
+                                id: ing.id,
+                                name: ing.name,
+                                price: ing.price,
+                            }))}
+                            required={true}
+                            error={!formData.ingredientid && isModalOpen}
+                        />
+
                         {!formData.ingredientid && isModalOpen && (
                             <p className="text-xs text-red-500 mt-1">El ingrediente es obligatorio</p>
                         )}
                     </div>
-
-                    {/* Unidad de Medida */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Unidad de Medida <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            required
-                            className={`w-full px-3 py-2 border text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B] bg-white ${!formData.unitmeasurementid && isModalOpen ? 'border-red-500' : 'border-gray-300'}`}
-                            value={formData.unitmeasurementid}
-                            onChange={(e) => setFormData({ ...formData, unitmeasurementid: parseInt(e.target.value) })}
-                        >
-                            <option value="0">Seleccionar unidad</option>
-                            {unitMeasurements.map((um) => (
-                                <option key={um.id} value={um.id}>
-                                    {um.name} ({um.symbol})
-                                </option>
-                            ))}
-                        </select>
+                        <DropdownSearchable
+                            placeholder="-- Seleccionar unidad --"
+                            value={formData.unitmeasurementid || 0}
+                            onChange={(id) => {
+                                setFormData({
+                                    ...formData,
+                                    unitmeasurementid: typeof id === 'number' ? id : parseInt(id as string)
+                                });
+                            }}
+                            options={unitMeasurements.map((um) => ({
+                                id: um.id,
+                                name: `${um.name} (${um.symbol})`,
+                                price: undefined, // No tiene precio
+                            }))}
+                            required={true}
+                            error={!formData.unitmeasurementid && isModalOpen}
+                        />
                         {!formData.unitmeasurementid && isModalOpen && (
                             <p className="text-xs text-red-500 mt-1">La unidad de medida es obligatoria</p>
                         )}
                     </div>
-
-                    {/* Stock Actual */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                            Stock Actual <span className="text-red-500">*</span>
+                            Stock
                         </label>
                         <input
-                            required
                             type="number"
                             step="any"
                             min="0"
                             className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.currentstock}
+                            value={formData.currentstock || ""}
                             onChange={(e) => setFormData({ ...formData, currentstock: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
-
-                    {/* Costo */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Costo (Bs) <span className="text-red-500">*</span>
@@ -517,28 +489,23 @@ export default function InventoryABM() {
                             step="any"
                             min="0"
                             className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.cost}
+                            value={formData.cost || ""}
                             onChange={(e) => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
-
-                    {/* Cantidad */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                            Cantidad por empaque / lote <span className="text-red-500">*</span>
+                            Cantidad por empaque / lote
                         </label>
                         <input
-                            required
                             type="number"
                             step="any"
                             min="0"
                             className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.quantity}
+                            value={formData.quantity || ""}
                             onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0 })}
                         />
                     </div>
-
-                    {/* Último Precio de Compra */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Último Precio Compra (Bs)
@@ -555,58 +522,6 @@ export default function InventoryABM() {
                                 setFormData({ ...formData, lastpurchaseprice: val === "" ? null : parseFloat(val) });
                             }}
                         />
-                    </div>
-
-                    {/* Stock Mínimo */}
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                            Stock Mínimo
-                        </label>
-                        <input
-                            type="number"
-                            step="any"
-                            min="0"
-                            placeholder="Opcional"
-                            className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.minstock !== null ? formData.minstock : ""}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setFormData({ ...formData, minstock: val === "" ? null : parseFloat(val) });
-                            }}
-                        />
-                    </div>
-
-                    {/* Stock Máximo */}
-                    <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
-                            Stock Máximo
-                        </label>
-                        <input
-                            type="number"
-                            step="any"
-                            min="0"
-                            placeholder="Opcional"
-                            className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.maxstock !== null ? formData.maxstock : ""}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setFormData({ ...formData, maxstock: val === "" ? null : parseFloat(val) });
-                            }}
-                        />
-                    </div>
-
-                    {/* Estado - Activo */}
-                    <div className="flex items-center gap-2 pt-6 sm:col-span-2">
-                        <input
-                            type="checkbox"
-                            id="inventory-state"
-                            className="h-4 w-4 rounded border-gray-300 text-[#D12B2B] focus:ring-[#D12B2B]"
-                            checked={formData.state}
-                            onChange={(e) => setFormData({ ...formData, state: e.target.checked })}
-                        />
-                        <label htmlFor="inventory-state" className="text-sm font-bold text-gray-700 uppercase cursor-pointer">
-                            Activo / Disponible
-                        </label>
                     </div>
                 </div>
             </ResponsiveModal>
