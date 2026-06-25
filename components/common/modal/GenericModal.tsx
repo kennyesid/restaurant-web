@@ -105,6 +105,38 @@ export function GenericModal({
     }
   };
 
+  // MODIFICATION CATEGORY
+  // const handleSaveModifications = () => {
+  //   const normalizedItems = editableItems.map((item) => {
+  //     // ✅ Procesar item principal
+  //     const processedItem = {
+  //       ...item,
+  //       reasonModification: item.reasonModification?.trim() || "Venta Modificada",
+  //       // ✅ Asegurar categoryId en productDetailProduct
+  //       productDetailProduct: item.productDetailProduct?.map(subItem => ({
+  //         ...subItem,
+  //         categoryId: subItem.categoryId ?? item.categoryId ?? 0
+  //       }))
+  //     };
+
+  //     if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
+  //       return processedItem;
+  //     }
+  //     return processedItem;
+  //   });
+
+  //   const newTotal = normalizedItems.reduce(
+  //     (sum, item) =>
+  //       sum + (item.modifiedSubtotal ?? item.price * item.quantity),
+  //     0,
+  //   );
+
+  //   setIsLocked(true);
+  //   changeSubTotal(normalizedItems);
+  //   setEditableItems(normalizedItems);
+  //   setIsEditMode(false);
+  // };
+  // MODIFICATION CATEGORY
   const handleSaveModifications = () => {
     const normalizedItems = editableItems.map((item) => {
       if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
@@ -131,6 +163,14 @@ export function GenericModal({
       items.map((item) => ({
         ...item,
         modified: false,
+
+        // MODIFICATION CATEGORYID
+        // productDetailProduct: item.productDetailProduct?.map(subItem => ({
+        //   ...subItem,
+        //   categoryId: subItem.categoryId ?? item.categoryId ?? 0
+        // }))
+        // MODIFICATION CATEGORYID
+
       })),
     );
   }, [items]);
@@ -369,70 +409,7 @@ export function GenericModal({
             </div>
           </div>
         </div>
-        {/* FIN CAMBIOS */}
       </div>
-
-      {/* CAMBIOS */}
-      {/* <div className="p-3 bg-slate-50 border rounded-xl border-slate-200 space-y-3">
-        <p className="text-xs font-bold text-[#052A3D] uppercase tracking-wide">
-          Pago en Efectivo y Cambio
-        </p>
-        <div className="grid grid-cols-5 gap-1.5">
-          {Object.values(BolivianCashCuts)
-            .filter((v) => typeof v === "number")
-            .map((cutValue) => (
-              <button
-                key={cutValue}
-                type="button"
-                onClick={() => setAmountPaid(Number(cutValue))}
-                className={`p-2 rounded-lg text-xs font-black transition-all active:scale-95 cursor-pointer border text-center ${amountPaid === cutValue
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                  }`}
-              >
-                Bs {cutValue}
-              </button>
-            ))}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 pt-1">
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              Monto Recibido
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-0 text-sm font-semibold text-slate-500 pb-0.5">Bs</span>
-              <input
-                type="number"
-                value={amountPaid === 0 ? "" : amountPaid}
-                onChange={(e) => setAmountPaid(Number(e.target.value))}
-                min={0}
-                className="w-full pl-6 pb-1 bg-transparent outline-none font-bold text-slate-800 border-b border-slate-300 focus:border-[#052A3D] text-sm"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-              Cambio a Devolver
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-0 text-sm font-semibold text-emerald-600 pb-0.5">Bs</span>
-              <input
-                type="text"
-                readOnly
-                value={changeReturned.toFixed(2)}
-                className={`w-full pl-6 pb-1 bg-transparent outline-none font-black border-b border-transparent text-sm ${changeReturned > 0 ? "text-emerald-600" : "text-slate-400"
-                  }`}
-              />
-            </div>
-          </div>
-        </div>
-      </div> */}
-
-      {/* FIN CAMBIOS */}
-
-
       <div className="flex justify-between items-center px-2">
         <span className="text-lg font-bold">Total a pagar:</span>
         <span className="text-2xl font-black text-[#052A3D]">

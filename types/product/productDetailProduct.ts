@@ -7,6 +7,7 @@ export interface ProductDetailProduct {
   // ProductFittings?: ProductFittings[];
   productFittings?: string[];
   productId?: number;
+  categoryId: number;
   name?: string;
   description?: string | null;
   quantity?: number | 0;

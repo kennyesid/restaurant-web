@@ -152,20 +152,39 @@ export function ShoppingCart() {
           (item.productDetailProduct && item.productDetailProduct.length > 0);
 
         if (isPromo && item.productDetailProduct) {
-          const flatSubProducts = item.productDetailProduct.map((sub: any) => ({
-            id: sub.id,
-            // name: `${sub.name} ${sub.productFittings && sub.productFittings.length > 0 ? `(${sub.productFittings.join(", ")})` : ""}`,
-            name: sub.name,
-            quantity: 0,
-            price: 0,
-            categoryId: sub.categoryId || item.categoryId,
-            productId: sub.productId,
-            productFittings: sub.productFittings ? sub.productFittings : [],
-            modifiedSubtotal: sub.modifiedSubtotal,
-            reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
-            isCountable: false,
-            productDetailProduct: undefined,
-          }));
+          const flatSubProducts = item.productDetailProduct.map((sub: any) => {
+            const subCategoryId = sub.categoryId ?? item.categoryId ?? 0;
+            const subFittings = Array.isArray(sub.productFittings)
+              ? sub.productFittings.map((f: any) => typeof f === 'object' ? f.id : f).filter(Boolean)
+              : [];
+
+            return {
+              id: sub.id,
+              name: sub.name || `${item.name} - Detalle`,
+              quantity: 0,
+              price: 0,
+              categoryId: subCategoryId,
+              productId: sub.productId || sub.id,
+              productFittings: subFittings,
+              modifiedSubtotal: sub.modifiedSubtotal,
+              reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
+              isCountable: false,
+              productDetailProduct: undefined,
+            };
+          });
+          // const flatSubProducts = item.productDetailProduct.map((sub: any) => ({
+          //   id: sub.id,
+          //   name: sub.name,
+          //   quantity: 0,
+          //   price: 0,
+          //   categoryId: sub.categoryId || item.categoryId,
+          //   productId: sub.productId,
+          //   productFittings: sub.productFittings ? sub.productFittings : [],
+          //   modifiedSubtotal: sub.modifiedSubtotal,
+          //   reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
+          //   isCountable: false,
+          //   productDetailProduct: undefined,
+          // }));
           return [mainItem, ...flatSubProducts];
         }
         return [mainItem];
@@ -448,6 +467,7 @@ export function ShoppingCart() {
       // id: Date.now(),
       id: selectedProduct.id,
       productId: selectedProduct.id,
+      categoryId: selectedProduct.categoryId,
       name: selectedProduct.name,
       price:
         formModifiedPrice !== "" ? formModifiedPrice : selectedProduct.price,

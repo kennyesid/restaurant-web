@@ -25,12 +25,12 @@ const responderFalla = <T>(
 // ========================================================
 // OBTENER TODAS LAS VENTAS (CON SU DETALLE COMPLETO)
 // ========================================================
-
 export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
     const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
 
+    // 1️⃣ Obtener sales con sus detalles (sales_details)
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
@@ -43,17 +43,62 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
 
     if (error) throw error;
 
+    // 2️⃣ Obtener TODOS los sub-detalles (sales_details_details) en una sola consulta
+    const allSaleDetailIds = (sales || []).flatMap(sale => 
+      (sale.detail || []).map((d: any) => d.id)
+    ).filter(Boolean);
+
+    let subDetailsMap: Record<number, any[]> = {};
+
+    if (allSaleDetailIds.length > 0) {
+      const { data: subDetails, error: subError } = await supabase
+        .from("sales_details_details")
+        .select("*")
+        .in("saleDetailId", allSaleDetailIds);
+
+      if (subError) throw subError;
+
+      // 3️⃣ Agrupar sub-detalles por saleDetailId
+      subDetailsMap = (subDetails || []).reduce((acc: Record<number, any[]>, sub: any) => {
+        if (!acc[sub.saleDetailId]) {
+          acc[sub.saleDetailId] = [];
+        }
+        acc[sub.saleDetailId].push(sub);
+        return acc;
+      }, {});
+    }
+
+    // 4️⃣ Formatear la respuesta final
     const formattedSales = (sales || []).map((sale: any) => {
       const formattedDetail = (sale.detail || []).map((item: any) => {
-        const updatedProductFitting = Array.isArray(item.productFitting)
-          ? item.productFitting
+        // Obtener sub-detalles para este detail
+        const subDetails = subDetailsMap[item.id] || [];
+
+        // Procesar fittings del item principal
+        const updatedProductFitting = Array.isArray(item.productFittings)
+          ? item.productFittings
             .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
             .filter(Boolean)
           : [];
 
+        // Procesar sub-detalles con sus fittings
+        const formattedSubDetails = subDetails.map((sub: any) => {
+          const updatedSubFittings = Array.isArray(sub.productFittings)
+            ? sub.productFittings
+              .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+              .filter(Boolean)
+            : [];
+
+          return {
+            ...sub,
+            productFittings: updatedSubFittings
+          };
+        });
+
         return {
           ...item,
-          productFitting: updatedProductFitting
+          productFittings: updatedProductFitting,
+          productDetailProduct: formattedSubDetails // 👈 Aquí van los sub-detalles
         };
       });
 
@@ -65,10 +110,171 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
 
     return responderExito(formattedSales as unknown as Sale[]);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error en getSales:", error);
     return responderFalla("Error al obtener el historial de ventas");
   }
 }
+
+export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+    const groupId = configService.getGroupId();
+    const fitingMasterList = await ProductFittingsService.getAll();
+
+    // 1️⃣ Obtener TODAS las ventas con sus detalles y sub-detalles
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select(`
+        *,
+        detail:sales_details(
+          *,
+          subDetails:sales_details_details!inner(*)
+        )
+      `)
+      .eq("groupId", groupId)
+      .eq("state", true)
+      .order("createdAt", { ascending: false });
+
+    if (error) throw error;
+
+    // 2️⃣ Formatear cada venta con su estructura completa
+    const formattedSales = (sales || []).map((sale: any) => {
+      // Formatear los detalles de la venta
+      const formattedDetail = (sale.detail || []).map((item: any) => {
+        // Procesar fittings del item principal (si tiene)
+        const updatedProductFittings = Array.isArray(item.productFittings)
+          ? item.productFittings
+            .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+            .filter(Boolean)
+          : [];
+
+        // Procesar sub-detalles (sales_details_details)
+        const formattedSubDetails = (item.subDetails || []).map((sub: any) => {
+          const updatedSubFittings = Array.isArray(sub.productFittings)
+            ? sub.productFittings
+              .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+              .filter(Boolean)
+            : [];
+
+          return {
+            id: sub.id,
+            productId: sub.productId,
+            name: sub.name,
+            price: sub.price || 0,
+            reasonModification: sub.reasonModification || null,
+            quantity: sub.quantity || 0,
+            productFittings: updatedSubFittings,
+            state: sub.state ?? true,
+            categoryId: sub.categoryId,
+            isCountable: sub.isCountable ?? false,
+            modifiedSubtotal: sub.modifiedSubtotal,
+            createdAt: sub.createdAt,
+            updatedAt: sub.updatedAt,
+            imageUrl: sub.imageUrl,
+            description: sub.description,
+          };
+        });
+
+        // Retornar el item completo
+        return {
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          categoryId: item.categoryId,
+          productId: item.productId,
+          productFittings: updatedProductFittings,
+          productDetailProduct: formattedSubDetails, // 👈 Sub-detalles anidados
+          isCountable: item.isCountable ?? true,
+          reasonModification: item.reasonModification || null,
+          modifiedSubtotal: item.modifiedSubtotal,
+          subTotal: item.subTotal,
+          state: item.state ?? true,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          imageUrl: item.imageUrl,
+          description: item.description,
+        };
+      });
+
+      // Retornar la venta completa
+      return {
+        id: sale.id,
+        detail: formattedDetail,
+        paymentType: sale.paymentType,
+        userId: sale.userId,
+        groupId: sale.groupId,
+        userName: sale.userName,
+        userCustomerId: sale.userCustomerId,
+        userCustomerName: sale.userCustomerName,
+        userDocument: sale.userDocument,
+        orderNumber: sale.orderNumber,
+        orderStatus: sale.orderStatus,
+        tenantId: sale.tenantId,
+        state: sale.state,
+        total: sale.total,
+        amountPaid: sale.amountPaid,
+        changeReturned: sale.changeReturned,
+        orderType: sale.orderType,
+        shift: sale.shift,
+        createdAt: sale.createdAt,
+        updatedAt: sale.updatedAt,
+      };
+    });
+
+    return responderExito(formattedSales as unknown as Sale[], "Ventas obtenidas con éxito");
+  } catch (error: any) {
+    console.error("❌ Error en getAllSalesWithDetails:", {
+      mensaje: error?.message,
+      detalles: error?.details,
+      codigo: error?.code,
+    });
+    return responderFalla(`Error al obtener las ventas: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+// export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
+//   try {
+//     const groupId = configService.getGroupId();
+//     const fitingMasterList = await ProductFittingsService.getAll();
+
+//     const { data: sales, error } = await supabase
+//       .from("sales")
+//       .select(`
+//         *,
+//         detail:sales_details(*)
+//       `)
+//       .eq("groupId", groupId)
+//       .eq("state", true)
+//       .order("createdAt", { ascending: false });
+
+//     if (error) throw error;
+
+//     const formattedSales = (sales || []).map((sale: any) => {
+//       const formattedDetail = (sale.detail || []).map((item: any) => {
+//         const updatedProductFitting = Array.isArray(item.productFitting)
+//           ? item.productFitting
+//             .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+//             .filter(Boolean)
+//           : [];
+
+//         return {
+//           ...item,
+//           productFitting: updatedProductFitting
+//         };
+//       });
+
+//       return {
+//         ...sale,
+//         detail: formattedDetail
+//       };
+//     });
+
+//     return responderExito(formattedSales as unknown as Sale[]);
+//   } catch (error) {
+//     console.error(error);
+//     return responderFalla("Error al obtener el historial de ventas");
+//   }
+// }
 
 // ========================================================
 // OBTENER UNA VENTA POR ID
@@ -97,11 +303,14 @@ export async function getSaleById(id: number): Promise<RespuestaGenericaDto<Sale
 // ========================================================
 // CREAR UNA VENTA (CON OPERACIONES EN CASCADA MANUAL)
 // ========================================================
+
 export async function createSale(
   saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
     const { detail, ...headerVenta } = saleData;
+    
+    // 1. Insertar cabecera de la venta
     const { data: newSale, error: saleError } = await supabase
       .from("sales")
       .insert([headerVenta])
@@ -111,37 +320,87 @@ export async function createSale(
     if (saleError) throw saleError;
     const saleId = newSale.id;
 
-    // const finalDetail: CartItem[] = [];
     const finalDetail: any[] = [];
 
-    if (detail && detail.length > 0) {
-      for (const item of detail) {
-        // 1. Extraemos los campos que no van directo al spread o necesitan transformación
-        const { id: frontId, productFittings, productDetailProduct, ...cartItemData } = item;
+    // 2. Filtrar SOLO los items con isCountable: true
+    const countableItems = detail.filter(item => item.isCountable === true);
 
-        // 2. Transformamos la lista de objetos de guarniciones en un array limpio de IDs numéricos [2, 3]
+    if (countableItems && countableItems.length > 0) {
+      for (const item of countableItems) {
+        // 3. Procesar item principal (sales_details)
+        const { 
+          id: frontId, 
+          productFittings, 
+          productDetailProduct, 
+          ...cartItemData 
+        } = item;
+
+        // Transformar fittings a array de IDs
         const fittingIds = Array.isArray(productFittings)
           ? productFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
           : [];
 
-        // 3. Insertamos directamente todo el producto aplanado en "sales_details"
+        // Insertar en sales_details
         const { data: insertedDetail, error: itemError } = await supabase
           .from("sales_details")
           .insert([{
             ...cartItemData,
             saleId,
-            productFittings: fittingIds // Guardamos el array de enteros [2, 3] directo en la columna
+            productFittings: fittingIds
           }])
           .select()
           .single();
 
         if (itemError) throw itemError;
 
-        // 4. Agregamos el registro procesado al array de respuesta
-        finalDetail.push(insertedDetail);
+        const saleDetailId = insertedDetail.id;
+
+        // 4. Procesar productDetailProduct (sub-items) - SOLO si existe y tiene elementos
+        const detailProducts = Array.isArray(productDetailProduct) 
+          ? productDetailProduct.filter(p => p && Object.keys(p).length > 0) 
+          : [];
+
+        const insertedSubDetails: any[] = [];
+
+        if (detailProducts.length > 0) {
+          for (const subItem of detailProducts) {
+            // 4a. Extraer datos del sub-item
+            const { 
+              id: subFrontId,
+              productFittings: subFittings,
+              ...subItemData 
+            } = subItem;
+
+            // Transformar fittings del sub-item a array de IDs
+            const subFittingIds = Array.isArray(subFittings)
+              ? subFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
+              : [];
+
+            // 4b. Insertar en sales_details_details (relacionado con saleDetailId)
+            const { data: insertedSubDetail, error: subError } = await supabase
+              .from("sales_details_details")
+              .insert([{
+                ...subItemData,
+                saleDetailId, // 👈 Relación con el detail padre
+                productFittings: subFittingIds
+              }])
+              .select()
+              .single();
+
+            if (subError) throw subError;
+            insertedSubDetails.push(insertedSubDetail);
+          }
+        }
+
+        // 5. Armar el objeto final con su detalle y sub-detalles
+        finalDetail.push({
+          ...insertedDetail,
+          productDetailProduct: insertedSubDetails // 👈 Los sub-items guardados
+        });
       }
     }
 
+    // 6. Construir respuesta
     const responsePayload: Sale = {
       ...newSale,
       detail: finalDetail
@@ -149,7 +408,6 @@ export async function createSale(
 
     return responderExito(responsePayload, "Venta registrada con éxito");
   } catch (error: any) {
-    // 👇 ESTO ES CLAVE: Obliga al navegador a imprimir el mensaje directo sin colapsarlo como Object
     console.error("❌ ERROR CRÍTICO DE SUPABASE:", {
       mensaje: error?.message,
       detalles: error?.details,
@@ -161,6 +419,70 @@ export async function createSale(
     return responderFalla(`No se pudo procesar la venta: ${error?.message || 'Error de datos'}`);
   }
 }
+
+// export async function createSale(
+//   saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
+// ): Promise<RespuestaGenericaDto<Sale>> {
+//   try {
+//     const { detail, ...headerVenta } = saleData;
+//     const { data: newSale, error: saleError } = await supabase
+//       .from("sales")
+//       .insert([headerVenta])
+//       .select()
+//       .single();
+
+//     if (saleError) throw saleError;
+//     const saleId = newSale.id;
+
+//     // const finalDetail: CartItem[] = [];
+//     const finalDetail: any[] = [];
+
+//     if (detail && detail.length > 0) {
+//       for (const item of detail) {
+//         // 1. Extraemos los campos que no van directo al spread o necesitan transformación
+//         const { id: frontId, productFittings, productDetailProduct, ...cartItemData } = item;
+
+//         // 2. Transformamos la lista de objetos de guarniciones en un array limpio de IDs numéricos [2, 3]
+//         const fittingIds = Array.isArray(productFittings)
+//           ? productFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
+//           : [];
+
+//         // 3. Insertamos directamente todo el producto aplanado en "sales_details"
+//         const { data: insertedDetail, error: itemError } = await supabase
+//           .from("sales_details")
+//           .insert([{
+//             ...cartItemData,
+//             saleId,
+//             productFittings: fittingIds // Guardamos el array de enteros [2, 3] directo en la columna
+//           }])
+//           .select()
+//           .single();
+
+//         if (itemError) throw itemError;
+
+//         // 4. Agregamos el registro procesado al array de respuesta
+//         finalDetail.push(insertedDetail);
+//       }
+//     }
+
+//     const responsePayload: Sale = {
+//       ...newSale,
+//       detail: finalDetail
+//     };
+
+//     return responderExito(responsePayload, "Venta registrada con éxito");
+//   } catch (error: any) {
+//     console.error("❌ ERROR CRÍTICO DE SUPABASE:", {
+//       mensaje: error?.message,
+//       detalles: error?.details,
+//       pista: error?.hint,
+//       codigo: error?.code,
+//       objetoCompleto: error
+//     });
+
+//     return responderFalla(`No se pudo procesar la venta: ${error?.message || 'Error de datos'}`);
+//   }
+// }
 
 // ========================================================
 // ELIMINACIÓN LÓGICA (UPDATE state = false)

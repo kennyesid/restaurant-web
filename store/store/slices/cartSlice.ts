@@ -17,8 +17,9 @@ const cartSlice = createSlice({
         (item) => item.id === action.payload.id,
       );
       if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
-        existingItem.subTotal = existingItem.price * action.payload.quantity;
+        const newQuantity = action.payload.quantity;
+        existingItem.quantity += newQuantity;
+        existingItem.subTotal = existingItem.price * existingItem.quantity;
       } else {
         // state.items.push(action.payload);
         state.items.push({
