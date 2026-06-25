@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { getSales, deleteSale } from "@/services/salesService";
+import { getSales, deleteSale, getAllSalesWithDetails } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale, User } from "@/types";
 import { Card } from "@/components/ui/card";
@@ -60,7 +60,7 @@ export default function SalesPage() {
   const loadSales = async () => {
     try {
       setLoading(true);
-      const data = await getSales();
+      const data = await getAllSalesWithDetails();
       console.log('data:: ', JSON.stringify(data))
       handleResponse(data, setSales);
     } catch (error) {
@@ -69,6 +69,19 @@ export default function SalesPage() {
       setLoading(false);
     }
   };
+
+  // const loadSales = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const data = await getSales();
+  //     console.log('data:: ', JSON.stringify(data))
+  //     handleResponse(data, setSales);
+  //   } catch (error) {
+  //     console.error("Error loading sales:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const loadAll = async () => {
     try {

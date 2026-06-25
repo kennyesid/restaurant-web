@@ -95,7 +95,6 @@ export default function DashboardRecap() {
   const [selectedUserId, setSelectedUserId] = useState<string>("all");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
   const [selectedProduct, setSelectedProduct] = useState<number>(0);
-
   const [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -114,12 +113,6 @@ export default function DashboardRecap() {
           getCategories(),
           getProducts(),
         ]);
-
-      // console.log("salesRes", JSON.stringify(salesRes));
-      // console.log("usersRes", JSON.stringify(usersRes));
-      // console.log("categoriesRes", JSON.stringify(categoriesRes));
-      // console.log("productsRes", JSON.stringify(productsRes));
-
       setSales(salesRes.contenido || []);
       setUsers(usersRes || []);
       setCategories(categoriesRes || []);
@@ -166,7 +159,6 @@ export default function DashboardRecap() {
     });
   }, [sales, dateRange, selectedUserId, selectedCategoryId, products]);
 
-  // 1. Datos diarios (evolución)
   const dailyRevenueData: DailyRevenue[] = useMemo(() => {
     if (!dateRange.from || !dateRange.to || isNaN(dateRange.from.getTime()) || isNaN(dateRange.to.getTime())) {
       return [];

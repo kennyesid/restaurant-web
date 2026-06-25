@@ -80,15 +80,7 @@ export default function CartPage() {
         title="Gestión de Ventas"
         subtitle="Punto de Venta (POS) y facturación de la sucursall"
       />
-      {/* <div className="flex flex-col items-center justify-center text-center ">
-        <h1 className="text-2xl sm:text-3xl text-rest-primary font-black tracking-tight uppercase">
-          Gestión de Ventas
-        </h1>
-        <p className="text-xs sm:text-xs text-muted-foreground font-medium max-w-md">
-          Punto de Venta (POS) y facturación de la sucursal
-        </p>
-      </div> */}
-      {/* 1. CONTENEDOR GRID DINÁMICO */}
+
       <div
         className={cn(
           "grid grid-cols-1 gap-6 transition-all duration-300",
