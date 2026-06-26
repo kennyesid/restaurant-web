@@ -34,4 +34,10 @@ export class DateUtils {
       timeZone: "America/La_Paz" 
     });
   }
+  
+  static obtenerFechaBoliviaLocal(fecha: Date | string): string {
+    return new Date(fecha).toLocaleDateString("sv-SE", {
+      timeZone: "America/La_Paz",
+    });
+  }
 }

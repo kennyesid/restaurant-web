@@ -61,7 +61,7 @@ export default function SalesPage() {
     try {
       setLoading(true);
       const data = await getAllSalesWithDetails();
-      console.log('data:: ', JSON.stringify(data))
+      console.log('data:: ', JSON.stringify(data));
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
@@ -69,7 +69,9 @@ export default function SalesPage() {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+    console.log("sales", sales.map(s => s.id));
+  }, [sales]);
   // const loadSales = async () => {
   //   try {
   //     setLoading(true);
@@ -101,8 +103,9 @@ export default function SalesPage() {
     .filter((sale) => {
       if (!sale.createdAt) return false;
 
-      const dateObject = new Date(sale.createdAt);
-      const saleDate = dateObject.toISOString().split("T")[0];
+      // const dateObject = new Date(sale.createdAt);
+      // const saleDate = dateObject.toISOString().split("T")[0];
+      const saleDate = DateUtils.obtenerFechaBoliviaLocal(sale.createdAt);
 
       const dateMatch =
         (!appliedFilters.startDate || saleDate >= appliedFilters.startDate) &&
@@ -290,12 +293,15 @@ export default function SalesPage() {
                 <th className="px-6 py-3 font-semibold">Tipo Orden</th>
                 <th className="px-6 py-3 font-semibold">Operador</th>
                 <th className="px-6 py-3 font-semibold">Pago</th>
+                <th className="px-6 py-3 font-semibold">Monto Pagado</th>
+                <th className="px-6 py-3 font-semibold">Cambio</th>
                 <th className="px-6 py-3 font-semibold text-right">Total</th>
                 <th className="px-6 py-3 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
               {paginatedSales.map((sale, index) => (
+
                 <Fragment key={index}>
                   <tr className="hover:bg-muted/40 transition-colors">
                     <td className="px-4 py-2">
@@ -320,9 +326,6 @@ export default function SalesPage() {
                         </span>
                       </div>
                     </td>
-                    {/* <td className="px-6 py-2">
-                      {getOrderStatusBadge(sale.orderStatus)}
-                    </td> */}
                     <td className="px-6 py-2">
                       <div className="flex flex-col">
                         <span className="font-medium">
@@ -378,10 +381,6 @@ export default function SalesPage() {
                         <span className="text-xs text-gray-600 font-medium">
                           {sale.userName}
                         </span>
-                        {/* <span className="inline-flex items-center gap-1 text-[10px] uppercase font-bold text-gray-500">
-                          {sale.shift === "night" ? <Moon size={10} className="text-indigo-500" /> : <Sun size={10} className="text-amber-500" />}
-                          {sale.shift === "night" ? "Noche" : "Día"}
-                        </span> */}
                       </div>
                     </td>
                     <td className="px-6 py-2">
@@ -394,6 +393,16 @@ export default function SalesPage() {
                           }`}
                       >
                         {getPaymentTypeLabel(sale.paymentType)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 text-center">
+                      <span className="font-bold text-base text-[#052A3D]">
+                        Bs {sale.amountPaid?.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-6 py-2 text-center">
+                      <span className="font-bold text-base text-[#052A3D]">
+                        Bs {sale.changeReturned?.toLocaleString()}
                       </span>
                     </td>
                     <td className="px-6 py-2 text-right">
@@ -416,13 +425,10 @@ export default function SalesPage() {
                       </div>
                     </td>
                   </tr>
-
-                  {/* SECCIÓN EXPANDIBLE REDISEÑADA AL DETALLE */}
                   {expandedRow === sale.id && (
                     <tr className="bg-slate-50/70">
                       <td colSpan={9} className="px-6 py-4">
                         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-1">
-                          {/* Top bar de la expansión */}
                           <div className="flex flex-wrap justify-between items-center  gap-2">
                             <div>
                               <h3 className="font-black text-sm text-[#052A3D] uppercase tracking-wide">
@@ -492,7 +498,6 @@ export default function SalesPage() {
                                           <tr
                                             className={`transition-colors ${isModificado ? "bg-slate-50/60 italic" : "hover:bg-slate-50/40"}`}
                                           >
-                                            {/* Celda del trigger interno */}
                                             <td className="px-2 py-3.5 text-center whitespace-nowrap">
                                               {tieneDesglose &&
                                                 !isModificado ? (
@@ -542,14 +547,14 @@ export default function SalesPage() {
                                                   )}
                                                 </div>
 
-                                                {item.productFitting &&
-                                                  item.productFitting.length >
+                                                {item.productFittings &&
+                                                  item.productFittings.length >
                                                   0 && (
                                                     <p className="text-xs text-slate-400">
                                                       <span className="font-medium text-slate-500">
                                                         Acompañamientos:
                                                       </span>{" "}
-                                                      {item.productFitting.join(
+                                                      {item.productFittings.join(
                                                         ", ",
                                                       )}
                                                     </p>
@@ -572,32 +577,22 @@ export default function SalesPage() {
                                                 : `Bs ${item.price}`}
                                             </td>
                                           </tr>
-
-                                          {/* Fila de Desglose Condicional controlada de forma segura */}
                                           {tieneDesglose &&
                                             !isModificado &&
                                             isPromoExpanded && (
                                               <>
-                                                {/* Fila de encabezado del desglose */}
-
-                                                {/* Filas de los sub-productos */}
                                                 {item.productDetailProduct.map(
                                                   (sub: any) => (
                                                     <tr
                                                       key={sub.id}
                                                       className="bg-slate-50/30 border-b border-slate-100/60 last:border-b-2 hover:bg-slate-50 transition-colors"
                                                     >
-                                                      {/* Espaciador/Icono */}
                                                       <td className="px-2 py-2 text-center text-slate-400 text-xs">
                                                         •
                                                       </td>
-
-                                                      {/* Cantidad */}
                                                       <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-500">
                                                         {sub.quantity}x
                                                       </td>
-
-                                                      {/* Nombre y Detalles (Acompañamientos / Notas) */}
                                                       <td
                                                         className="px-4 py-2 text-xs"
                                                         colSpan={2}
@@ -607,8 +602,6 @@ export default function SalesPage() {
                                                             <span className="font-medium text-slate-700">
                                                               {sub.name}
                                                             </span>
-
-                                                            {/* 👇 BADGE ELEGANTE Y COMPACTO AL LADO DEL NOMBRE */}
                                                             {sub.reasonModification && (
                                                               <span
                                                                 className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium leading-none max-w-[180px] truncate"
@@ -622,11 +615,6 @@ export default function SalesPage() {
                                                               </span>
                                                             )}
                                                           </div>
-                                                          {/* <span className="font-medium text-slate-700">
-                                                            {sub.name}
-                                                          </span> */}
-
-                                                          {/* Acompañamientos */}
                                                           {sub.ProductFittings &&
                                                             sub.ProductFittings
                                                               .length > 0 && (
@@ -639,16 +627,8 @@ export default function SalesPage() {
                                                                 )}
                                                               </span>
                                                             )}
-
-                                                          {/* Razón de modificación */}
-                                                          {/* {sub.reasonModification && (
-                                                        <span className="text-[11px] text-amber-600 block italic">
-                                                          <span className="font-medium not-italic text-amber-700">Nota:</span> {sub.reasonModification}
-                                                        </span>
-                                                      )} */}
                                                         </div>
                                                       </td>
-                                                      {/* Precio */}
                                                       <td className="px-4 py-2 text-right font-mono text-xs text-slate-600">
                                                         Bs {sub.price}
                                                       </td>
@@ -668,7 +648,6 @@ export default function SalesPage() {
                       </td>
                     </tr>
                   )}
-                  {/* jaskldjlkjlaksdjlk que pendejo */}
                 </Fragment>
               ))}
             </tbody>

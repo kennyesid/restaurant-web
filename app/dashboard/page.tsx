@@ -44,12 +44,13 @@ import {
 
 import { format, subDays, eachDayOfInterval, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
-import { Sale, User, Product, Category } from "@/types";
+import { Sale, User, Product, Category, Inventory } from "@/types";
 import { getSales } from "@/services/salesService";
 import { getUsers } from "@/services/usersService";
 import { getProducts } from "@/services/productsSservice";
 import { getCategories } from "@/services/categoriesService";
 import PageHeader from "@/components/page/header/PageHeader";
+import { getInventory } from "@/services/inventoryService";
 
 // ========== Tipos ==========
 interface DailyRevenue {
@@ -97,6 +98,7 @@ export default function DashboardRecap() {
   const [selectedProduct, setSelectedProduct] = useState<number>(0);
   const [sales, setSales] = useState<Sale[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [inventory, setInventory] = useState<Inventory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [salesByUserDocument, setSalesByUserDocument] = useState<number>(0);
@@ -106,17 +108,19 @@ export default function DashboardRecap() {
   const loadAllData = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const [salesRes, usersRes, categoriesRes, productsRes] =
+      const [salesRes, usersRes, categoriesRes, productsRes, inventoryRes] =
         await Promise.all([
           getSales(),
           getUsers(),
           getCategories(),
           getProducts(),
+          getInventory(),
         ]);
       setSales(salesRes.contenido || []);
       setUsers(usersRes || []);
       setCategories(categoriesRes || []);
       setProducts(productsRes || []);
+      setInventory(inventoryRes || []);
 
       if (salesRes.contenido && salesRes.contenido.length > 0) {
         const latestSale = [...salesRes.contenido].sort(
@@ -159,6 +163,16 @@ export default function DashboardRecap() {
     });
   }, [sales, dateRange, selectedUserId, selectedCategoryId, products]);
 
+  const totalInventoryCost = useMemo(() => {
+    return inventory.reduce((sum, item) => {
+      return sum + (Number(item.cost) || 0);
+    }, 0);
+  }, [inventory]);
+
+  // const totalInventoryCost = useMemo(() => {
+  //   return inventory.reduce((sum, item) => sum + item.cost, 0);
+  // }, [inventory]);
+
   const dailyRevenueData: DailyRevenue[] = useMemo(() => {
     if (!dateRange.from || !dateRange.to || isNaN(dateRange.from.getTime()) || isNaN(dateRange.to.getTime())) {
       return [];
@@ -195,6 +209,14 @@ export default function DashboardRecap() {
       };
     });
   }, [filteredSales, dateRange, products, selectedCategoryId]);
+
+  const combinedChartData = useMemo(() => {
+    return dailyRevenueData.map((day) => ({
+      ...day,
+      expenses: day.revenue * 0.65,
+      profit: day.revenue * 0.35,
+    }));
+  }, [dailyRevenueData]);
 
   // En la sección de hourlyStackedData, reemplaza con esto:
 
@@ -741,14 +763,14 @@ export default function DashboardRecap() {
 
                 <div className="relative z-10 flex flex-col items-center">
                   <p className="text-xs uppercase tracking-wider opacity-80 text-[#052A3D]">
-                    Efectivo
+                    Gastos
                   </p>
                   <h2 className="text-3xl font-black text-[#052A3D] drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
-                    {cashSales.length}
+                    {totalInventoryCost.toLocaleString()}
                   </h2>
                   <div className="flex items-center gap-1 text-xs text-[#052A3D]/70">
                     <TrendingUp className="h-3 w-3" />
-                    <span>+Pago</span>
+                    <span>Valor Total</span>
                   </div>
                 </div>
               </div>
@@ -762,6 +784,64 @@ export default function DashboardRecap() {
               Evolución de Ingresos (Diario)
             </h3>
             <ResponsiveContainer width="100%" height={260}>
+              {/* <AreaChart data={combinedChartData} onClick={handleBarClick}>
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="expensesGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
+                  </linearGradient>
+                  <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="formattedDate" stroke="#64748b" fontSize={12} />
+                <YAxis stroke="#64748b" fontSize={12} tickFormatter={(v) => `$${v.toLocaleString("es-CO")}`} />
+
+                <Tooltip
+                  contentStyle={{ backgroundColor: "#fff", border: "none", borderRadius: "12px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.1)" }}
+                  formatter={(value: number, name: string) => {
+                    const labels: Record<string, string> = {
+                      revenue: "Ingresos",
+                      expenses: "Gastos",
+                      profit: "Ganancia",
+                    };
+                    return [`$${value.toLocaleString("es-CO")}`, labels[name] || name];
+                  }}
+                  labelFormatter={(label) => `📅 ${label}`}
+                />
+
+                <Area
+                  type="natural"
+                  dataKey="revenue"
+                  stroke="#3b82f6"
+                  fill="url(#revenueGradient)"
+                  strokeWidth={3}
+                  activeDot={{ r: 6, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+                />
+
+                <Area
+                  type="natural"
+                  dataKey="expenses"
+                  stroke="#ef4444"
+                  fill="url(#expensesGradient)"
+                  strokeWidth={2}
+                />
+
+                <Area
+                  type="natural"
+                  dataKey="profit"
+                  stroke="#10b981"
+                  fill="url(#profitGradient)"
+                  strokeWidth={2}
+                />
+              </AreaChart> */}
               <AreaChart data={dailyRevenueData} onClick={handleBarClick}>
                 <defs>
                   <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">

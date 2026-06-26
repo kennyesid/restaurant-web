@@ -120,14 +120,15 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
     const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
 
-    // 1️⃣ Obtener TODAS las ventas con sus detalles y sub-detalles
+// subDetails:sales_details_details!inner(*)
+
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
         *,
         detail:sales_details(
           *,
-          subDetails:sales_details_details!inner(*)
+          subDetails:sales_details_details(*)
         )
       `)
       .eq("groupId", groupId)
@@ -136,18 +137,14 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
 
     if (error) throw error;
 
-    // 2️⃣ Formatear cada venta con su estructura completa
     const formattedSales = (sales || []).map((sale: any) => {
-      // Formatear los detalles de la venta
       const formattedDetail = (sale.detail || []).map((item: any) => {
-        // Procesar fittings del item principal (si tiene)
         const updatedProductFittings = Array.isArray(item.productFittings)
           ? item.productFittings
             .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
             .filter(Boolean)
           : [];
 
-        // Procesar sub-detalles (sales_details_details)
         const formattedSubDetails = (item.subDetails || []).map((sub: any) => {
           const updatedSubFittings = Array.isArray(sub.productFittings)
             ? sub.productFittings
@@ -162,7 +159,7 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
             price: sub.price || 0,
             reasonModification: sub.reasonModification || null,
             quantity: sub.quantity || 0,
-            productFittings: updatedSubFittings,
+            productFittings: updatedSubFittings.map((f: any) => f.name),
             state: sub.state ?? true,
             categoryId: sub.categoryId,
             isCountable: sub.isCountable ?? false,
@@ -174,7 +171,6 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
           };
         });
 
-        // Retornar el item completo
         return {
           id: item.id,
           name: item.name,
@@ -182,8 +178,8 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
           price: item.price,
           categoryId: item.categoryId,
           productId: item.productId,
-          productFittings: updatedProductFittings,
-          productDetailProduct: formattedSubDetails, // 👈 Sub-detalles anidados
+          productFittings: updatedProductFittings.map((f: any) => f.name),
+          productDetailProduct: formattedSubDetails, 
           isCountable: item.isCountable ?? true,
           reasonModification: item.reasonModification || null,
           modifiedSubtotal: item.modifiedSubtotal,

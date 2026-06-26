@@ -12,7 +12,6 @@ const inventoryService = new DatabaseService<Inventory>('inventory', 1, false);
 export async function getInventory(): Promise<Inventory[]> {
   try {
     const allInventory = await inventoryService.getAll('id', true);
-    // Filtrar por el ID de grupo por defecto
     return allInventory.filter(item => item.groupid === 1);
   } catch (error) {
     console.error('Error al obtener el inventario:', error);

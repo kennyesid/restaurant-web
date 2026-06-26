@@ -308,7 +308,7 @@ export default function InventoryABM() {
     return (
         <div className="space-y-6">
             <PageHeader
-                title="Gestión de Inventario"
+                title="Gestión de Gastos"
                 subtitle="Control de existencias, costos y stock mínimo/máximo."
                 action={
                     <div className="w-50">
@@ -329,7 +329,7 @@ export default function InventoryABM() {
 
                         <div className="relative z-10 mb-2 flex flex-col items-center">
                             <p className="text-xs uppercase tracking-wider opacity-80">
-                                Costo Total del Inventario
+                                Gasto Total
                             </p>
                             <h2 className="text-3xl font-black text-[#facc15]">
                                 Bs {totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
