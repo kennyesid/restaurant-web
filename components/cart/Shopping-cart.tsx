@@ -154,8 +154,20 @@ export function ShoppingCart() {
         if (isPromo && item.productDetailProduct) {
           const flatSubProducts = item.productDetailProduct.map((sub: any) => {
             const subCategoryId = sub.categoryId ?? item.categoryId ?? 0;
+            // const subFittings = Array.isArray(sub.productFittings)
+            //   ? sub.productFittings.map((f: any) => typeof f === 'object' ? f.id : f).filter(Boolean)
+            //   : [];
+            // const subFittings = Array.isArray((item as any).productFittings)
+            //   ? (item as any).productFittings.map((f: any) => f.name || f)
+            //   : [];
+
             const subFittings = Array.isArray(sub.productFittings)
-              ? sub.productFittings.map((f: any) => typeof f === 'object' ? f.id : f).filter(Boolean)
+              ? sub.productFittings.map((f: any) => {
+                if (typeof f === 'object' && f !== null) {
+                  return f.name; // Si es objeto, toma el nombre
+                }
+                return f; // Si ya es string, úsalo directamente
+              }).filter(Boolean)
               : [];
 
             return {
