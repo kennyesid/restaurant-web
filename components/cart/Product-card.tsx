@@ -67,6 +67,26 @@ export function ProductCard({
                 })}
               </span>
             </div>
+            <div className="absolute bottom-4 right-4 flex gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(product);
+                }}
+                className="p-1.5 bg-yellow-500 hover:bg-black/20 rounded text-gray-900"
+              >
+                <Edit2 size={14} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(product.id);
+                }}
+                className="p-1.5 bg-red-600 hover:bg-red-700 rounded text-white"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           </Card>
         </div>
 
@@ -91,14 +111,14 @@ export function ProductCard({
               </div>
             </div>
 
-            {isTouchDevice && showActions && (
+            {showActions && (
               <div className="absolute bottom-4 right-4 flex gap-2">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit?.(product);
                   }}
-                  className="p-1.5 bg-black/10 hover:bg-black/20 rounded text-gray-900"
+                  className="p-1.5 bg-gray-200 hover:bg-black/20 rounded text-gray-900"
                 >
                   <Edit2 size={14} />
                 </button>
