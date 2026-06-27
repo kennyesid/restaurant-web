@@ -67,7 +67,7 @@ export function ProductCard({
                 })}
               </span>
             </div>
-            <div className="absolute bottom-4 right-4 flex gap-2">
+            {/* <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -86,7 +86,7 @@ export function ProductCard({
               >
                 <Trash2 size={14} />
               </button>
-            </div>
+            </div> */}
           </Card>
         </div>
 

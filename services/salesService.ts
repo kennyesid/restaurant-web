@@ -44,7 +44,7 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
     if (error) throw error;
 
     // 2️⃣ Obtener TODOS los sub-detalles (sales_details_details) en una sola consulta
-    const allSaleDetailIds = (sales || []).flatMap(sale => 
+    const allSaleDetailIds = (sales || []).flatMap(sale =>
       (sale.detail || []).map((d: any) => d.id)
     ).filter(Boolean);
 
@@ -120,7 +120,7 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
     const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
 
-// subDetails:sales_details_details!inner(*)
+    // subDetails:sales_details_details!inner(*)
 
     const { data: sales, error } = await supabase
       .from("sales")
@@ -179,7 +179,7 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
           categoryId: item.categoryId,
           productId: item.productId,
           productFittings: updatedProductFittings.map((f: any) => f.name),
-          productDetailProduct: formattedSubDetails, 
+          productDetailProduct: formattedSubDetails,
           isCountable: item.isCountable ?? true,
           reasonModification: item.reasonModification || null,
           modifiedSubtotal: item.modifiedSubtotal,
@@ -305,7 +305,7 @@ export async function createSale(
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
     const { detail, ...headerVenta } = saleData;
-    
+
     // 1. Insertar cabecera de la venta
     const { data: newSale, error: saleError } = await supabase
       .from("sales")
@@ -324,11 +324,11 @@ export async function createSale(
     if (countableItems && countableItems.length > 0) {
       for (const item of countableItems) {
         // 3. Procesar item principal (sales_details)
-        const { 
-          id: frontId, 
-          productFittings, 
-          productDetailProduct, 
-          ...cartItemData 
+        const {
+          id: frontId,
+          productFittings,
+          productDetailProduct,
+          ...cartItemData
         } = item;
 
         // Transformar fittings a array de IDs
@@ -352,8 +352,8 @@ export async function createSale(
         const saleDetailId = insertedDetail.id;
 
         // 4. Procesar productDetailProduct (sub-items) - SOLO si existe y tiene elementos
-        const detailProducts = Array.isArray(productDetailProduct) 
-          ? productDetailProduct.filter(p => p && Object.keys(p).length > 0) 
+        const detailProducts = Array.isArray(productDetailProduct)
+          ? productDetailProduct.filter(p => p && Object.keys(p).length > 0)
           : [];
 
         const insertedSubDetails: any[] = [];
@@ -361,10 +361,10 @@ export async function createSale(
         if (detailProducts.length > 0) {
           for (const subItem of detailProducts) {
             // 4a. Extraer datos del sub-item
-            const { 
+            const {
               id: subFrontId,
               productFittings: subFittings,
-              ...subItemData 
+              ...subItemData
             } = subItem;
 
             // Transformar fittings del sub-item a array de IDs
@@ -713,3 +713,242 @@ export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
 //     return responderFalla("Error al obtener el total de ventas");
 //   }
 // }
+
+// ========================================================
+// OBTENER VENTAS PENDIENTES DE LA COCINA (orderStatus = 2)
+// ========================================================
+export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+    const groupId = configService.getGroupId();
+    const fitingMasterList = await ProductFittingsService.getAll();
+
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select(`
+        *,
+        detail:sales_details(
+          *,
+          subDetails:sales_details_details(*)
+        )
+      `)
+      .eq("groupId", groupId)
+      .eq("state", true)
+      .eq("orderStatus", 2)
+      .order("createdAt", { ascending: true }); // Las más antiguas primero para que salgan en orden de llegada
+
+    if (error) throw error;
+
+    const formattedSales = (sales || []).map((sale: any) => {
+      const formattedDetail = (sale.detail || []).map((item: any) => {
+        const updatedProductFittings = Array.isArray(item.productFittings)
+          ? item.productFittings
+            .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+            .filter(Boolean)
+          : [];
+
+        const formattedSubDetails = (item.subDetails || []).map((sub: any) => {
+          const updatedSubFittings = Array.isArray(sub.productFittings)
+            ? sub.productFittings
+              .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+              .filter(Boolean)
+            : [];
+
+          return {
+            id: sub.id,
+            productId: sub.productId,
+            name: sub.name,
+            price: sub.price || 0,
+            reasonModification: sub.reasonModification || null,
+            quantity: sub.quantity || 0,
+            productFittings: updatedSubFittings.map((f: any) => f.name),
+            state: sub.state ?? true,
+            categoryId: sub.categoryId,
+            isCountable: sub.isCountable ?? false,
+            modifiedSubtotal: sub.modifiedSubtotal,
+            createdAt: sub.createdAt,
+            updatedAt: sub.updatedAt,
+            imageUrl: sub.imageUrl,
+            description: sub.description,
+          };
+        });
+
+        return {
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          categoryId: item.categoryId,
+          productId: item.productId,
+          productFittings: updatedProductFittings.map((f: any) => f.name),
+          productDetailProduct: formattedSubDetails,
+          isCountable: item.isCountable ?? true,
+          reasonModification: item.reasonModification || null,
+          modifiedSubtotal: item.modifiedSubtotal,
+          subTotal: item.subTotal,
+          state: item.state ?? true,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          imageUrl: item.imageUrl,
+          description: item.description,
+        };
+      });
+
+      return {
+        id: sale.id,
+        detail: formattedDetail,
+        paymentType: sale.paymentType,
+        userId: sale.userId,
+        groupId: sale.groupId,
+        userName: sale.userName,
+        userCustomerId: sale.userCustomerId,
+        userCustomerName: sale.userCustomerName,
+        userDocument: sale.userDocument,
+        orderNumber: sale.orderNumber,
+        orderStatus: sale.orderStatus,
+        tenantId: sale.tenantId,
+        state: sale.state,
+        total: sale.total,
+        amountPaid: sale.amountPaid,
+        changeReturned: sale.changeReturned,
+        orderType: sale.orderType,
+        shift: sale.shift,
+        createdAt: sale.createdAt,
+        updatedAt: sale.updatedAt,
+      };
+    });
+
+    return responderExito(formattedSales as unknown as Sale[], "Ventas de cocina obtenidas con éxito");
+  } catch (error: any) {
+    console.error("❌ Error en getSalesInKitchen:", error);
+    return responderFalla(`Error al obtener ventas de cocina: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+// ========================================================
+// OBTENER UNA VENTA DETALLADA POR ID (PARA REALTIME)
+// ========================================================
+export async function getSaleWithDetailsById(id: number): Promise<RespuestaGenericaDto<Sale>> {
+  try {
+    const fitingMasterList = await ProductFittingsService.getAll();
+
+    const { data: sale, error } = await supabase
+      .from("sales")
+      .select(`
+        *,
+        detail:sales_details(
+          *,
+          subDetails:sales_details_details(*)
+        )
+      `)
+      .eq("id", id)
+      .eq("state", true)
+      .single();
+
+    if (error) throw error;
+    if (!sale) return responderFalla(`No se encontró el pedido con ID ${id}`, 404);
+
+    const formattedDetail = (sale.detail || []).map((item: any) => {
+      const updatedProductFittings = Array.isArray(item.productFittings)
+        ? item.productFittings
+          .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+          .filter(Boolean)
+        : [];
+
+      const formattedSubDetails = (item.subDetails || []).map((sub: any) => {
+        const updatedSubFittings = Array.isArray(sub.productFittings)
+          ? sub.productFittings
+            .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
+            .filter(Boolean)
+          : [];
+
+        return {
+          id: sub.id,
+          productId: sub.productId,
+          name: sub.name,
+          price: sub.price || 0,
+          reasonModification: sub.reasonModification || null,
+          quantity: sub.quantity || 0,
+          productFittings: updatedSubFittings.map((f: any) => f.name),
+          state: sub.state ?? true,
+          categoryId: sub.categoryId,
+          isCountable: sub.isCountable ?? false,
+          modifiedSubtotal: sub.modifiedSubtotal,
+          createdAt: sub.createdAt,
+          updatedAt: sub.updatedAt,
+          imageUrl: sub.imageUrl,
+          description: sub.description,
+        };
+      });
+
+      return {
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        categoryId: item.categoryId,
+        productId: item.productId,
+        productFittings: updatedProductFittings.map((f: any) => f.name),
+        productDetailProduct: formattedSubDetails,
+        isCountable: item.isCountable ?? true,
+        reasonModification: item.reasonModification || null,
+        modifiedSubtotal: item.modifiedSubtotal,
+        subTotal: item.subTotal,
+        state: item.state ?? true,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        imageUrl: item.imageUrl,
+        description: item.description,
+      };
+    });
+
+    const formattedSale: Sale = {
+      id: sale.id,
+      detail: formattedDetail,
+      paymentType: sale.paymentType,
+      userId: sale.userId,
+      groupId: sale.groupId,
+      userName: sale.userName,
+      userCustomerId: sale.userCustomerId,
+      userCustomerName: sale.userCustomerName,
+      userDocument: sale.userDocument,
+      orderNumber: sale.orderNumber,
+      orderStatus: sale.orderStatus,
+      tenantId: sale.tenantId,
+      state: sale.state,
+      total: sale.total,
+      amountPaid: sale.amountPaid,
+      changeReturned: sale.changeReturned,
+      orderType: sale.orderType,
+      shift: sale.shift,
+      createdAt: sale.createdAt,
+      updatedAt: sale.updatedAt,
+    };
+
+    return responderExito(formattedSale, "Pedido obtenido con éxito");
+  } catch (error: any) {
+    console.error("❌ Error en getSaleWithDetailsById:", error);
+    return responderFalla(`Error al obtener detalles del pedido: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+// ========================================================
+// ACTUALIZAR ESTADO DEL PEDIDO (orderStatus)
+// ========================================================
+export async function updateSaleOrderStatus(id: number, orderStatus: number): Promise<RespuestaGenericaDto<boolean>> {
+  try {
+    const { data, error } = await supabase
+      .from("sales")
+      .update({ orderStatus, updatedAt: new Date().toISOString() })
+      .eq("id", id)
+      .select();
+
+    if (error) throw error;
+
+    return data && data.length > 0
+      ? responderExito(true, "Estado de pedido actualizado con éxito")
+      : responderFalla("No se encontró el pedido para actualizar", 404);
+  } catch (error: any) {
+    console.error("❌ Error en updateSaleOrderStatus:", error);
+    return responderFalla(`Error al actualizar el estado: ${error?.message || 'Error de base de datos'}`);
+  }
+}

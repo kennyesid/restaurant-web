@@ -17,4 +17,5 @@ export interface ProductDetailProduct {
   createdAt?: string | null;
   createdBy?: string | null;
   state?: boolean | null;
+  reasonModification?: string | null;
 }
