@@ -31,7 +31,7 @@ import { createUser } from "@/services/usersService";
 import Image from "next/image";
 import { ResponsiveModal } from "../common/modal/ResponsiveModal";
 import { Column, GenericDataTable } from "../common/table/GenericDataTable";
-import { CONSTANT_PRODUCT_FITTING } from "@/lib/constants/constantsFitting";
+// import { CONSTANT_PRODUCT_FITTING } from "@/lib/constants/constantsFitting";
 import { ProductFittings } from "@/types/product/productFittings";
 import { ProductDetailProduct } from "@/types/product/productDetailProduct";
 import { getProducts } from "@/services/productsSservice";
@@ -44,6 +44,9 @@ import { parameterService } from "@/services/parameterService";
 import RoleGuard from "../auth/RoleGuard";
 import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
 import TicketModal from "../common/print/TicketModal";
+import { ProductFittingsService } from "@/services/productFittingsService";
+import { getProductsByMainId } from "@/services/productByProducts";
+import { ProductsByProduct } from "@/types/product/ProductByProducts";
 
 
 export function ShoppingCart() {
@@ -52,6 +55,7 @@ export function ShoppingCart() {
   const [showSummary, setShowSummary] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
+  // const [selectedPromo, setSelectedPromo] = useState<CartItem | null>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [orderType, setOrderType] = useState<OrderTypeEnum>(
     OrderTypeEnum.CONSUMO_LOCAL,
@@ -63,10 +67,18 @@ export function ShoppingCart() {
   const [selectedFittings, setSelectedFittings] = useState<number[]>([]);
   const [showTicket, setShowTicket] = useState(false);
   const [createdSale, setCreatedSale] = useState<Sale | null>(null);
+  const [productFittings, setProductFittings] = useState<ProductFittings[]>([]);
+  const [productByProducts, setProductsByProduct] = useState<Product[]>([]);
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [saleData, setSaleData] = useState<Sale | null>(null);
   const [amountPaid, setAmountPaid] = useState<number>(0);
+
+  const [selectedDishIndex, setSelectedDishIndex] = useState<number | null>(null);
+
+  const [selectedProductsForPromo, setSelectedProductsForPromo] = useState<Product[]>([]);
+  const [saveTemporaryProduct, setSaveTemporaryProduct] = useState<Product[]>([]);
+  const [promoRows, setPromoRows] = useState<CartItem[]>([]);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
@@ -93,6 +105,8 @@ export function ShoppingCart() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
+        const productFittings = await ProductFittingsService.getAll();
+        setProductFittings(productFittings);
         const data = await getProducts();
         // Filtrar opcional: Si quieres evitar que en el dropdown salgan otras promociones
         const onlySingleProducts = data.filter((p) => !p.isPromotion);
@@ -104,6 +118,42 @@ export function ShoppingCart() {
 
     loadProducts();
   }, []);
+
+  // const loadProductsByProduct = async (productMainId: number) => {
+  //   try {
+  //     const productByProducts = await getProductsByMainId(productMainId);
+  //     setProductsByProduct(productByProducts);
+  //   } catch (error) {
+  //     console.error("Error al cargar los productos en el modal:", error);
+  //   }
+  // };
+
+  const loadProductsByProduct = async (productMainId: number) => {
+    try {
+      const productByProducts = await getProductsByMainId(productMainId);
+      // Transformar los productos al formato de productDetailProduct
+      // const formattedProducts = productByProducts.map((p) => ({
+      //   id: p.id,
+      //   productId: p.id,
+      //   categoryId: p.categoryId,
+      //   name: p.name,
+      //   price: 0, // o el precio que tenga
+      //   reasonModification: null,
+      //   quantity: 1,
+      //   productFittings: [],
+      //   state: true,
+      // }));
+      setProductsByProduct(productByProducts);
+    } catch (error) {
+      console.error("Error al cargar los productos en el modal:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (isPromoModalOpen && selectedPromo?.productId) {
+      loadProductsByProduct(selectedPromo.productId);
+    }
+  }, [isPromoModalOpen, selectedPromo?.productId]);
 
   let total = items.reduce(
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -409,8 +459,65 @@ export function ShoppingCart() {
     setSelectedPromo(updatedPromoItem);
   };
 
+
+  const handleDishClick = (index: number) => {
+    setSelectedDishIndex(index); // Solo guarda el índice, abre el panel de selección
+  };
+
+  const handleAcceptPromo = () => {
+
+    if (saveTemporaryProduct.length === 0) {
+      toast.error("Debe seleccionar al menos un producto.");
+      return;
+    }
+
+    if (!selectedPromo) return;
+
+    const detailProducts = saveTemporaryProduct.map((product: any) => ({
+      id: product.id,
+      productId: product.id,
+      categoryId: product.categoryId,
+      name: product.name,
+      quantity: 1,
+      price: product.price,
+      productFittings: [],
+      reasonModification: "",
+      state: true,
+    }));
+
+    const newRow: CartItem = {
+      ...selectedPromo,
+      quantity: 1,
+      reasonModification: formReason,
+      productDetailProduct: detailProducts,
+    };
+
+    setPromoRows((prev) => [...prev, newRow]);
+    setSaveTemporaryProduct([]);
+    setSelectedDishIndex(null);
+    setFormReason("");
+  };
+
+  const handleSelectProductForDish = (product: Product) => {
+    setSaveTemporaryProduct((prevDishes) => [...prevDishes, product]);
+  };
+
+  const buildProductDetailProduct = () => {
+    return saveTemporaryProduct.map((product: any, index: number) => ({
+      id: product.id,
+      productId: product.id,
+      categoryId: product.categoryId,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+      reasonModification: "",
+      productFittings: [],
+      position: product.position ?? index,
+      state: true,
+    }));
+  };
+
   const handleSavePromoConfig = () => {
-    // Aseguramos que si el precio fue alterado, lleve un motivo de cambio por defecto
     const finalPromoConfig = {
       ...selectedPromo,
       reasonModification:
@@ -422,25 +529,35 @@ export function ShoppingCart() {
       cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem,
     );
 
-    handleChangeSubTotal(updatedCartItems); // Notifica el cambio al estado global/padre
+    handleChangeSubTotal(updatedCartItems);
     setIsPromoModalOpen(false);
   };
 
   // const handleSavePromoConfig = () => {
+  //   const finalPromoConfig = {
+  //     ...selectedPromo,
+  //     reasonModification:
+  //       selectedPromo.reasonModification?.trim() ||
+  //       "Precio de Combo Modificado",
+  //   };
+
   //   const updatedCartItems = items.map((cartItem) =>
-  //     cartItem.productId === selectedPromo.productId ? selectedPromo : cartItem,
+  //     cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem,
   //   );
+
   //   handleChangeSubTotal(updatedCartItems);
   //   setIsPromoModalOpen(false);
   // };
 
   const handlePromoSelected = (item: CartItem) => {
     setSelectedPromo(item);
+    setPromoRows([]);                // <-- limpiar filas temporales
+    setSaveTemporaryProduct([]);     // <-- limpiar selección anterior
+    setSelectedDishIndex(null);
     setIsPromoModalOpen(true);
-    // setPromoColumns(promoColumns);
     setFormReason("");
     setFormModifiedPrice("");
-  };
+  }
 
   const handleUpdateProductFittings = (
     productId: number,
@@ -476,7 +593,6 @@ export function ShoppingCart() {
     if (!selectedProduct) return;
 
     const newSubProduct = {
-      // id: Date.now(),
       id: selectedProduct.id,
       productId: selectedProduct.id,
       categoryId: selectedProduct.categoryId,
@@ -486,7 +602,7 @@ export function ShoppingCart() {
       reasonModification: formReason.trim() || null,
       quantity: formQuantity,
       productFittings: selectedFittings
-        .map((id) => CONSTANT_PRODUCT_FITTING.find((f) => f.id === id))
+        .map((id) => productFittings.find((f) => f.id === id))
         .filter(Boolean),
       state: true,
     };
@@ -513,52 +629,86 @@ export function ShoppingCart() {
   };
 
   const promoColumns: Column<any>[] = [
+    // {
+    //   header: "Producto",
+    //   accessor: (item) => (<div className="flex flex-col">
+    //     <span className="font-medium">
+    //       {item.name}
+    //     </span>
+    //     {item.position !== undefined && (<span className="text-xs text-slate-400"> Plato {item.position + 1} </span>)} </div>),
+    // },
     {
       header: "Producto",
-      accessor: "name",
+      accessor: (item: CartItem) => (
+        <div className="space-y-1">
+
+          <div className="font-semibold">
+            {item.name}
+          </div>
+
+          {item.productDetailProduct?.map((detail: any) => (
+            <div
+              key={detail.productId}
+              className="ml-4 text-xs text-slate-500"
+            >
+              • {detail.name}
+            </div>
+          ))}
+        </div>
+      ),
     },
     {
       header: "Cant",
-      accessor: (item) => (
-        <span className="font-semibold">{item.quantity} u</span>
-      ),
-    },
-    {
-      header: "Acomp",
-      accessor: (item: any) => {
-        const guarniciones = item.productFittings;
+      accessor: (item) => (<span className="font-semibold">{item.quantity} u</span>),
+    }, { header: "Acomp", accessor: (item: any) => { const guarniciones = item.productFittings; if (Array.isArray(guarniciones) && guarniciones.length > 0) { return (<div className="flex flex-wrap gap-1"> {guarniciones.map((g: ProductFittings, index: number) => (<span key={index} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200" > {g.name} </span>))} </div>); } return (<span className="text-slate-400 text-xs italic"> Ninguna </span>); }, }, { header: "Obs", accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>), },];
 
-        // Validamos que sea un array y tenga elementos
-        if (Array.isArray(guarniciones) && guarniciones.length > 0) {
-          return (
-            <div className="flex flex-wrap gap-1">
-              {guarniciones.map((g: ProductFittings, index: number) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
-                >
-                  {g.name}
-                </span>
-              ))}
-            </div>
-          );
-        }
+  // const promoColumns: Column<any>[] = [
+  //   {
+  //     header: "Producto",
+  //     accessor: "name",
+  //   },
+  //   {
+  //     header: "Cant",
+  //     accessor: (item) => (
+  //       <span className="font-semibold">{item.quantity} u</span>
+  //     ),
+  //   },
+  //   {
+  //     header: "Acomp",
+  //     accessor: (item: any) => {
+  //       const guarniciones = item.productFittings;
 
-        return <span className="text-slate-400 text-xs italic">Ninguna</span>;
-      },
-    },
-    {
-      /* 👇 NUEVA COLUMNA ADICIONADA */
-      header: "Obs",
-      accessor: (item) => (
-        <span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block">
-          {item.reasonModification || (
-            <span className="text-slate-300 italic">Ninguna</span>
-          )}
-        </span>
-      ),
-    },
-  ];
+  //       // Validamos que sea un array y tenga elementos
+  //       if (Array.isArray(guarniciones) && guarniciones.length > 0) {
+  //         return (
+  //           <div className="flex flex-wrap gap-1">
+  //             {guarniciones.map((g: ProductFittings, index: number) => (
+  //               <span
+  //                 key={index}
+  //                 className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
+  //               >
+  //                 {g.name}
+  //               </span>
+  //             ))}
+  //           </div>
+  //         );
+  //       }
+
+  //       return <span className="text-slate-400 text-xs italic">Ninguna</span>;
+  //     },
+  //   },
+  //   {
+  //     /* 👇 NUEVA COLUMNA ADICIONADA */
+  //     header: "Obs",
+  //     accessor: (item) => (
+  //       <span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block">
+  //         {item.reasonModification || (
+  //           <span className="text-slate-300 italic">Ninguna</span>
+  //         )}
+  //       </span>
+  //     ),
+  //   },
+  // ];
 
   const handleRemoveProductFromPromo = (itemToDelete: any) => {
     const updatedSubProducts = (
@@ -598,12 +748,6 @@ export function ShoppingCart() {
                   <div className="flex items-center gap-2 min-w-0">
                     <div
                       onClick={() => handlePromoSelected(item)}
-                      // onClick={() => {
-                      //   if (item.isPromotion) {
-                      //     setSelectedPromo(item);
-                      //     setIsPromoModalOpen(true);
-                      //   }
-                      // }}
                       className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
                         ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
                         : "border-border"
@@ -821,119 +965,158 @@ export function ShoppingCart() {
               </div>
             </div>
           </RoleGuard>
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-2 space-y-4">
-            <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">
-              Seleccione un Producto
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="md:col-span-2">
-                <DropdownSearchable
-                  label="Seleccionar Producto"
-                  placeholder="-- Elige un plato o escribe para buscar --"
-                  value={formProductId}
-                  onChange={(id) => setFormProductId(id)}
-                  options={productsList.map((p: any) => ({
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                  }))}
-                />
+          {/* MODIFICATION */}
+          {selectedPromo?.quantity && selectedPromo.quantity > 0 && (
+            <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+              {/* <div className="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200"> */}
+              <div className="flex flex-wrap justify-center gap-3">
+                {Array.from({ length: selectedPromo.quantity }, (_, i) => (
+                  <div
+                    key={i}
+                    className="relative w-10 h-10 md:w-12 md:h-12 lg:w-12 lg:h-12 bg-gray-300 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition"
+                    onClick={() => handleDishClick(i)}
+                  >
+                    <Image
+                      src="/images/others/select-dish.avif"
+                      alt={`Plato ${i + 1}`}
+                      fill
+                      className="w-full h-full object-cover opacity-60 grayscale"
+                    />
+                  </div>
+                ))}
               </div>
+              {selectedDishIndex !== null && (
+                <>
+                  <div className="flex justify-between items-center mb-3">
+                    <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">
+                      Seleccione el Pedido
+                    </p>
+                  </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-500 font-medium">
-                  Cantidad
-                </label>
-                <input
-                  onFocus={(e) => e.target.select()}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formQuantity}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9]/g, "");
-                    const num = raw === "" ? 1 : Math.max(1, parseInt(raw, 10));
-                    setFormQuantity(num);
-                  }}
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-center"
-                />
-              </div>
-              <div className="flex flex-col gap-1 md:col-span-3">
-                <label className="text-xs text-slate-500 font-medium">
-                  Observación
-                </label>
-                <input
-                  type="text"
-                  value={formReason}
-                  onChange={(e) => setFormReason(e.target.value)}
-                  placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
-                />
-              </div>
-            </div>
-            {/* 3. Selección Interactiva de Guarniciones (Se mantiene igual que antes) */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-slate-500 font-medium">
-                Guarniciones de Acompañamiento
-              </label>
-              <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
-                {CONSTANT_PRODUCT_FITTING.map((fitting) => {
-                  const isActive = selectedFittings.includes(fitting.id);
-                  const handleToggleImage = () => {
-                    if (isActive) {
-                      setSelectedFittings(
-                        selectedFittings.filter((id) => id !== fitting.id),
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {productByProducts.map((product) => {
+                      const isSelected = saveTemporaryProduct.some(
+                        (item: any) => item.id === product.id && item.position === selectedDishIndex
                       );
-                    } else {
-                      setSelectedFittings([...selectedFittings, fitting.id]);
-                    }
-                  };
 
-                  return (
-                    <button
-                      key={fitting.id}
-                      type="button"
-                      onClick={handleToggleImage}
-                      className="flex-1 min-w-[64px] focus:outline-none transition-transform active:scale-95 flex flex-col items-center gap-1 cursor-pointer"
+                      return (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSelectProductForDish(product)}
+                          className={`group relative flex flex-col items-center p-2 rounded-xl transition-all border text-center ${isSelected
+                            ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
+                            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                            }`}
+                        >
+                          {/* Contenedor de la Imagen Rectangular */}
+                          <div className="relative w-full h-24 sm:h-28 rounded-lg overflow-hidden mb-2 bg-gray-200 shadow-inner">
+                            <Image
+                              src={product.imageUrl || "/images/others/select-dish.avif"}
+                              alt={product.name}
+                              fill
+                              className={`object-cover transition-all duration-300 ${isSelected
+                                ? "opacity-100 grayscale-0 scale-105"
+                                : "opacity-60 grayscale group-hover:opacity-80 group-hover:grayscale-0"
+                                }`}
+                            />
+                            {/* Checkmark flotante si está seleccionado */}
+                            {isSelected && (
+                              <div className="absolute top-1.5 right-1.5 bg-blue-500 text-white rounded-full p-1 shadow-md z-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Texto del nombre abajo de la imagen */}
+                          <span className={`text-xs font-medium line-clamp-2 px-1 ${isSelected ? "text-blue-600 font-semibold" : "text-gray-600"
+                            }`}>
+                            {product.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex flex-col gap-1 md:col-span-3">
+                    <label className="text-xs text-slate-500 font-medium">
+                      Observación
+                    </label>
+                    <input
+                      type="text"
+                      value={formReason}
+                      onChange={(e) => setFormReason(e.target.value)}
+                      placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
+                      className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
+                    />
+                  </div>
+
+                  <div className="flex justify-end pt-1">
+                    <ButtonGeneric
+                      variant="confirmYellow"
+                      onClick={handleAcceptPromo}
                     >
-                      <img
-                        src={fitting.imageUrl ?? ""}
-                        alt={fitting.name}
-                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
-                          ? "border-yellow-400 opacity-100 scale-105"
-                          : "border-transparent opacity-30 grayscale"
-                          }`}
-                      />
-                      <span
-                        className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}
-                      >
-                        {fitting.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                      + Agregar a la Lista
+                    </ButtonGeneric>
+                  </div>
+                  {productByProducts.length === 0 && (
+                    <p className="text-sm text-gray-400 text-center py-2">
+                      No hay productos disponibles para este combo
+                    </p>
+                  )}
+                </>
+              )}
             </div>
+          )}
+          {/* 
+<div className="flex flex-col gap-1.5">
+                    <label className="text-xs text-slate-500 font-medium">
+                      Guarniciones de Acompañamiento
+                    </label>
+                    <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
+                      {productFittings.map((fitting) => {
+                        const isActive = selectedFittings.includes(fitting.id);
+                        const handleToggleImage = () => {
+                          if (isActive) {
+                            setSelectedFittings(
+                              selectedFittings.filter((id) => id !== fitting.id),
+                            );
+                          } else {
+                            setSelectedFittings([...selectedFittings, fitting.id]);
+                          }
+                        };
 
-            <div className="flex justify-end pt-1">
-              <ButtonGeneric
-                variant="confirmYellow"
-                onClick={handleAddProductToPromo}
-                disabled={!formProductId}
-              >
-                + Agregar a la Lista
-              </ButtonGeneric>
-            </div>
-          </div>
+                        return (
+                          <button
+                            key={fitting.id}
+                            type="button"
+                            onClick={handleToggleImage}
+                            className="flex-1 min-w-[64px] focus:outline-none transition-transform active:scale-95 flex flex-col items-center gap-1 cursor-pointer"
+                          >
+                            <img
+                              src={fitting.imageUrl ?? ""}
+                              alt={fitting.name}
+                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
+                                ? "border-yellow-400 opacity-100 scale-105"
+                                : "border-transparent opacity-30 grayscale"
+                                }`}
+                            />
+                            <span
+                              className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}
+                            >
+                              {fitting.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div> */}
 
-          {/* 📊 TABLA RESUMEN INFERIOR (Muestra los subproductos normales) */}
-
-          {/* <p className="font-semibold text-xs text-slate-500 uppercase tracking-wider">
-              Componentes del Combo actual
-            </p> */}
           <GenericDataTable
             columns={promoColumns}
-            data={selectedPromo?.productDetailProduct || []}
+            // data={selectedPromo ? [selectedPromo] : []}
+            data={promoRows}
             showActions={true}
             actions={{
               onDelete: handleRemoveProductFromPromo,
@@ -943,10 +1126,8 @@ export function ShoppingCart() {
 
         </ResponsiveModal>
       )}
-      {/* En ShoppingCart.tsx (al final, donde invocas el modal) */}
       <GenericModal
         isOpen={showSummary}
-        // onClose={() => setShowSummary(false)}
         onClose={() => {
           setShowSummary(false); // Cierra el modal
           setSelectedClient(null); // Resetea el cliente seleccionado

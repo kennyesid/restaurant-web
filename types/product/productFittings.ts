@@ -1,6 +1,7 @@
 // Guarniciones
 export interface ProductFittings {
   id: number;
+  groupId: number;
   productDetailProductId?: number;
   name?: string;
   description?: string | null;

@@ -23,9 +23,13 @@ export interface User {
 
 export interface Role {
   id: number;
+  groupId: number;
+  code: string;
   name: string;
   description: string;
   tenantId: string;
+  createdAt?: string;
+  updatedAt?: string;
   state?: boolean;
 }
 

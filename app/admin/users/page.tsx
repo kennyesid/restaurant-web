@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Plus, Edit, Trash2, Search, X } from "lucide-react";
+import { Plus, Edit, Trash2, Search, X, EyeOff, Eye } from "lucide-react";
 import { User, Role, RoleType, ToastType } from "@/types";
 import {
     getUsers,
@@ -41,6 +41,7 @@ export default function UsersABM() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [showPassword, setShowPassword] = React.useState(false);
 
     const defaultFormState = {
         username: "",
@@ -71,6 +72,8 @@ export default function UsersABM() {
                 getUsers(),
                 getRoles(),
             ]);
+            console.log("users: ", fetchedUsers);
+            console.log("roles: ", fetchedRoles);
             setUsersList(fetchedUsers);
             setRoles(fetchedRoles);
         } catch (error) {
@@ -158,7 +161,7 @@ export default function UsersABM() {
             return;
         }
 
-        const selectedRoleName = roles.find(r => r.id === formData.roleId)?.name || "";
+        const selectedRoleName = roles.find(r => r.id === formData.roleId)?.code || "";
 
         try {
             if (editingUser) {
@@ -268,7 +271,7 @@ export default function UsersABM() {
         {
             header: "Rol",
             accessor: (item) => {
-                const roleName = roles.find((r) => r.id === item.roleId)?.name || item.role || "Sin rol";
+                const roleName = roles.find((r) => r.code === item.role)?.name || item.role || "Sin rol";
                 return (
                     <span className="bg-amber-50 text-amber-700 px-2 py-1 rounded text-xs font-medium">
                         {roleName}
@@ -427,6 +430,7 @@ export default function UsersABM() {
             >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Username */}
+                    {/* Nombre de Usuario */}
                     <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Nombre de Usuario <span className="text-red-500">*</span>
@@ -434,10 +438,12 @@ export default function UsersABM() {
                         <input
                             required
                             type="text"
-                            placeholder="Ej. jgonzales"
+                            placeholder="Ej. Juan Gonzales"
                             className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
                             value={formData.username}
-                            onChange={(e) => setFormData({ ...formData, username: e.target.value.replace(/\s+/g, '') })}
+
+                            // 💡 SOLUCIÓN: Quitamos el .replace() para que permita la barra espaciadora normalmente
+                            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                         />
                     </div>
 
@@ -446,18 +452,28 @@ export default function UsersABM() {
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Contraseña <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            required
-                            type="password"
-                            placeholder="Mínimo 4 caracteres"
-                            className="w-full px-3 py-2 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        />
+                        {/* Contenedor relativo para posicionar el icono absolutamente adentro del input */}
+                        <div className="relative flex items-center">
+                            <input
+                                required
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Mínimo 4 caracteres"
+                                className="w-full px-3 py-2 pr-10 border border-gray-300 text-sm rounded focus:outline-none focus:ring-1 focus:ring-[#D12B2B]"
+                                value={formData.password}
+                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                            />
+                            <button
+                                type="button" // Es importante que sea type="button" para que no haga submit al formulario
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none cursor-pointer"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
 
                     {/* Nombre Completo */}
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             Nombres <span className="text-red-500">*</span>
                         </label>
@@ -469,7 +485,7 @@ export default function UsersABM() {
                             value={formData.fullName}
                             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         />
-                    </div>
+                    </div> */}
 
                     {/* Apellidos */}
                     <div>
@@ -501,7 +517,7 @@ export default function UsersABM() {
                     </div>
 
                     {/* NIT */}
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-bold text-gray-700 uppercase mb-1">
                             NIT / Factura
                         </label>
@@ -512,7 +528,7 @@ export default function UsersABM() {
                             value={formData.nit}
                             onChange={(e) => setFormData({ ...formData, nit: e.target.value })}
                         />
-                    </div>
+                    </div> */}
 
                     {/* Teléfono */}
                     <div>
@@ -579,7 +595,7 @@ export default function UsersABM() {
                     </div>
 
                     {/* Estado - Activo */}
-                    <div className="flex items-center gap-2 pt-6">
+                    {/* <div className="flex items-center gap-2 pt-6">
                         <input
                             type="checkbox"
                             id="user-state"
@@ -590,7 +606,7 @@ export default function UsersABM() {
                         <label htmlFor="user-state" className="text-sm font-bold text-gray-700 uppercase cursor-pointer">
                             Activo
                         </label>
-                    </div>
+                    </div> */}
                 </div>
             </ResponsiveModal>
         </div>

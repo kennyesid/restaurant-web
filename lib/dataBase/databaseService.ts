@@ -22,20 +22,11 @@ export class DatabaseService<T> {
       .select('*')
       .eq('state', true);
 
-    // 👇 Solo si la tabla tiene groupId, agregamos el filtro
     if (this.hasGroupId) {
       query = query.eq('groupId', this.groupId);
     }
 
-
-console.log("Tabla:", this.tableName);
-console.log("Tiene groupId:", this.hasGroupId);
-console.log("GroupId:", this.groupId);
-
     const { data, error } = await query.order(orderBy, { ascending });
-
-console.log(`DATA: ${this.tableName} :`, data);
-console.log(`ERROR: ${this.tableName} :`, error);
 
     if (error) {
       console.error(`Error en getAll de la tabla ${this.tableName}:`, error.message);

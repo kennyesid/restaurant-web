@@ -71,9 +71,9 @@ export function GenericDataTable<T>({
                                 </td>
                             </tr>
                         ) : (
-                            data.map((item) => (
+                            data.map((item, index) => (
                                 <tr
-                                    key={String(item[rowKey])}
+                                    key={index}
                                     className="hover:bg-slate-50/60 transition-colors duration-150 group"
                                 >
                                     {/* CELDAS DINÁMICAS */}

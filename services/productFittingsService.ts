@@ -4,7 +4,7 @@ import { configService } from "./configService";
 
 // 1. Instanciamos el servicio genérico pasándole el tipo y el nombre exacto de la tabla
 const groupId = configService.getGroupId(); 
-const repository = new DatabaseService<ProductFittings>("product_fittings", groupId);
+const repository = new DatabaseService<ProductFittings>("product_fittings", groupId, true);
 
 export class ProductFittingsService {
   
