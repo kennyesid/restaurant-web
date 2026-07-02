@@ -55,6 +55,11 @@ export function GenericModal({
   const [editableItems, setEditableItems] = useState<CartItem[]>(items);
   const [isLocked, setIsLocked] = useState(false);
 
+  useEffect(() => {
+    console.log('revisionnnn::' + JSON.stringify(items));
+  }, [])
+
+
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
       setSelectedClient(null);
