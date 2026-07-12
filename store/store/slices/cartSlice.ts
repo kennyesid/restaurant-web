@@ -1,4 +1,5 @@
-import { CartItem, CartState } from "@/types";
+import { CartItem, CartItemDetail, CartState } from "@/types";
+import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: CartState = {
@@ -71,6 +72,29 @@ const cartSlice = createSlice({
     updateCartItems: (state, action) => {
       state.items = action.payload;
     },
+
+
+
+    updateCartItemDetail: (
+    state,
+    action: PayloadAction<{
+        id:number;
+        cartItemDetailDetails: CartItemDetailDetails[];
+    }>
+    )=>{
+      //  console.log("ACTION:", action.payload)
+        const item = state.items.find(
+            x=>x.id===action.payload.id
+        );
+// console.log("ITEM ENCONTRADO:", item);
+        if(item){
+            item.cartItemDetailDetails = action.payload.cartItemDetailDetails;
+        }
+    },
+
+
+
+
     toggleCartSide: (state) => {
       state.isCartOpen = !state.isCartOpen;
     },
@@ -90,5 +114,6 @@ export const {
   updateCartItems,
   toggleCartSide,
   setToggleCartFalse,
+  updateCartItemDetail,
 } = cartSlice.actions;
 export default cartSlice.reducer;

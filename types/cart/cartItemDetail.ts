@@ -1,9 +1,7 @@
 import { ProductDetailProduct } from "@/types/product/productDetailProduct";
 import { ProductFittings } from "../product/productFittings";
-import { CartItemDetail } from "./cartItemDetail";
-import { CartItemDetailDetails } from "./cartItemDetailDetails";
 
-export interface CartItem {
+export interface CartItemDetail {
   id: number;
   name: string;
   price: number;
@@ -17,8 +15,6 @@ export interface CartItem {
   orderTypeSend?: string;
   isPromotion?: boolean;
   isCountable?: boolean | false;
-  cartItemDetail?: CartItemDetail[];
-  cartItemDetailDetails?: CartItemDetailDetails[];
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;

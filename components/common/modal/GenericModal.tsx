@@ -1,10 +1,10 @@
 import { BaseModal } from "@/components/ui/Modal/BaseModal";
 import { BolivianCashCuts, CartItem, User } from "@/types";
 import { ButtonGeneric } from "@/components/common/button/ButtonGeneric";
-import { Save, Search, UserPlus, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Save, Search, UserPlus, X } from "lucide-react";
 import { STYLE_INTERNAL } from "@/lib/constants/constantStyle";
 import { storage } from "@/lib/storage";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { ResponsiveModal } from "./ResponsiveModal";
 
@@ -54,11 +54,8 @@ export function GenericModal({
   const [isNewClient, setIsNewClient] = useState(false);
   const [editableItems, setEditableItems] = useState<CartItem[]>(items);
   const [isLocked, setIsLocked] = useState(false);
-
-  useEffect(() => {
-    console.log('revisionnnn::' + JSON.stringify(items));
-  }, [])
-
+  const [expandedItems, setExpandedItems] = useState<number[]>([]);
+  const [expandedDetails, setExpandedDetails] = useState<string[]>([]);
 
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
@@ -163,22 +160,34 @@ export function GenericModal({
     setIsEditMode(false);
   };
 
-  useEffect(() => {
-    setEditableItems(
-      items.map((item) => ({
-        ...item,
-        modified: false,
-
-        // MODIFICATION CATEGORYID
-        // productDetailProduct: item.productDetailProduct?.map(subItem => ({
-        //   ...subItem,
-        //   categoryId: subItem.categoryId ?? item.categoryId ?? 0
-        // }))
-        // MODIFICATION CATEGORYID
-
-      })),
+  const toggleItem = (id: number) => {
+    setExpandedItems(prev =>
+      prev.includes(id)
+        ? prev.filter(x => x !== id)
+        : [...prev, id]
     );
+  };
+
+  const toggleDetail = (key: string) => {
+    setExpandedDetails(prev =>
+      prev.includes(key)
+        ? prev.filter(x => x !== key)
+        : [...prev, key]
+    );
+  };
+
+  useEffect(() => {
+    setEditableItems(items);
+    console.log('revisionn joder:' + JSON.stringify(items));
   }, [items]);
+  // useEffect(() => {
+  //   setEditableItems(
+  //     items.map((item) => ({
+  //       ...item,
+  //       modified: false,
+  //     })),
+  //   );
+  // }, [items]);
 
   return (
     <ResponsiveModal
@@ -212,75 +221,194 @@ export function GenericModal({
             </tr>
           </thead>
           <tbody>
-            {editableItems.map((item) => (
-              // className="border-t"
-              <tr key={item.id}>
-                <td className="p-2 font-medium">{item.name}</td>
-                <td className="p-2 text-center">
-                  <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
-                    {item.quantity}
-                  </span>
-                </td>
-                {!isEditMode && (
-                  <td className="p-2 text-right">
-                    Bs{" "}
-                    {(
-                      item.modifiedSubtotal ?? item.price * item.quantity
-                    ).toLocaleString()}
-                  </td>
-                )}
-                {isEditMode && (
-                  <>
+            {editableItems.map((item) => {
+              const isExpanded = expandedItems.includes(item.id);
+
+              return (
+                <Fragment key={item.id}>
+                  {/* ==========================
+          PRODUCTO PRINCIPAL
+      ========================== */}
+
+                  <tr className="border-b hover:bg-gray-50 transition-colors">
                     <td className="p-2">
-                      <input
-                        type="text"
-                        value={item.reasonModification ?? ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
+                      <div className="flex items-center gap-2">
 
-                          setEditableItems((prev) =>
-                            prev.map((i) =>
-                              i.id === item.id
-                                ? { ...i, reasonModification: value }
-                                : i,
-                            ),
-                          );
-                        }}
-                        className="w-full border-b outline-none text-sm"
-                        placeholder="Motivo..."
-                      />
+                        {item.cartItemDetail?.length ? (
+                          <button
+                            onClick={() => toggleItem(item.id)}
+                            className="text-gray-500 hover:text-blue-600"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown size={18} />
+                            ) : (
+                              <ChevronRight size={18} />
+                            )}
+                          </button>
+                        ) : (
+                          <div className="w-[18px]" />
+                        )}
+
+                        <span className="font-medium">
+                          {item.name}
+                        </span>
+                      </div>
                     </td>
 
-                    <td className="p-2 text-right">
-                      <input
-                        type="number"
-                        value={
-                          item.modifiedSubtotal ?? item.price * item.quantity
-                        }
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-
-                          setEditableItems((prev) =>
-                            prev.map((i) =>
-                              i.id === item.id
-                                ? { ...i, modifiedSubtotal: value }
-                                : i,
-                            ),
-                          );
-                        }}
-                        min={1}
-                        className="w-24 text-right border-b outline-none"
-                      />
+                    <td className="p-2 text-center">
+                      <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
+                        {item.quantity}
+                      </span>
                     </td>
-                  </>
-                )}
-              </tr>
-            ))}
+
+                    {!isEditMode && (
+                      <td className="p-2 text-right">
+                        Bs {(item.modifiedSubtotal ?? item.price * item.quantity).toLocaleString()}
+                      </td>
+                    )}
+
+                    {isEditMode && (
+                      <>
+                        <td className="p-2">
+                          <input
+                            type="text"
+                            value={item.reasonModification ?? ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+
+                              setEditableItems((prev) =>
+                                prev.map((i) =>
+                                  i.id === item.id
+                                    ? {
+                                      ...i,
+                                      reasonModification: value,
+                                    }
+                                    : i
+                                )
+                              );
+                            }}
+                            className="w-full border-b outline-none text-sm"
+                            placeholder="Motivo..."
+                          />
+                        </td>
+
+                        <td className="p-2 text-right">
+                          <input
+                            type="number"
+                            value={item.modifiedSubtotal ?? item.price * item.quantity}
+                            onChange={(e) => {
+                              const value = Number(e.target.value);
+
+                              setEditableItems((prev) =>
+                                prev.map((i) =>
+                                  i.id === item.id
+                                    ? {
+                                      ...i,
+                                      modifiedSubtotal: value,
+                                    }
+                                    : i
+                                )
+                              );
+                            }}
+                            min={1}
+                            className="w-24 text-right border-b outline-none"
+                          />
+                        </td>
+                      </>
+                    )}
+                  </tr>
+
+                  {/* ==========================
+          DETALLE DEL PRODUCTO
+      ========================== */}
+
+                  {isExpanded &&
+                    item.cartItemDetail?.map((detail, index) => {
+                      const detailKey = `${item.id}-${index}`;
+
+                      const detailExpanded =
+                        expandedDetails.includes(detailKey);
+
+                      return (
+                        <Fragment key={detailKey}>
+                          <tr className="bg-blue-50">
+                            <td
+                              colSpan={isEditMode ? 4 : 3}
+                              className="pl-10 py-2"
+                            >
+                              <div className="flex items-center gap-2">
+
+                                <button
+                                  onClick={() => toggleDetail(detailKey)}
+                                  className="text-gray-500 hover:text-blue-600"
+                                >
+                                  {detailExpanded ? (
+                                    <ChevronDown size={16} />
+                                  ) : (
+                                    <ChevronRight size={16} />
+                                  )}
+                                </button>
+
+                                <span className="font-medium">
+                                  🍽 Plato {index + 1}
+                                </span>
+
+                                {detail.orderTypeSend && (
+                                  <span className="text-xs text-blue-600 bg-blue-100 rounded-full px-2 py-1">
+                                    {detail.orderTypeSend}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* ==========================
+                  PRODUCTOS DEL PLATO
+              ========================== */}
+
+                          {detailExpanded &&
+                            detail.productDetailProduct?.map((product) => (
+                              <tr
+                                key={product.id}
+                                className="bg-gray-50"
+                              >
+                                <td
+                                  colSpan={isEditMode ? 4 : 3}
+                                  className="pl-20 py-2"
+                                >
+                                  <div className="flex items-center justify-between">
+
+                                    <div className="flex items-center gap-2">
+
+                                      <span className="text-green-600">
+                                        •
+                                      </span>
+
+                                      <span>
+                                        {product.name}
+                                      </span>
+
+                                    </div>
+
+                                    <span className="text-xs text-gray-500">
+                                      Bs {product.price}
+                                    </span>
+
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                        </Fragment>
+                      );
+                    })}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
       <div className="border-t space-y-4 bg-gray-50/50 p-3 rounded-xl border border-slate-100">
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
             Tipo de Orden
           </label>
@@ -306,7 +434,7 @@ export function GenericModal({
               Para Llevar
             </button>
           </div>
-        </div>
+        </div> */}
 
         {/* <hr className="border-slate-200/60" /> */}
         <div className="space-y-3">

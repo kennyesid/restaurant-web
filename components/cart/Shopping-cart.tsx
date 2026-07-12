@@ -8,6 +8,7 @@ import {
   setPaymentType,
   updateCartItems,
   toggleCartSide,
+  updateCartItemDetail,
 } from "@/store/store/slices/cartSlice";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,7 +19,7 @@ import {
   obtenerSiguienteOrdenDiariaSupabase,
 } from "@/services/salesService";
 import { toast } from "sonner";
-import { CartItem, Sale } from "@/types";
+import { CartItem, CartItemDetailMistake, OrderTypeSend, Sale, SelectedProduct } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
@@ -47,6 +48,9 @@ import TicketModal from "../common/print/TicketModal";
 import { ProductFittingsService } from "@/services/productFittingsService";
 import { getProductsByMainId } from "@/services/productByProducts";
 import { ProductsByProduct } from "@/types/product/ProductByProducts";
+import { getOrderTypes } from "@/services/parameter/orderTypeSendService";
+import { CartItemDetail } from "@/types/cart/cartItemDetail";
+import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
 
 
 export function ShoppingCart() {
@@ -55,7 +59,8 @@ export function ShoppingCart() {
   const [showSummary, setShowSummary] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
-  // const [selectedPromo, setSelectedPromo] = useState<CartItem | null>(null);
+  const [promoItems, setPromoItems] = useState<CartItemDetailMistake[]>([]);
+  // const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [orderType, setOrderType] = useState<OrderTypeEnum>(
     OrderTypeEnum.CONSUMO_LOCAL,
@@ -68,17 +73,20 @@ export function ShoppingCart() {
   const [showTicket, setShowTicket] = useState(false);
   const [createdSale, setCreatedSale] = useState<Sale | null>(null);
   const [productFittings, setProductFittings] = useState<ProductFittings[]>([]);
-  const [productByProducts, setProductsByProduct] = useState<Product[]>([]);
+  const [productByProducts, setProductsByProduct] = useState<SelectedProduct[]>([]);
 
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [saleData, setSaleData] = useState<Sale | null>(null);
   const [amountPaid, setAmountPaid] = useState<number>(0);
 
-  const [selectedDishIndex, setSelectedDishIndex] = useState<number | null>(null);
+  const [selectedDishIndex, setSelectedDishIndex] = useState<CartItemDetailDetails | null>(null);
+  const [openDish, setOpenDish] = useState(false);
+  // const [selectedDishIndex, setSelectedDishIndex] = useState<number | null>(null);
 
   const [selectedProductsForPromo, setSelectedProductsForPromo] = useState<Product[]>([]);
-  const [saveTemporaryProduct, setSaveTemporaryProduct] = useState<Product[]>([]);
-  const [promoRows, setPromoRows] = useState<CartItem[]>([]);
+  // const [saveTemporaryProduct, setSaveTemporaryProduct] = useState<SelectedProduct[]>([]);
+  const [promoRows, setPromoRows] = useState<CartItemDetailDetails[]>([]);
+  // const [promoRows, setPromoRows] = useState<CartItemDetail[]>([]);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
@@ -100,6 +108,8 @@ export function ShoppingCart() {
   });
   const [customNit, setCustomNit] = useState("");
   const [productsList, setProductsList] = useState<Product[]>([]);
+  const [orderTypeSendList, setOrderTypeSendList] = useState<OrderTypeSend[]>([]);
+  const [selectedOrderTypeSend, setSelectedOrderTypeSend] = useState<string>("");
   // const [promoColumns, setPromoColumns] = useState<Column<any>[]>([]);
 
   useEffect(() => {
@@ -116,44 +126,51 @@ export function ShoppingCart() {
       }
     };
 
+    // const loadOrderTypeSend = async () => {
+    //   const orderTypeSend = await getOrderTypes();
+    //   setOrderTypeSendList(orderTypeSend);
+    // }
+
     loadProducts();
+    // loadOrderTypeSend();
   }, []);
+
+  useEffect(() => {
+    if (isPromoModalOpen && selectedPromo?.productId) {
+      // Cargar productos relacionados (ya lo tienes)
+      // loadProductsByProduct(selectedPromo.productId);
+      // Cargar tipos de envío
+      const loadOrderTypes = async () => {
+        const types = await getOrderTypes();
+        setOrderTypeSendList(types);
+        // Seleccionar el primero por defecto (opcional)
+        if (types.length > 0) {
+          setSelectedOrderTypeSend(types[1].code);
+        }
+      };
+      loadOrderTypes();
+    }
+  }, [isPromoModalOpen, selectedPromo?.productId]);
 
   // const loadProductsByProduct = async (productMainId: number) => {
   //   try {
-  //     const productByProducts = await getProductsByMainId(productMainId);
-  //     setProductsByProduct(productByProducts);
+  //     const productByProducts: Product[] = await getProductsByMainId(productMainId);
+  //     const selectedProducts: SelectedProduct[] = productByProducts.map((product) => ({
+  //       ...product,
+  //       selected: false,
+  //     }));
+  //     // console.log("selectedProducts", JSON.stringify(selectedProducts));
+  //     setProductsByProduct(selectedProducts);
   //   } catch (error) {
   //     console.error("Error al cargar los productos en el modal:", error);
   //   }
   // };
 
-  const loadProductsByProduct = async (productMainId: number) => {
-    try {
-      const productByProducts = await getProductsByMainId(productMainId);
-      // Transformar los productos al formato de productDetailProduct
-      // const formattedProducts = productByProducts.map((p) => ({
-      //   id: p.id,
-      //   productId: p.id,
-      //   categoryId: p.categoryId,
-      //   name: p.name,
-      //   price: 0, // o el precio que tenga
-      //   reasonModification: null,
-      //   quantity: 1,
-      //   productFittings: [],
-      //   state: true,
-      // }));
-      setProductsByProduct(productByProducts);
-    } catch (error) {
-      console.error("Error al cargar los productos en el modal:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (isPromoModalOpen && selectedPromo?.productId) {
-      loadProductsByProduct(selectedPromo.productId);
-    }
-  }, [isPromoModalOpen, selectedPromo?.productId]);
+  // useEffect(() => {
+  //   if (isPromoModalOpen && selectedPromo?.productId) {
+  //     loadProductsByProduct(selectedPromo.productId);
+  //   }
+  // }, [isPromoModalOpen, selectedPromo?.productId]);
 
   let total = items.reduce(
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -181,7 +198,7 @@ export function ShoppingCart() {
     // console.log("PASO 1: ", JSON.stringify(items));
 
     try {
-      console.log('revisar::', JSON.stringify(items));
+      // console.log('revisar::', JSON.stringify(items));
       const saleItems = items.flatMap((item) => {
         const mainItem = {
           id: item.id,
@@ -204,12 +221,6 @@ export function ShoppingCart() {
         if (isPromo && item.productDetailProduct) {
           const flatSubProducts = item.productDetailProduct.map((sub: any) => {
             const subCategoryId = sub.categoryId ?? item.categoryId ?? 0;
-            // const subFittings = Array.isArray(sub.productFittings)
-            //   ? sub.productFittings.map((f: any) => typeof f === 'object' ? f.id : f).filter(Boolean)
-            //   : [];
-            // const subFittings = Array.isArray((item as any).productFittings)
-            //   ? (item as any).productFittings.map((f: any) => f.name || f)
-            //   : [];
 
             const subFittings = Array.isArray(sub.productFittings)
               ? sub.productFittings.map((f: any) => {
@@ -251,8 +262,6 @@ export function ShoppingCart() {
         }
         return [mainItem];
       });
-
-      // console.log("PASO 2: ", JSON.stringify(saleItems));
 
       if (selectedClient) {
         if (selectedClient.id === 0) {
@@ -299,7 +308,7 @@ export function ShoppingCart() {
         orderType: orderType as OrderTypeEnum,
         shift: getCurrentShift(),
       };
-      console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
+      // console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
       const response = await createSale(newSaleData);
 
       // const response = await createSale({
@@ -391,7 +400,7 @@ export function ShoppingCart() {
           "API_PRINT_URL",
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        console.log("api_impresion: " + JSON.stringify(printPayload));
+        // console.log("api_impresion: " + JSON.stringify(printPayload));
         // await ApiService.post(urlImpresion, printPayload);
         const response = await ApiService.post(
           urlImpresion,
@@ -442,284 +451,247 @@ export function ShoppingCart() {
     );
   };
 
-  const handleUpdatePromoQuantity = (subProductId: number, newQty: number) => {
-    if (!selectedPromo) return;
 
-    const updatedDetails = selectedPromo.productDetailProduct.map(
-      (subItem: any) =>
-        subItem.productId === subProductId
-          ? { ...subItem, quantity: Math.max(0, newQty) }
-          : subItem,
-    );
+  const handleDishClick = (cartDetail: CartItemDetailDetails) => {
 
-    const updatedPromoItem = {
-      ...selectedPromo,
-      productDetailProduct: updatedDetails,
-    };
-    setSelectedPromo(updatedPromoItem);
-  };
+    if (cartDetail?.productDetailProduct?.length) {
+      setOpenDish(true)
+    }
 
-
-  const handleDishClick = (index: number) => {
-    setSelectedDishIndex(index); // Solo guarda el índice, abre el panel de selección
+    setSelectedOrderTypeSend(cartDetail?.orderTypeSend || orderTypeSendList[1].code);
+    setFormReason(cartDetail?.reasonModification ?? "");
+    // cartDetail.completed = true;
+    setSelectedDishIndex(cartDetail);
   };
 
   const handleAcceptPromo = () => {
 
-    if (saveTemporaryProduct.length === 0) {
-      toast.error("Debe seleccionar al menos un producto.");
+    if (!selectedPromo) return;
+
+    if (!selectedDishIndex) {
+      toast.error("Seleccione un plato primero.");
       return;
     }
 
-    if (!selectedPromo) return;
-
-    const detailProducts = saveTemporaryProduct.map((product: any) => ({
-      id: product.id,
-      productId: product.id,
-      categoryId: product.categoryId,
-      name: product.name,
-      quantity: 1,
-      price: product.price,
-      productFittings: [],
-      reasonModification: "",
-      state: true,
-    }));
-
-    const newRow: CartItem = {
-      ...selectedPromo,
-      quantity: 1,
-      reasonModification: formReason,
-      productDetailProduct: detailProducts,
+    const plateIndex = promoRows.findIndex((p) => p.id === selectedDishIndex.id);
+    if (plateIndex === -1) {
+      toast.error("El plato seleccionado no existe.");
+      return;
+    }
+    const currentPlate = promoRows[plateIndex];
+    const updatedPlate: CartItemDetailDetails = {
+      ...currentPlate,
+      productDetailProduct: selectedDishIndex?.productDetailProduct,
+      reasonModification: formReason || currentPlate.reasonModification,
+      orderTypeSend: selectedOrderTypeSend,
+      completed: true,
     };
-
-    setPromoRows((prev) => [...prev, newRow]);
-    setSaveTemporaryProduct([]);
+    const updatedRows = [...promoRows];
+    updatedRows[plateIndex] = updatedPlate;
+    setPromoRows(updatedRows);
     setSelectedDishIndex(null);
+    setOpenDish(false);
     setFormReason("");
+    setSelectedOrderTypeSend(
+      orderTypeSendList[1].code
+    );
+    toast.success("Productos agregados al plato correctamente.");
   };
 
-  const handleSelectProductForDish = (product: Product) => {
-    setSaveTemporaryProduct((prevDishes) => [...prevDishes, product]);
-  };
-
-  const buildProductDetailProduct = () => {
-    return saveTemporaryProduct.map((product: any, index: number) => ({
-      id: product.id,
-      productId: product.id,
-      categoryId: product.categoryId,
-      name: product.name,
-      price: product.price,
-      quantity: 1,
-      reasonModification: "",
-      productFittings: [],
-      position: product.position ?? index,
-      state: true,
-    }));
+  const handleSelectProductForDish = (product: SelectedProduct) => {
+    setSelectedDishIndex((prev: any) => {
+      if (!prev) return prev;
+      const updatedProducts = prev.productDetailProduct.map((p: any) =>
+        p.id === product.id ? { ...p, selected: !p.selected } : p
+      );
+      return { ...prev, productDetailProduct: updatedProducts };
+    });
   };
 
   const handleSavePromoConfig = () => {
-    const finalPromoConfig = {
-      ...selectedPromo,
-      reasonModification:
-        selectedPromo.reasonModification?.trim() ||
-        "Precio de Combo Modificado",
-    };
-
-    const updatedCartItems = items.map((cartItem) =>
-      cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem,
+    dispatch(
+      updateCartItemDetail({
+        id: selectedPromo.id,
+        cartItemDetailDetails: promoRows
+      })
     );
-
-    handleChangeSubTotal(updatedCartItems);
     setIsPromoModalOpen(false);
-  };
+  }
 
-  // const handleSavePromoConfig = () => {
-  //   const finalPromoConfig = {
-  //     ...selectedPromo,
-  //     reasonModification:
-  //       selectedPromo.reasonModification?.trim() ||
-  //       "Precio de Combo Modificado",
-  //   };
-
-  //   const updatedCartItems = items.map((cartItem) =>
-  //     cartItem.id === finalPromoConfig.id ? finalPromoConfig : cartItem,
-  //   );
-
-  //   handleChangeSubTotal(updatedCartItems);
-  //   setIsPromoModalOpen(false);
-  // };
-
-  const handlePromoSelected = (item: CartItem) => {
+  const handlePromoSelected = async (item: CartItem) => {
     setSelectedPromo(item);
-    setPromoRows([]);                // <-- limpiar filas temporales
-    setSaveTemporaryProduct([]);     // <-- limpiar selección anterior
+    setOpenDish(false);
+
+    const productByProducts: Product[] = await getProductsByMainId(item.productId);
+    const productMap = new Map<number, Product>();
+    productByProducts.forEach(p => productMap.set(p.id, p));
+
+    const existingPlates = item.cartItemDetailDetails || [];
+
+    let initialDetails: CartItemDetailDetails[] = [];
+
+    const selectedProducts: SelectedProduct[] = productByProducts.map((product) => ({
+      ...product,
+      selected: false,
+    }));
+
+    if (existingPlates.length > 0) {
+      const platesToUse = existingPlates.slice(0, item.quantity);
+
+      initialDetails = platesToUse.map((plate) => {
+        const productDetail: SelectedProduct[] = (plate.productDetailProduct || []).map((prod: any) => {
+          const fullProduct = productMap.get(prod.id);
+          return {
+            ...(fullProduct || prod),
+            selected: prod.selected ?? false,
+          };
+        });
+
+        return {
+          ...plate,
+          productDetailProduct: productDetail,
+          completed: (productDetail.some(p => p.selected === true)) ? true : false,
+        };
+      });
+
+      const remaining = item.quantity - initialDetails.length;
+      if (remaining > 0) {
+        const emptyPlates: CartItemDetailDetails[] = Array.from(
+          { length: remaining },
+          (_, index) => ({
+            id: initialDetails.length + index + 1, // 👈 continuar numeración
+            cartItemId: item.id,
+            name: `${item.name} - Plato ${initialDetails.length + index + 1}`,
+            price: 0,
+            categoryId: item.categoryId,
+            productId: item.productId,
+            quantity: 1,
+            modified: false,
+            subTotal: 0,
+            modifiedSubtotal: 0,
+            reasonModification: "",
+            orderTypeSend: "",
+            isPromotion: false,
+            isCountable: true,
+            productFittings: [],
+            productDetailProduct: selectedProducts, // Todos los productos disponibles
+            imageUrl: "",
+            completed: false,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            state: true,
+          })
+        );
+        initialDetails = [...initialDetails, ...emptyPlates];
+      }
+    }
+    else {
+      initialDetails = Array.from(
+        { length: item.quantity },
+        (_, index) => ({
+          id: index + 1,
+          cartItemId: item.id,
+          name: `${item.name} - Plato ${index + 1}`,
+          price: 0,
+          categoryId: item.categoryId,
+          productId: item.productId,
+          quantity: 1,
+          modified: false,
+          subTotal: 0,
+          modifiedSubtotal: 0,
+          reasonModification: "",
+          orderTypeSend: "",
+          isPromotion: false,
+          isCountable: true,
+          productFittings: [],
+          productDetailProduct: selectedProducts, // Todos los productos disponibles
+          imageUrl: "",
+          completed: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          state: true,
+        })
+      );
+    }
+
+    setPromoRows(initialDetails);
     setSelectedDishIndex(null);
     setIsPromoModalOpen(true);
     setFormReason("");
     setFormModifiedPrice("");
-  }
-
-  const handleUpdateProductFittings = (
-    productId: number,
-    updatedFittings: any[],
-  ) => {
-    if (!selectedPromo) return;
-
-    // 1. Clonamos y recorremos los subproductos de la promoción seleccionada
-    const updatedProducts = selectedPromo.productDetailProduct.map(
-      (product: any) => {
-        // Si es el plato que estamos editando, le actualizamos sus ProductFittings
-        if (product.productId === productId) {
-          return {
-            ...product,
-            ProductFittings: updatedFittings,
-          };
-        }
-        return product;
-      },
-    );
-
-    // 2. Guardamos el nuevo estado en tu setter de React
-    setSelectedPromo({
-      ...selectedPromo,
-      productDetailProduct: updatedProducts,
-    });
-  };
-
-  const handleAddProductToPromo = () => {
-    const selectedProduct = productsList.find(
-      (p: any) => p.id === formProductId,
-    );
-    if (!selectedProduct) return;
-
-    const newSubProduct = {
-      id: selectedProduct.id,
-      productId: selectedProduct.id,
-      categoryId: selectedProduct.categoryId,
-      name: selectedProduct.name,
-      price:
-        formModifiedPrice !== "" ? formModifiedPrice : selectedProduct.price,
-      reasonModification: formReason.trim() || null,
-      quantity: formQuantity,
-      productFittings: selectedFittings
-        .map((id) => productFittings.find((f) => f.id === id))
-        .filter(Boolean),
-      state: true,
-    };
-    setSelectedPromo({
-      ...selectedPromo,
-      productDetailProduct: [
-        ...(selectedPromo.productDetailProduct || []),
-        newSubProduct,
-      ],
-    });
-
-    setFormProductId("");
-    setFormQuantity(1);
-    setSelectedFittings([]);
-    setFormReason("");
-    setFormModifiedPrice("");
-
-    const currentToastBody = {
-      type: ToastType.Successfully,
-      message: "Exito",
-      description: `Se agrego el producto ${selectedProduct.name} al combo`,
-    };
-    toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />);
   };
 
   const promoColumns: Column<any>[] = [
-    // {
-    //   header: "Producto",
-    //   accessor: (item) => (<div className="flex flex-col">
-    //     <span className="font-medium">
-    //       {item.name}
-    //     </span>
-    //     {item.position !== undefined && (<span className="text-xs text-slate-400"> Plato {item.position + 1} </span>)} </div>),
-    // },
     {
       header: "Producto",
-      accessor: (item: CartItem) => (
+      accessor: (item: CartItemDetailDetails) => (
         <div className="space-y-1">
-
-          <div className="font-semibold">
-            {item.name}
-          </div>
-
-          {item.productDetailProduct?.map((detail: any) => (
-            <div
-              key={detail.productId}
-              className="ml-4 text-xs text-slate-500"
-            >
-              • {detail.name}
-            </div>
-          ))}
+          <div className="font-semibold">{item.name}</div>
+          {item.productDetailProduct
+            ?.filter((detail: any) => detail.selected === true)
+            .map((detail: any) => (
+              <div key={detail.id || `${item.id}-${detail.productId}`} className="ml-4 text-xs text-slate-500">
+                • {detail.name}
+              </div>
+            ))}
         </div>
       ),
     },
     {
       header: "Cant",
       accessor: (item) => (<span className="font-semibold">{item.quantity} u</span>),
-    }, { header: "Acomp", accessor: (item: any) => { const guarniciones = item.productFittings; if (Array.isArray(guarniciones) && guarniciones.length > 0) { return (<div className="flex flex-wrap gap-1"> {guarniciones.map((g: ProductFittings, index: number) => (<span key={index} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200" > {g.name} </span>))} </div>); } return (<span className="text-slate-400 text-xs italic"> Ninguna </span>); }, }, { header: "Obs", accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>), },];
+    },
+    // {
+    //   header: "Acomp",
+    //   accessor: (item: any) => { const guarniciones = item.productFittings; if (Array.isArray(guarniciones) && guarniciones.length > 0) { return (<div className="flex flex-wrap gap-1"> {guarniciones.map((g: ProductFittings, index: number) => (<span key={index} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200" > {g.name} </span>))} </div>); } return (<span className="text-slate-400 text-xs italic"> Ninguna </span>); },
+    // },
+    {
+      header: "Obs",
+      accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>),
+    },
+    {
+      header: "Envío",
+      accessor: (item: CartItemDetailDetails) => {
+        const type = item.orderTypeSend || "";
+        const isParaLlevar = type.toUpperCase().includes("LLEVAR") || type.toUpperCase() === "PARA_LLEVAR";
+        const label = isParaLlevar ? "Para Llevar" : "En Mesa";
+        return (
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isParaLlevar
+            ? "bg-orange-100 text-orange-700 border border-orange-200"
+            : "bg-blue-100 text-blue-700 border border-blue-200"
+            }`}>
+            {label}
+          </span>
+        );
+      },
+    },
+  ];
 
-  // const promoColumns: Column<any>[] = [
-  //   {
-  //     header: "Producto",
-  //     accessor: "name",
-  //   },
-  //   {
-  //     header: "Cant",
-  //     accessor: (item) => (
-  //       <span className="font-semibold">{item.quantity} u</span>
-  //     ),
-  //   },
-  //   {
-  //     header: "Acomp",
-  //     accessor: (item: any) => {
-  //       const guarniciones = item.productFittings;
 
-  //       // Validamos que sea un array y tenga elementos
-  //       if (Array.isArray(guarniciones) && guarniciones.length > 0) {
-  //         return (
-  //           <div className="flex flex-wrap gap-1">
-  //             {guarniciones.map((g: ProductFittings, index: number) => (
-  //               <span
-  //                 key={index}
-  //                 className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200"
-  //               >
-  //                 {g.name}
-  //               </span>
-  //             ))}
-  //           </div>
-  //         );
-  //       }
+  // MODIFICACION DE ELIMINACION REVISAR
 
-  //       return <span className="text-slate-400 text-xs italic">Ninguna</span>;
-  //     },
-  //   },
-  //   {
-  //     /* 👇 NUEVA COLUMNA ADICIONADA */
-  //     header: "Obs",
-  //     accessor: (item) => (
-  //       <span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block">
-  //         {item.reasonModification || (
-  //           <span className="text-slate-300 italic">Ninguna</span>
-  //         )}
-  //       </span>
-  //     ),
-  //   },
-  // ];
+  // const handleRemoveProductFromPromo = (itemToDelete: any) => {
+  //   const updatedSubProducts = (
+  //     selectedPromo.productDetailProduct || []
+  //   ).filter((item: any) => item.id !== itemToDelete.id);
 
-  const handleRemoveProductFromPromo = (itemToDelete: any) => {
-    const updatedSubProducts = (
-      selectedPromo.productDetailProduct || []
-    ).filter((item: any) => item.id !== itemToDelete.id);
+  //   setSelectedPromo({
+  //     ...selectedPromo,
+  //     productDetailProduct: updatedSubProducts,
+  //   });
+  // };
 
-    setSelectedPromo({
-      ...selectedPromo,
-      productDetailProduct: updatedSubProducts,
-    });
-  };
+  // useEffect(() => {
+  //   if (
+  //     orderTypeSendList.length > 0 &&
+  //     !selectedOrderTypeSend
+  //   ) {
+  //     setSelectedOrderTypeSend(
+  //       orderTypeSendList[0].code ||
+  //       orderTypeSendList[0].name
+  //     );
+  //   }
+  // }, [orderTypeSendList]);
 
   return (
     <>
@@ -856,13 +828,13 @@ export function ShoppingCart() {
               <label className="block text-sm font-medium mb-2 text-rest-primary">
                 Método de Pago
               </label>
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-3">
                 {["cash", "qr", "mixed"].map((method) => (
                   <button
                     key={method}
                     onClick={() => dispatch(setPaymentType(method as any))}
-                    className={`flex-1 py-1 px-1 text-sm font-medium transition-colors cursor-pointer ${paymentType === method
-                      ? "bg-[#facc15]  text-rest-primary"
+                    className={`py-2 px-3 text-sm font-medium transition-colors cursor-pointer rounded-md text-center ${paymentType === method
+                      ? "bg-[#facc15] text-rest-primary"
                       : "bg-muted text-foreground hover:bg-muted/80"
                       }`}
                   >
@@ -965,172 +937,155 @@ export function ShoppingCart() {
               </div>
             </div>
           </RoleGuard>
-          {/* MODIFICATION */}
-          {selectedPromo?.quantity && selectedPromo.quantity > 0 && (
-            <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-              {/* <div className="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200"> */}
-              <div className="flex flex-wrap justify-center gap-3">
-                {Array.from({ length: selectedPromo.quantity }, (_, i) => (
-                  <div
-                    key={i}
-                    className="relative w-10 h-10 md:w-12 md:h-12 lg:w-12 lg:h-12 bg-gray-300 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition"
-                    onClick={() => handleDishClick(i)}
-                  >
-                    <Image
-                      src="/images/others/select-dish.avif"
-                      alt={`Plato ${i + 1}`}
-                      fill
-                      className="w-full h-full object-cover opacity-60 grayscale"
-                    />
-                  </div>
-                ))}
+          {promoRows.length && (
+            <div className="mb-2 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center mb-2">
+                Seleccione un Plato
+              </p>
+              <div className="flex flex-wrap justify-center gap-3 mb-2">
+                {promoRows.map((plate, index) => {
+                  const isSelected = selectedDishIndex?.id === plate.id ? true : false;
+                  return (
+                    <div
+                      key={plate.id}
+                      onClick={() => handleDishClick(plate)}
+                      className={`relative w-14 h-14 md:w-14 md:h-14 lg:w-15 lg:h-15 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition ${isSelected
+                        ? "border-2 border-green-500 ring-2 ring-green-300"
+                        : "bg-gray-300 border-2 border-transparent"
+                        }`}
+                    >
+                      <Image
+                        src="/images/others/select-dish.avif"
+                        alt={`Plato ${index + 1}`}
+                        fill
+                        className={`w-full h-full object-cover transition ${isSelected || plate.completed
+                          ? "opacity-100 saturate-100"
+                          : "opacity-40 grayscale"
+                          }`}
+                      />
+                      {/* 👇 NÚMERO DEL PLATO EN EL CENTRO */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                          {plate.id}
+                        </span>
+                      </div>
+
+                      {plate.completed && (
+                        <div className="absolute top-0.5 right-0.5 bg-green-500 text-white rounded-full p-0.5 shadow-md">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              {selectedDishIndex !== null && (
-                <>
-                  <div className="flex justify-between items-center mb-3">
-                    <p className="font-semibold text-xs text-[#052A3D] uppercase tracking-wider">
-                      Seleccione el Pedido
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {productByProducts.map((product) => {
-                      const isSelected = saveTemporaryProduct.some(
-                        (item: any) => item.id === product.id && item.position === selectedDishIndex
-                      );
-
-                      return (
-                        <button
-                          key={product.id}
-                          onClick={() => handleSelectProductForDish(product)}
-                          className={`group relative flex flex-col items-center p-2 rounded-xl transition-all border text-center ${isSelected
-                            ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
-                            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+              <div className="mb-3">
+                <div className="flex flex-wrap gap-2">
+                  {orderTypeSendList.map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => setSelectedOrderTypeSend(type.code || type.name)}
+                      className={`flex-1 min-w-[80px] px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${selectedOrderTypeSend === (type.code || type.name)
+                        ? "bg-[#052a3d] border-[#052a3d] text-white"
+                        : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
+                        }`}
+                    >
+                      {type.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col gap-1 md:col-span-3 mb-3">
+                <label className="text-xs text-slate-500 font-medium">
+                  Comentario:
+                </label>
+                <input
+                  type="text"
+                  value={formReason}
+                  onChange={(e) => setFormReason(e.target.value)}
+                  placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
+                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
+                />
+              </div>
+              {openDish && (
+                <div className="flex flex-wrap justify-center gap-3 mb-3">
+                  {selectedDishIndex?.productDetailProduct?.map((product) => (
+                    <button
+                      key={product.id}
+                      onClick={() => handleSelectProductForDish(product)}
+                      className={`group relative flex flex-col items-center p-0 rounded-xl transition-all border text-center w-25 h-25 ${product.selected
+                        ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
+                        : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                        }`}
+                    >
+                      {/* Contenedor de la imagen cuadrada */}
+                      <div
+                        className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${product.selected
+                          ? "border-green-500 ring-2 ring-green-300 shadow-lg"
+                          : "border-gray-200 opacity-60 hover:opacity-100"
+                          }`}
+                      >
+                        <Image
+                          src={product.imageUrl || "/images/others/select-dish.avif"}
+                          alt={product.name}
+                          fill
+                          className={`object-cover transition ${product.selected
+                            ? "opacity-100 saturate-100"
+                            : "opacity-40 grayscale"
                             }`}
-                        >
-                          {/* Contenedor de la Imagen Rectangular */}
-                          <div className="relative w-full h-24 sm:h-28 rounded-lg overflow-hidden mb-2 bg-gray-200 shadow-inner">
-                            <Image
-                              src={product.imageUrl || "/images/others/select-dish.avif"}
-                              alt={product.name}
-                              fill
-                              className={`object-cover transition-all duration-300 ${isSelected
-                                ? "opacity-100 grayscale-0 scale-105"
-                                : "opacity-60 grayscale group-hover:opacity-80 group-hover:grayscale-0"
-                                }`}
-                            />
-                            {/* Checkmark flotante si está seleccionado */}
-                            {isSelected && (
-                              <div className="absolute top-1.5 right-1.5 bg-blue-500 text-white rounded-full p-1 shadow-md z-10">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Texto del nombre abajo de la imagen */}
-                          <span className={`text-xs font-medium line-clamp-2 px-1 ${isSelected ? "text-blue-600 font-semibold" : "text-gray-600"
-                            }`}>
+                        />
+                        {/* Nombre centrado en la parte inferior dentro de la imagen */}
+                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+                          <span
+                            className={`block text-base font-medium text-center text-white line-clamp-2 ${product.selected ? "font-semibold" : ""
+                              }`}
+                          >
                             {product.name}
                           </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="flex flex-col gap-1 md:col-span-3">
-                    <label className="text-xs text-slate-500 font-medium">
-                      Observación
-                    </label>
-                    <input
-                      type="text"
-                      value={formReason}
-                      onChange={(e) => setFormReason(e.target.value)}
-                      placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
-                      className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
-                    />
-                  </div>
-
-                  <div className="flex justify-end pt-1">
-                    <ButtonGeneric
-                      variant="confirmYellow"
-                      onClick={handleAcceptPromo}
-                    >
-                      + Agregar a la Lista
-                    </ButtonGeneric>
-                  </div>
-                  {productByProducts.length === 0 && (
-                    <p className="text-sm text-gray-400 text-center py-2">
-                      No hay productos disponibles para este combo
-                    </p>
-                  )}
-                </>
+                        </div>
+                        {/* Checkmark flotante si está seleccionado */}
+                        {product.selected && (
+                          <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               )}
+              <div className="flex justify-end pt-1">
+                <ButtonGeneric
+                  variant="confirmYellow"
+                  onClick={handleAcceptPromo}
+                >
+                  + Agregar a la Lista
+                </ButtonGeneric>
+              </div>
             </div>
           )}
-          {/* 
-<div className="flex flex-col gap-1.5">
-                    <label className="text-xs text-slate-500 font-medium">
-                      Guarniciones de Acompañamiento
-                    </label>
-                    <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-4 bg-white p-2.5 rounded-lg border border-slate-200 w-full overflow-x-auto">
-                      {productFittings.map((fitting) => {
-                        const isActive = selectedFittings.includes(fitting.id);
-                        const handleToggleImage = () => {
-                          if (isActive) {
-                            setSelectedFittings(
-                              selectedFittings.filter((id) => id !== fitting.id),
-                            );
-                          } else {
-                            setSelectedFittings([...selectedFittings, fitting.id]);
-                          }
-                        };
 
-                        return (
-                          <button
-                            key={fitting.id}
-                            type="button"
-                            onClick={handleToggleImage}
-                            className="flex-1 min-w-[64px] focus:outline-none transition-transform active:scale-95 flex flex-col items-center gap-1 cursor-pointer"
-                          >
-                            <img
-                              src={fitting.imageUrl ?? ""}
-                              alt={fitting.name}
-                              className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 shadow-sm transition-all duration-200 ${isActive
-                                ? "border-yellow-400 opacity-100 scale-105"
-                                : "border-transparent opacity-30 grayscale"
-                                }`}
-                            />
-                            <span
-                              className={`text-[9px] sm:text-[10px] font-bold text-center truncate w-full ${isActive ? "text-yellow-600" : "text-slate-400"}`}
-                            >
-                              {fitting.name}
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div> */}
-
-          <GenericDataTable
-            columns={promoColumns}
-            // data={selectedPromo ? [selectedPromo] : []}
-            data={promoRows}
-            showActions={true}
-            actions={{
-              onDelete: handleRemoveProductFromPromo,
-            }}
-            rowKey="id"
-          />
-
+          {promoRows.length > 0 && (
+            <div className="mt-4 border rounded-xl overflow-hidden shadow-sm">
+              <GenericDataTable
+                columns={promoColumns}
+                data={promoRows}
+                showActions={true}
+                rowKey="id"
+              />
+            </div>
+          )}
         </ResponsiveModal>
       )}
       <GenericModal
         isOpen={showSummary}
         onClose={() => {
-          setShowSummary(false); // Cierra el modal
-          setSelectedClient(null); // Resetea el cliente seleccionado
+          setShowSummary(false);
+          setSelectedClient(null);
         }}
         items={items}
         total={total}
@@ -1176,7 +1131,6 @@ export function ShoppingCart() {
           dispatch(toggleCartSide());
         }}
         onConfirm={() => {
-          // No necesitamos confirmación, solo cerrar
           setIsTicketModalOpen(false);
           setSaleData(null);
           dispatch(clearCart());
