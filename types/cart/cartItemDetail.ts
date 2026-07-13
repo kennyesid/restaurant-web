@@ -3,6 +3,7 @@ import { ProductFittings } from "../product/productFittings";
 
 export interface CartItemDetail {
   id: number;
+  cartItemId: number;
   name: string;
   price: number;
   categoryId: number;
@@ -18,6 +19,7 @@ export interface CartItemDetail {
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;
+  completed?: boolean;
   createdAt?: string;
   updatedAt?: string;
   state?: boolean;

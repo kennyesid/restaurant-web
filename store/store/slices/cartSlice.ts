@@ -79,7 +79,7 @@ const cartSlice = createSlice({
     state,
     action: PayloadAction<{
         id:number;
-        cartItemDetailDetails: CartItemDetailDetails[];
+        cartItemDetail: CartItemDetail[];
     }>
     )=>{
       //  console.log("ACTION:", action.payload)
@@ -88,7 +88,7 @@ const cartSlice = createSlice({
         );
 // console.log("ITEM ENCONTRADO:", item);
         if(item){
-            item.cartItemDetailDetails = action.payload.cartItemDetailDetails;
+            item.cartItemDetail = action.payload.cartItemDetail;
         }
     },
 

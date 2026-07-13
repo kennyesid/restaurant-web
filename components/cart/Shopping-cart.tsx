@@ -19,7 +19,8 @@ import {
   obtenerSiguienteOrdenDiariaSupabase,
 } from "@/services/salesService";
 import { toast } from "sonner";
-import { CartItem, CartItemDetailMistake, OrderTypeSend, Sale, SelectedProduct } from "@/types";
+// SelectedProduct
+import { CartItem, CartItemDetail, OrderTypeSend, ProductDetailProduct, Sale } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
@@ -32,9 +33,7 @@ import { createUser } from "@/services/usersService";
 import Image from "next/image";
 import { ResponsiveModal } from "../common/modal/ResponsiveModal";
 import { Column, GenericDataTable } from "../common/table/GenericDataTable";
-// import { CONSTANT_PRODUCT_FITTING } from "@/lib/constants/constantsFitting";
 import { ProductFittings } from "@/types/product/productFittings";
-import { ProductDetailProduct } from "@/types/product/productDetailProduct";
 import { getProducts } from "@/services/productsSservice";
 import { Product } from "@/types";
 import { DropdownSearchable, RestaurantTicket } from "@/components/common";
@@ -44,13 +43,10 @@ import { DateUtils } from "@/utils/date-utils";
 import { parameterService } from "@/services/parameterService";
 import RoleGuard from "../auth/RoleGuard";
 import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
-import TicketModal from "../common/print/TicketModal";
 import { ProductFittingsService } from "@/services/productFittingsService";
 import { getProductsByMainId } from "@/services/productByProducts";
-import { ProductsByProduct } from "@/types/product/ProductByProducts";
 import { getOrderTypes } from "@/services/parameter/orderTypeSendService";
-import { CartItemDetail } from "@/types/cart/cartItemDetail";
-import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
+// import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
 
 
 export function ShoppingCart() {
@@ -59,34 +55,23 @@ export function ShoppingCart() {
   const [showSummary, setShowSummary] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
-  const [promoItems, setPromoItems] = useState<CartItemDetailMistake[]>([]);
-  // const [selectedPromo, setSelectedPromo] = useState<any | null>(null);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [orderType, setOrderType] = useState<OrderTypeEnum>(
     OrderTypeEnum.CONSUMO_LOCAL,
   );
   const [formReason, setFormReason] = useState("");
   const [formModifiedPrice, setFormModifiedPrice] = useState<number | "">("");
-  const [formProductId, setFormProductId] = useState<number | "">("");
-  const [formQuantity, setFormQuantity] = useState<number>(1);
-  const [selectedFittings, setSelectedFittings] = useState<number[]>([]);
   const [showTicket, setShowTicket] = useState(false);
   const [createdSale, setCreatedSale] = useState<Sale | null>(null);
   const [productFittings, setProductFittings] = useState<ProductFittings[]>([]);
-  const [productByProducts, setProductsByProduct] = useState<SelectedProduct[]>([]);
-
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [saleData, setSaleData] = useState<Sale | null>(null);
   const [amountPaid, setAmountPaid] = useState<number>(0);
-
-  const [selectedDishIndex, setSelectedDishIndex] = useState<CartItemDetailDetails | null>(null);
+  const [selectedDishIndex, setSelectedDishIndex] = useState<CartItemDetail | null>(null);
+  // const [selectedDishIndex, setSelectedDishIndex] = useState<CartItemDetailDetails | null>(null);
   const [openDish, setOpenDish] = useState(false);
-  // const [selectedDishIndex, setSelectedDishIndex] = useState<number | null>(null);
-
-  const [selectedProductsForPromo, setSelectedProductsForPromo] = useState<Product[]>([]);
-  // const [saveTemporaryProduct, setSaveTemporaryProduct] = useState<SelectedProduct[]>([]);
-  const [promoRows, setPromoRows] = useState<CartItemDetailDetails[]>([]);
-  // const [promoRows, setPromoRows] = useState<CartItemDetail[]>([]);
+  const [promoRows, setPromoRows] = useState<CartItemDetail[]>([]);
+  // const [promoRows, setPromoRows] = useState<CartItemDetailDetails[]>([]);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
     items: state.cart.items,
@@ -100,7 +85,6 @@ export function ShoppingCart() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [needsInvoice, setNeedsInvoice] = useState(false);
-  // const [selectedClient, setSelectedClient] = useState<User | null>(null);
   const [selectedClient, setSelectedClient] = useState<any>({
     id: 1,
     fullName: "",
@@ -110,7 +94,6 @@ export function ShoppingCart() {
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [orderTypeSendList, setOrderTypeSendList] = useState<OrderTypeSend[]>([]);
   const [selectedOrderTypeSend, setSelectedOrderTypeSend] = useState<string>("");
-  // const [promoColumns, setPromoColumns] = useState<Column<any>[]>([]);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -118,32 +101,20 @@ export function ShoppingCart() {
         const productFittings = await ProductFittingsService.getAll();
         setProductFittings(productFittings);
         const data = await getProducts();
-        // Filtrar opcional: Si quieres evitar que en el dropdown salgan otras promociones
         const onlySingleProducts = data.filter((p) => !p.isPromotion);
         setProductsList(onlySingleProducts);
       } catch (error) {
         console.error("Error al cargar los productos en el modal:", error);
       }
     };
-
-    // const loadOrderTypeSend = async () => {
-    //   const orderTypeSend = await getOrderTypes();
-    //   setOrderTypeSendList(orderTypeSend);
-    // }
-
     loadProducts();
-    // loadOrderTypeSend();
   }, []);
 
   useEffect(() => {
     if (isPromoModalOpen && selectedPromo?.productId) {
-      // Cargar productos relacionados (ya lo tienes)
-      // loadProductsByProduct(selectedPromo.productId);
-      // Cargar tipos de envío
       const loadOrderTypes = async () => {
         const types = await getOrderTypes();
         setOrderTypeSendList(types);
-        // Seleccionar el primero por defecto (opcional)
         if (types.length > 0) {
           setSelectedOrderTypeSend(types[1].code);
         }
@@ -151,26 +122,6 @@ export function ShoppingCart() {
       loadOrderTypes();
     }
   }, [isPromoModalOpen, selectedPromo?.productId]);
-
-  // const loadProductsByProduct = async (productMainId: number) => {
-  //   try {
-  //     const productByProducts: Product[] = await getProductsByMainId(productMainId);
-  //     const selectedProducts: SelectedProduct[] = productByProducts.map((product) => ({
-  //       ...product,
-  //       selected: false,
-  //     }));
-  //     // console.log("selectedProducts", JSON.stringify(selectedProducts));
-  //     setProductsByProduct(selectedProducts);
-  //   } catch (error) {
-  //     console.error("Error al cargar los productos en el modal:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (isPromoModalOpen && selectedPromo?.productId) {
-  //     loadProductsByProduct(selectedPromo.productId);
-  //   }
-  // }, [isPromoModalOpen, selectedPromo?.productId]);
 
   let total = items.reduce(
     (sum, item) => sum + (item.modifiedSubtotal ?? item.price * item.quantity),
@@ -192,19 +143,13 @@ export function ShoppingCart() {
       toast.error("El carrito está vacío");
       return;
     }
-
     setIsProcessing(true);
-
-    // console.log("PASO 1: ", JSON.stringify(items));
-
     try {
-      // console.log('revisar::', JSON.stringify(items));
       const saleItems = items.flatMap((item) => {
         const mainItem = {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
-          // price: item.subTotal,
           price: (typeof item.subTotal === 'number' ? item.subTotal : 0),
           categoryId: item.categoryId,
           productId: item.productId,
@@ -212,7 +157,6 @@ export function ShoppingCart() {
           modifiedSubtotal: item.modifiedSubtotal,
           reasonModification: item.reasonModification?.includes('Precio de Combo Modificado') ? undefined : item.reasonModification,
           isCountable: true,
-          // isCountable: item.isCountable ?? false,
         };
         const isPromo =
           item.isPromotion ||
@@ -225,9 +169,9 @@ export function ShoppingCart() {
             const subFittings = Array.isArray(sub.productFittings)
               ? sub.productFittings.map((f: any) => {
                 if (typeof f === 'object' && f !== null) {
-                  return f.name; // Si es objeto, toma el nombre
+                  return f.name;
                 }
-                return f; // Si ya es string, úsalo directamente
+                return f;
               }).filter(Boolean)
               : [];
 
@@ -245,19 +189,6 @@ export function ShoppingCart() {
               productDetailProduct: undefined,
             };
           });
-          // const flatSubProducts = item.productDetailProduct.map((sub: any) => ({
-          //   id: sub.id,
-          //   name: sub.name,
-          //   quantity: 0,
-          //   price: 0,
-          //   categoryId: sub.categoryId || item.categoryId,
-          //   productId: sub.productId,
-          //   productFittings: sub.productFittings ? sub.productFittings : [],
-          //   modifiedSubtotal: sub.modifiedSubtotal,
-          //   reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
-          //   isCountable: false,
-          //   productDetailProduct: undefined,
-          // }));
           return [mainItem, ...flatSubProducts];
         }
         return [mainItem];
@@ -426,10 +357,6 @@ export function ShoppingCart() {
           "La venta se guardó, pero hubo un problema con la ticketera.",
         );
       }
-
-      // dispatch(clearCart());
-      // setShowSummary(false);
-      // dispatch(toggleCartSide());
     } catch (error) {
       toast.error("Error al procesar la venta");
     } finally {
@@ -451,8 +378,7 @@ export function ShoppingCart() {
     );
   };
 
-
-  const handleDishClick = (cartDetail: CartItemDetailDetails) => {
+  const handleDishClick = (cartDetail: CartItemDetail) => {
 
     if (cartDetail?.productDetailProduct?.length) {
       setOpenDish(true)
@@ -460,7 +386,6 @@ export function ShoppingCart() {
 
     setSelectedOrderTypeSend(cartDetail?.orderTypeSend || orderTypeSendList[1].code);
     setFormReason(cartDetail?.reasonModification ?? "");
-    // cartDetail.completed = true;
     setSelectedDishIndex(cartDetail);
   };
 
@@ -479,7 +404,7 @@ export function ShoppingCart() {
       return;
     }
     const currentPlate = promoRows[plateIndex];
-    const updatedPlate: CartItemDetailDetails = {
+    const updatedPlate: CartItemDetail = {
       ...currentPlate,
       productDetailProduct: selectedDishIndex?.productDetailProduct,
       reasonModification: formReason || currentPlate.reasonModification,
@@ -498,7 +423,7 @@ export function ShoppingCart() {
     toast.success("Productos agregados al plato correctamente.");
   };
 
-  const handleSelectProductForDish = (product: SelectedProduct) => {
+  const handleSelectProductForDish = (product: ProductDetailProduct) => {
     setSelectedDishIndex((prev: any) => {
       if (!prev) return prev;
       const updatedProducts = prev.productDetailProduct.map((p: any) =>
@@ -512,7 +437,7 @@ export function ShoppingCart() {
     dispatch(
       updateCartItemDetail({
         id: selectedPromo.id,
-        cartItemDetailDetails: promoRows
+        cartItemDetail: promoRows
       })
     );
     setIsPromoModalOpen(false);
@@ -526,11 +451,11 @@ export function ShoppingCart() {
     const productMap = new Map<number, Product>();
     productByProducts.forEach(p => productMap.set(p.id, p));
 
-    const existingPlates = item.cartItemDetailDetails || [];
+    const existingPlates = item.cartItemDetail || [];
 
-    let initialDetails: CartItemDetailDetails[] = [];
+    let initialDetails: CartItemDetail[] = [];
 
-    const selectedProducts: SelectedProduct[] = productByProducts.map((product) => ({
+    const selectedProducts: ProductDetailProduct[] = productByProducts.map((product) => ({
       ...product,
       selected: false,
     }));
@@ -539,7 +464,7 @@ export function ShoppingCart() {
       const platesToUse = existingPlates.slice(0, item.quantity);
 
       initialDetails = platesToUse.map((plate) => {
-        const productDetail: SelectedProduct[] = (plate.productDetailProduct || []).map((prod: any) => {
+        const productDetail: ProductDetailProduct[] = (plate.productDetailProduct || []).map((prod: any) => {
           const fullProduct = productMap.get(prod.id);
           return {
             ...(fullProduct || prod),
@@ -556,7 +481,7 @@ export function ShoppingCart() {
 
       const remaining = item.quantity - initialDetails.length;
       if (remaining > 0) {
-        const emptyPlates: CartItemDetailDetails[] = Array.from(
+        const emptyPlates: CartItemDetail[] = Array.from(
           { length: remaining },
           (_, index) => ({
             id: initialDetails.length + index + 1, // 👈 continuar numeración
@@ -624,7 +549,7 @@ export function ShoppingCart() {
   const promoColumns: Column<any>[] = [
     {
       header: "Producto",
-      accessor: (item: CartItemDetailDetails) => (
+      accessor: (item: CartItemDetail) => (
         <div className="space-y-1">
           <div className="font-semibold">{item.name}</div>
           {item.productDetailProduct
@@ -641,17 +566,13 @@ export function ShoppingCart() {
       header: "Cant",
       accessor: (item) => (<span className="font-semibold">{item.quantity} u</span>),
     },
-    // {
-    //   header: "Acomp",
-    //   accessor: (item: any) => { const guarniciones = item.productFittings; if (Array.isArray(guarniciones) && guarniciones.length > 0) { return (<div className="flex flex-wrap gap-1"> {guarniciones.map((g: ProductFittings, index: number) => (<span key={index} className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200" > {g.name} </span>))} </div>); } return (<span className="text-slate-400 text-xs italic"> Ninguna </span>); },
-    // },
     {
       header: "Obs",
       accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>),
     },
     {
       header: "Envío",
-      accessor: (item: CartItemDetailDetails) => {
+      accessor: (item: CartItemDetail) => {
         const type = item.orderTypeSend || "";
         const isParaLlevar = type.toUpperCase().includes("LLEVAR") || type.toUpperCase() === "PARA_LLEVAR";
         const label = isParaLlevar ? "Para Llevar" : "En Mesa";
@@ -666,32 +587,6 @@ export function ShoppingCart() {
       },
     },
   ];
-
-
-  // MODIFICACION DE ELIMINACION REVISAR
-
-  // const handleRemoveProductFromPromo = (itemToDelete: any) => {
-  //   const updatedSubProducts = (
-  //     selectedPromo.productDetailProduct || []
-  //   ).filter((item: any) => item.id !== itemToDelete.id);
-
-  //   setSelectedPromo({
-  //     ...selectedPromo,
-  //     productDetailProduct: updatedSubProducts,
-  //   });
-  // };
-
-  // useEffect(() => {
-  //   if (
-  //     orderTypeSendList.length > 0 &&
-  //     !selectedOrderTypeSend
-  //   ) {
-  //     setSelectedOrderTypeSend(
-  //       orderTypeSendList[0].code ||
-  //       orderTypeSendList[0].name
-  //     );
-  //   }
-  // }, [orderTypeSendList]);
 
   return (
     <>
@@ -721,7 +616,7 @@ export function ShoppingCart() {
                     <div
                       onClick={() => handlePromoSelected(item)}
                       className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
-                        ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10" // 👈 Usamos color arbitrario o red-500 y sumamos z-10
+                        ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10"
                         : "border-border"
                         }`}
                     >
@@ -764,8 +659,6 @@ export function ShoppingCart() {
                     >
                       <Minus size={14} />
                     </button>
-
-                    {/* INPUT */}
                     <input
                       type="number"
                       value={item.quantity}
@@ -785,8 +678,6 @@ export function ShoppingCart() {
                         [-moz-appearance:textfield]
                       "
                     />
-
-                    {/* PLUS */}
                     <button
                       onClick={() =>
                         dispatch(
@@ -809,11 +700,6 @@ export function ShoppingCart() {
                       <Trash2 size={14} />
                     </button>
                     <p className="font-semibold text-rest-primary text-sm whitespace-nowrap">
-                      {/* Bs{" "}
-                      {(
-                        item.modifiedSubtotal ?? item.price * item.quantity
-                      ).toString()} */}
-                      {/* Bs {(item.modifiedSubtotal ?? item.subTotal).toString()} */}
                       Bs {(item.modifiedSubtotal ?? item.subTotal ?? 0).toString()}
                     </p>
                   </div>
@@ -1029,7 +915,7 @@ export function ShoppingCart() {
                       >
                         <Image
                           src={product.imageUrl || "/images/others/select-dish.avif"}
-                          alt={product.name}
+                          alt={product.name ?? ""}
                           fill
                           className={`object-cover transition ${product.selected
                             ? "opacity-100 saturate-100"
@@ -1045,7 +931,6 @@ export function ShoppingCart() {
                             {product.name}
                           </span>
                         </div>
-                        {/* Checkmark flotante si está seleccionado */}
                         {product.selected && (
                           <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
