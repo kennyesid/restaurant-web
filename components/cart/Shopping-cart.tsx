@@ -71,6 +71,7 @@ export function ShoppingCart() {
   // const [selectedDishIndex, setSelectedDishIndex] = useState<CartItemDetailDetails | null>(null);
   const [openDish, setOpenDish] = useState(false);
   const [promoRows, setPromoRows] = useState<CartItemDetail[]>([]);
+  const [table, setTable] = useState<number>(1);
   // const [promoRows, setPromoRows] = useState<CartItemDetailDetails[]>([]);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
@@ -145,6 +146,7 @@ export function ShoppingCart() {
     }
     setIsProcessing(true);
     try {
+      console.log('REVIEW N1 :: ' + JSON.stringify(items));
       const saleItems = items.flatMap((item) => {
         const mainItem = {
           id: item.id,
@@ -238,8 +240,9 @@ export function ShoppingCart() {
         changeReturned: changeReturned,
         orderType: orderType as OrderTypeEnum,
         shift: getCurrentShift(),
+        table: table
       };
-      // console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
+      console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
       const response = await createSale(newSaleData);
 
       // const response = await createSale({
@@ -457,6 +460,8 @@ export function ShoppingCart() {
 
     const selectedProducts: ProductDetailProduct[] = productByProducts.map((product) => ({
       ...product,
+      productId: product.id,
+      groupId: product.groupId ?? 0,
       selected: false,
     }));
 

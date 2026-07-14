@@ -5,7 +5,7 @@ export interface Product {
   id: number;
   productIngredientDetail?: ProductIngredientDetail[];
   productDetailProduct?: ProductDetailProduct[];
-  groupId?: string;
+  groupId?: number;
   categoryId: number;
   name: string;
   description: string;

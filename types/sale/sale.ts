@@ -27,6 +27,7 @@ export interface Sale {
   total: number;
   paymentType: PaymentTypeEnum;
   shift: string;
+  table: number;
   createdAt: Date;
   updatedAt: Date;
   state: boolean;

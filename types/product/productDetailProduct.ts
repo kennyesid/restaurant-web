@@ -5,9 +5,10 @@ import { ProductIngredientDetail } from "./productIngredientDetail";
 
 export interface ProductDetailProduct {
   id: number;
-  productIngredientDetail?: ProductIngredientDetail[];
-  productDetailProduct?: ProductDetailProduct[];
-  groupId?: string;
+  // productIngredientDetail?: ProductIngredientDetail[];
+  // productDetailProduct?: ProductDetailProduct[];
+  productId: number;
+  groupId?: number;
   categoryId: number;
   name: string;
   description: string;

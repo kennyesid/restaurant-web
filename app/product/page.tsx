@@ -47,7 +47,7 @@ export default function ProductsPage() {
     price: 0,
     imageUrl: "",
     categoryId: 0,
-    groupId: "",
+    groupId: 0,
     code: "",
     legend: "",
     isPromotion: false,
@@ -152,7 +152,7 @@ export default function ProductsPage() {
         price: product.price,
         imageUrl: product.imageUrl,
         categoryId: product.categoryId,
-        groupId: product.groupId || "",
+        groupId: product.groupId || 0,
         code: product.code || "",
         legend: product.legend || "",
         isPromotion: !!product.isPromotion,
@@ -170,7 +170,7 @@ export default function ProductsPage() {
         price: 0,
         imageUrl: "",
         categoryId: categories[0]?.id || 0,
-        groupId: "",
+        groupId: 0,
         code: "",
         legend: "",
         isPromotion: false,
@@ -290,6 +290,32 @@ export default function ProductsPage() {
   const getCategoryName = (categoryId: number) => {
     return categories.find((c) => c.id === categoryId)?.name || "N/A";
   };
+
+  useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') return;
+
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        alert('mobile');
+        // setDevice('mobile');
+      } else if (width >= 640 && width < 1024) {
+        alert('tablet');
+        // setDevice('tablet');
+      } else {
+        alert('desktop');
+        // setDevice('desktop');
+      }
+    };
+
+    // Ejecutar al montar
+    handleResize();
+
+    // Escuchar cambios de tamaño
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (loading) {
     return <div className="p-6">Cargando...</div>;
