@@ -19,11 +19,6 @@ import { CustomNotification } from "@/components/common/toast/CustomNotification
 import { configService } from "@/services/configService";
 import { Eye, EyeOff } from "lucide-react";
 
-// const loginSchema = z.object({
-//   email: z.string().min(1, "Email requerido"),
-//   password: z.string().min(1, "Contraseña requerida"),
-// });
-
 const loginSchema = z.object({
   email: z
     .string()

@@ -363,14 +363,14 @@ export async function createSale(
             // 4a. Extraer datos del sub-item
             const {
               id: subFrontId,
-              productFittings: subFittings,
+              // productFittings: subFittings,
               ...subItemData
             } = subItem;
 
             // Transformar fittings del sub-item a array de IDs
-            const subFittingIds = Array.isArray(subFittings)
-              ? subFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
-              : [];
+            // const subFittingIds = Array.isArray(subFittings)
+            //   ? subFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
+            //   : [];
 
             // 4b. Insertar en sales_details_details (relacionado con saleDetailId)
             const { data: insertedSubDetail, error: subError } = await supabase
@@ -378,7 +378,7 @@ export async function createSale(
               .insert([{
                 ...subItemData,
                 saleDetailId, // 👈 Relación con el detail padre
-                productFittings: subFittingIds
+                // productFittings: subFittingIds
               }])
               .select()
               .single();
@@ -920,6 +920,7 @@ export async function getSaleWithDetailsById(id: number): Promise<RespuestaGener
       changeReturned: sale.changeReturned,
       orderType: sale.orderType,
       shift: sale.shift,
+      table: sale.table,
       createdAt: sale.createdAt,
       updatedAt: sale.updatedAt,
     };

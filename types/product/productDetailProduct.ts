@@ -1,12 +1,12 @@
 // types/ProductIngredientDetail.ts
 
+import { CartItemDetail } from "../cart/cartItemDetail";
 import { ProductFittings } from "./productFittings";
 import { ProductIngredientDetail } from "./productIngredientDetail";
 
 export interface ProductDetailProduct {
   id: number;
-  // productIngredientDetail?: ProductIngredientDetail[];
-  // productDetailProduct?: ProductDetailProduct[];
+  cartItemDetailId?: number;
   productId: number;
   groupId?: number;
   categoryId: number;
@@ -16,7 +16,7 @@ export interface ProductDetailProduct {
   legend: string;
   price: number;
   isPromotion: boolean;
-  imageUrl: string; // base64 or image URL
+  imageUrl: string;
   isFeatured: boolean;
   displayOrder?: number;
   isAvailable: boolean;
@@ -28,7 +28,8 @@ export interface ProductDetailProduct {
 }
 
 
-
+// productIngredientDetail?: ProductIngredientDetail[];
+  // productDetailProduct?: ProductDetailProduct[];
 
 
 // export interface ProductDetailProduct {
