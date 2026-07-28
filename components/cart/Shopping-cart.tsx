@@ -46,6 +46,7 @@ import { PaymentTypeEnum } from "@/types/enum/paymentTypeEnum";
 import { ProductFittingsService } from "@/services/productFittingsService";
 import { getProductsByMainId } from "@/services/productByProducts";
 import { getOrderTypes } from "@/services/parameter/orderTypeSendService";
+import { configService } from "@/services/configService";
 // import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
 
 
@@ -72,6 +73,7 @@ export function ShoppingCart() {
   const [openDish, setOpenDish] = useState(false);
   const [promoRows, setPromoRows] = useState<CartItemDetail[]>([]);
   const [table, setTable] = useState<number>(1);
+  const [adminPermision, setAdminPermision] = useState<boolean>(false);
   // const [promoRows, setPromoRows] = useState<CartItemDetailDetails[]>([]);
 
   const { items, paymentType, user } = useAppSelector((state) => ({
@@ -104,6 +106,10 @@ export function ShoppingCart() {
         const data = await getProducts();
         const onlySingleProducts = data.filter((p) => !p.isPromotion);
         setProductsList(onlySingleProducts);
+
+        const timeoutValue = configService.getParameterValue('PERMISION_SHIPPING_CART');
+        // console.log("timeoutValue", JSON.stringify(timeoutValue));
+        setAdminPermision(timeoutValue === '1');
       } catch (error) {
         console.error("Error al cargar los productos en el modal:", error);
       }
@@ -147,54 +153,66 @@ export function ShoppingCart() {
     setIsProcessing(true);
     try {
       console.log('REVIEW N1 :: ' + JSON.stringify(items));
-      const saleItems = items.flatMap((item) => {
-        const mainItem = {
-          id: item.id,
+
+      const normalizedItems: CartItem[] = items.map((item) => {
+        if (item.cartItemDetail && item.cartItemDetail.length > 0) {
+          return item;
+        }
+
+        const detail: CartItemDetail = {
+          id: 1,
+          cartItemId: item.productId,
           name: item.name,
-          quantity: item.quantity,
-          price: (typeof item.subTotal === 'number' ? item.subTotal : 0),
+          price: item.price,
           categoryId: item.categoryId,
           productId: item.productId,
-          productDetailProduct: item.productDetailProduct,
-          modifiedSubtotal: item.modifiedSubtotal,
-          reasonModification: item.reasonModification?.includes('Precio de Combo Modificado') ? undefined : item.reasonModification,
-          isCountable: true,
+          quantity: item.quantity,
+          modified: item.modified ?? false,
+          subTotal: item.subTotal ?? item.price * item.quantity,
+          modifiedSubtotal: item.modifiedSubtotal ?? 0,
+          reasonModification: item.reasonModification ?? "",
+          orderTypeSend: item.orderTypeSend ?? "CONSUMO_LOCAL",
+          isPromotion: item.isPromotion ?? false,
+          isCountable: item.isCountable ?? true,
+          productFittings: item.productFittings ?? [],
+          productDetailProduct: [
+            {
+              id: item.id,
+              productId: item.productId,
+              groupId: 1,
+              categoryId: item.categoryId,
+              name: item.name,
+              description: item.name,
+              legend: item.name,
+              price: item.price,
+              isPromotion: item.isPromotion ?? false,
+              imageUrl: item.imageUrl ?? "",
+              isFeatured: false,
+              displayOrder: 0,
+              isAvailable: true,
+              piecesOfChicken: undefined,
+              selected: true,
+              createdAt: item.createdAt ?? null,
+              createdBy: null,
+              state: item.state ?? true,
+            },
+          ],
+          imageUrl: item.imageUrl ?? "",
+          completed: true,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          state: item.state ?? true,
         };
-        const isPromo =
-          item.isPromotion ||
-          (item.productDetailProduct && item.productDetailProduct.length > 0);
 
-        if (isPromo && item.productDetailProduct) {
-          const flatSubProducts = item.productDetailProduct.map((sub: any) => {
-            const subCategoryId = sub.categoryId ?? item.categoryId ?? 0;
-
-            const subFittings = Array.isArray(sub.productFittings)
-              ? sub.productFittings.map((f: any) => {
-                if (typeof f === 'object' && f !== null) {
-                  return f.name;
-                }
-                return f;
-              }).filter(Boolean)
-              : [];
-
-            return {
-              id: sub.id,
-              name: sub.name || `${item.name} - Detalle`,
-              quantity: 0,
-              price: 0,
-              categoryId: subCategoryId,
-              productId: sub.productId || sub.id,
-              productFittings: subFittings,
-              modifiedSubtotal: sub.modifiedSubtotal,
-              reasonModification: sub.reasonModification?.includes('Precio de Combo Modificado') ? undefined : sub.reasonModification,
-              isCountable: false,
-              productDetailProduct: undefined,
-            };
-          });
-          return [mainItem, ...flatSubProducts];
-        }
-        return [mainItem];
+        return {
+          ...item,
+          cartItemDetail: [detail],
+        };
       });
+
+      // Luego usa processedItems en:
+      // - newSaleData.detail
+      // - printPayload.detail
 
       if (selectedClient) {
         if (selectedClient.id === 0) {
@@ -223,7 +241,7 @@ export function ShoppingCart() {
       const numeroOrdenCalculado = await obtenerSiguienteOrdenDiariaSupabase();
 
       const newSaleData: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
-        detail: saleItems,
+        detail: normalizedItems,
         paymentType: paymentType as PaymentTypeEnum,
         userId: user?.id || 0,
         groupId: user?.groupId || 0,
@@ -244,23 +262,6 @@ export function ShoppingCart() {
       };
       console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
       const response = await createSale(newSaleData);
-
-      // const response = await createSale({
-      //   detail: saleItems,
-      //   paymentType: paymentType as any,
-      //   userId: user?.id || 1,
-      //   userCustomerId: userSendId,
-      //   userName: selectedClient?.fullName ?? "SIN NOMBRE",
-      //   userDocument: selectedClient?.nit ?? "0",
-      //   orderNumber: numeroOrdenCalculado,
-      //   orderStatus: OrderStatusEnum.EN_COCINA,
-      //   tenantId: 1,
-      //   state: true,
-      //   total,
-      //   orderType: orderType as any,
-      //   shift: getCurrentShift(),
-      // });
-
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
         type: isSuccess ? ToastType.Successfully : ToastType.Fail,
@@ -277,21 +278,15 @@ export function ShoppingCart() {
         return;
       }
 
-      // setCreatedSale(response.contenido as Sale);
-      // setShowTicket(true);
-      // console.log('REVISARR:: ', JSON.stringify(response.contenido));
       setSaleData(newSaleData as Sale);
       setIsTicketModalOpen(true);
 
-      // ========================================================
-      // 💡 NUEVO: CONSUMO DEL ENDPOINT DE IMPRESIÓN (.NET)
       try {
         const printPayload = {
-          detail: saleItems.map((item) => ({
+          detail: items.map((item) => ({
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            // price: item.isCountable ? item.price * item.quantity : 0,
             price: item.isCountable ? item.price : 0,
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
@@ -334,26 +329,11 @@ export function ShoppingCart() {
           "API_PRINT_URL",
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
-        // console.log("api_impresion: " + JSON.stringify(printPayload));
-        // await ApiService.post(urlImpresion, printPayload);
+
         const response = await ApiService.post(
           urlImpresion,
           printPayload,
         );
-        // console.log("ℹ️ [Impresión] Solicitud enviada con éxito:", JSON.stringify(response));
-
-        // await ApiService.post(
-        //   "http://localhost/restauranteapi/api/Print/PrintRestaurant",
-        //   printPayload,
-        // );
-
-        // await ApiService.post(
-        //   "http://localhost:5182/api/Print/PrintRestaurant",
-        //   printPayload,
-        // );
-
-        // console.log("printPayload: ", JSON.stringify(printPayload));
-        // await ApiService.post("https://localhost:7175/api/Print/PrintRestaurant", printPayload);
       } catch (printError) {
         console.error("Error en el servicio de impresión física:", printError);
         toast.error(
@@ -778,7 +758,7 @@ export function ShoppingCart() {
           confirmText="Confirmar"
           size="lg"
         >
-          <RoleGuard allowedRoles="ADMIN">
+          {adminPermision && (
             <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="flex flex-col gap-1 md:col-span-1">
                 <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
@@ -827,7 +807,57 @@ export function ShoppingCart() {
                 />
               </div>
             </div>
-          </RoleGuard>
+          )}
+          {/* <RoleGuard allowedRoles="ADMIN">
+            <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-1 md:col-span-1">
+                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                  Precio (Bs)
+                </label>
+                <input
+                  onFocus={(e) => e.target.select()}
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
+                  value={
+                    selectedPromo.modifiedSubtotal ??
+                    selectedPromo.price * (selectedPromo.quantity || 1)
+                  }
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9.]/g, "");
+                    const parts = raw.split(".");
+                    let sanitized = parts[0];
+                    if (parts.length > 1)
+                      sanitized += "." + parts.slice(1).join("");
+                    const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
+                    setSelectedPromo({
+                      ...selectedPromo,
+                      price: selectedPromo.price * (selectedPromo.quantity || 1),
+                      modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
+                    });
+                  }}
+                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
+                />
+              </div>
+              <div className="flex flex-col gap-1 md:col-span-2">
+                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                  Motivo Cambio
+                </label>
+                <input
+                  type="text"
+                  value={selectedPromo.reasonModification || ""}
+                  onChange={(e) => {
+                    setSelectedPromo({
+                      ...selectedPromo,
+                      reasonModification: e.target.value,
+                    });
+                  }}
+                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
+                  placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
+                />
+              </div>
+            </div>
+          </RoleGuard> */}
           {promoRows.length && (
             <div className="mb-2 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
               <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center mb-2">

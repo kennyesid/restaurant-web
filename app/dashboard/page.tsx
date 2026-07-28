@@ -435,13 +435,13 @@ export default function DashboardRecap() {
     });
 
     ///  PRUEBA BORRAR
-    filteredSales.forEach((sale) => {
-      console.log(
-        "VENTA",
-        sale.createdAt,
-        sale.total
-      );
-    });
+    // filteredSales.forEach((sale) => {
+    //   console.log(
+    //     "VENTA",
+    //     sale.createdAt,
+    //     sale.total
+    //   );
+    // });
     ///
 
 

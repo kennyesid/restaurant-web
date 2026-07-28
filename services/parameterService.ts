@@ -3,6 +3,7 @@ import { DatabaseService } from "@/lib/dataBase/databaseService"; // Ajusta la r
 // 💡 Definimos la interfaz exacta según tu esquema de PostgreSQL
 export interface ParameterEntity {
   id: number;
+  groupId?: number;
   groupKey: string;
   code: string;
   value: string;
@@ -71,6 +72,41 @@ export class ParameterService {
       return [];
     }
   }
+
+    /**
+   * Obtiene todos los parámetros que pertenezcan a una misma agrupación (ej: 'IMPRESION')
+   */
+async obtenerListPorGrupo(
+  groupKey: string,
+  groupId?: number,
+  code?: string
+): Promise<ParameterEntity[]> {
+  try {
+    // Obtener todos los registros ordenados por sortOrder
+    const todos = await this.databaseService.getAll("sortOrder", true);
+
+    // Filtro base: groupKey y state activo
+    let resultado = todos.filter((p) => p.groupKey === groupKey && p.state);
+
+    // Si se proporciona groupId, filtrar por él
+    if (groupId !== undefined && groupId !== null) {
+      resultado = resultado.filter((p) => p.groupId === groupId);
+    }
+
+    // Si se proporciona code, filtrar por él (exacto)
+    if (code !== undefined && code !== null && code.trim() !== "") {
+      resultado = resultado.filter((p) => p.code === code);
+    }
+
+    return resultado;
+  } catch (error) {
+    console.error(
+      `[ParameterService] Error al obtener el grupo ${groupKey}:`,
+      error
+    );
+    return [];
+  }
+}
 }
 
 // Exportamos una instancia única (Singleton) para no recrearla en cada importación

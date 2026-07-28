@@ -18,6 +18,7 @@ import { ToastType } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { configService } from "@/services/configService";
 import { Eye, EyeOff } from "lucide-react";
+import { parameterService } from "@/services/parameterService";
 
 const loginSchema = z.object({
   email: z
@@ -49,12 +50,15 @@ export default function LoginPage() {
     try {
       const user = await authenticateUser(data.email, data.password);
       if (user) {
-        sessionStorage.setItem("isAuthenticated", "true");
-        sessionStorage.setItem("username", user.fullName || user.username);
-        sessionStorage.setItem("userId", user.id.toString());
+        // sessionStorage.setItem("isAuthenticated", "true");
+        // sessionStorage.setItem("username", user.fullName || user.username);
+        // sessionStorage.setItem("userId", user.id.toString());
 
         if (user?.groupId) {
           configService.setGroupId(user.groupId);
+          const responseParameter = await parameterService.obtenerListPorGrupo("ADMIN", user.groupId, "");
+          // console.log("responseParameter: " + JSON.stringify(responseParameter));
+          configService.loadParameters(responseParameter);
         } else {
           configService.setGroupId(1);
         }
