@@ -50,14 +50,13 @@ export default function LoginPage() {
     try {
       const user = await authenticateUser(data.email, data.password);
       if (user) {
-        // sessionStorage.setItem("isAuthenticated", "true");
-        // sessionStorage.setItem("username", user.fullName || user.username);
-        // sessionStorage.setItem("userId", user.id.toString());
+        sessionStorage.setItem("isAuthenticated", "true");
+        sessionStorage.setItem("username", user.fullName || user.username);
+        sessionStorage.setItem("userId", user.id.toString());
 
         if (user?.groupId) {
           configService.setGroupId(user.groupId);
           const responseParameter = await parameterService.obtenerListPorGrupo("ADMIN", user.groupId, "");
-          // console.log("responseParameter: " + JSON.stringify(responseParameter));
           configService.loadParameters(responseParameter);
         } else {
           configService.setGroupId(1);
@@ -117,10 +116,8 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
-          {/* FORM CARD INTERNO */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* EMAIL */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-rest-primary tracking-wider">
                   Email
@@ -129,13 +126,6 @@ export default function LoginPage() {
                   type="email"
                   placeholder="correo@ejemplo.com"
                   {...register("email")}
-                  // {...register("email", {
-                  //   required: "El email es obligatorio",
-                  //   pattern: {
-                  //     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  //     message: "Email inválido",
-                  //   },
-                  // })}
                   className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.email ? "border-red-400" : ""
                     }`}
                 />
@@ -171,24 +161,6 @@ export default function LoginPage() {
                   <p className="text-xs text-red-500">{errors.password.message}</p>
                 )}
               </div>
-
-              {/* <div className="space-y-2">
-                <label className="text-xs font-semibold text-rest-primary tracking-wider">
-                  Password
-                </label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  {...register("password")}
-                  className={`bg-gray-50 border-gray-200 h-11 focus:ring-2 focus:ring-yellow-400 ${errors.password ? "border-red-400" : ""
-                    }`}
-                />
-                {errors.password && (
-                  <p className="text-xs text-red-500">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div> */}
               <ButtonGeneric
                 type="submit"
                 variant="primaryRed"
@@ -214,7 +186,6 @@ export default function LoginPage() {
             className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/5"></div>
-          {/* IMAGEN SALTANDO (Esquina inferior derecha) */}
           <div className="absolute bottom-6 right-6 z-20">
             <div className="animate-bounce">
               <Image
