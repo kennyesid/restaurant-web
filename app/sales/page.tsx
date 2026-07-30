@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import { getSales, deleteSale, getAllSalesWithDetails, getAllSalesWithDetailsCombo } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
-import { Sale, User } from "@/types";
+import { Sale, User, Product } from "@/types";
 import { Card } from "@/components/ui/card";
 import {
   Trash2,
@@ -26,6 +26,7 @@ import { AlertVariant } from "@/types/enum/alertVariant";
 import AlertDialogComponent from "@/components/common/alert/AlertDialogComponent";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { getUsers } from "@/services/usersService";
+import { getProducts } from "@/services/productsSservice";
 
 export default function SalesPage() {
   const today = DateUtils.obtenerTipoFechaBoliviaLocal();
@@ -33,10 +34,12 @@ export default function SalesPage() {
   const [loading, setLoading] = useState(true);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
   const [filterUser, setFilterUser] = useState("all");
   const [filterPaymentType, setFilterPaymentType] = useState("all");
+  const [filterProduct, setFilterProduct] = useState("all");
   const [expandedPromos, setExpandedPromos] = useState<Record<string, boolean>>(
     {},
   );
@@ -47,6 +50,7 @@ export default function SalesPage() {
     endDate: today,
     filterUser: "all",
     filterPaymentType: "all",
+    filterProduct: "all",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,11 +75,13 @@ export default function SalesPage() {
 
   const loadAll = async () => {
     try {
-      const [usersRes] =
+      const [usersRes, productsRes] =
         await Promise.all([
           getUsers(),
+          getProducts(),
         ]);
       setUsers(usersRes || []);
+      setProducts(productsRes || []);
     } catch (error) {
       console.error("Error loading sales:", error);
     } finally {
@@ -99,7 +105,31 @@ export default function SalesPage() {
       const paymentMatch =
         filterPaymentType === "all" || sale.paymentType === filterPaymentType;
 
-      return dateMatch && userMatch && paymentMatch;
+      const productMatch =
+        filterProduct === "all" ||
+        (sale.detail &&
+          sale.detail.some((item) => {
+            if (item.productId?.toString() === filterProduct) return true;
+            if (item.cartItemDetail && item.cartItemDetail.length > 0) {
+              return item.cartItemDetail.some((detail: any) => {
+                if (detail.productId?.toString() === filterProduct) return true;
+                if (detail.productDetailProduct && detail.productDetailProduct.length > 0) {
+                  return detail.productDetailProduct.some(
+                    (sub: any) => sub.productId?.toString() === filterProduct && sub.selected === true
+                  );
+                }
+                return false;
+              });
+            }
+            if (item.productDetailProduct && item.productDetailProduct.length > 0) {
+              return item.productDetailProduct.some(
+                (sub: any) => sub.productId?.toString() === filterProduct
+              );
+            }
+            return false;
+          }));
+
+      return dateMatch && userMatch && paymentMatch && productMatch;
     })
     .sort(
       (a, b) =>
@@ -188,13 +218,13 @@ export default function SalesPage() {
         </div>
 
         <div className="lg:col-span-3 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium">Usuario</label>
               <select
                 value={filterUser}
                 onChange={(e) => setFilterUser(e.target.value)}
-                className="w-full border rounded-md p-2"
+                className="w-full border rounded-md p-2 text-sm"
               >
                 <option value="all">Todos</option>
                 {users.map((user) => (
@@ -210,12 +240,28 @@ export default function SalesPage() {
               <select
                 value={filterPaymentType}
                 onChange={(e) => setFilterPaymentType(e.target.value)}
-                className="w-full border rounded-md p-2"
+                className="w-full border rounded-md p-2 text-sm"
               >
                 <option value="all">Todos</option>
                 {uniquePaymentTypes.map((type) => (
                   <option key={type} value={type}>
                     {getPaymentTypeLabel(type)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">Filtrar por Producto</label>
+              <select
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+                className="w-full border rounded-md p-2 text-sm"
+              >
+                <option value="all">Todos los productos</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id.toString()}>
+                    {p.name}
                   </option>
                 ))}
               </select>
@@ -229,7 +275,7 @@ export default function SalesPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full border rounded-md p-2"
+                className="w-full border rounded-md p-2 text-sm"
               />
             </div>
             <div>
@@ -238,7 +284,7 @@ export default function SalesPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full border rounded-md p-2"
+                className="w-full border rounded-md p-2 text-sm"
               />
             </div>
             <ButtonGeneric
@@ -246,12 +292,14 @@ export default function SalesPage() {
               onClick={() => {
                 setFilterUser("all");
                 setFilterPaymentType("all");
+                setFilterProduct("all");
                 setCurrentPage(1);
                 setAppliedFilters({
                   startDate: startDate,
                   endDate: endDate,
                   filterUser: "all",
                   filterPaymentType: "all",
+                  filterProduct: "all",
                 });
               }}
             >
@@ -407,21 +455,31 @@ export default function SalesPage() {
                   </tr>
                   {expandedRow === sale.id && (
                     <tr className="bg-slate-50/70">
-                      <td colSpan={9} className="px-6 py-4">
-                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-1">
-                          <div className="flex flex-wrap justify-between items-center  gap-2">
+                      <td colSpan={11} className="px-6 py-4">
+                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+                          <div className="flex flex-wrap justify-between items-center gap-4">
                             <div>
                               <h3 className="font-black text-sm text-[#052A3D] uppercase tracking-wide">
                                 Detalle — Pedido #{sale.orderNumber}
                               </h3>
                             </div>
-                            <div className="text-right">
-                              <p className="text-xs text-gray-400 font-medium">
-                                Total
-                              </p>
-                              <span className="font-black text-xl text-[#052A3D]">
-                                Bs {sale.total.toLocaleString()}
-                              </span>
+                            <div className="flex flex-wrap items-center gap-6 text-right">
+                              <div>
+                                <p className="text-xs text-gray-400 font-medium">Total</p>
+                                <span className="font-black text-xl text-[#052A3D]">Bs {sale.total.toLocaleString()}</span>
+                              </div>
+                              {sale.amountPaid > 0 && (
+                                <div>
+                                  <p className="text-xs text-gray-400 font-medium">Monto Recibido</p>
+                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {sale.amountPaid.toLocaleString()}</span>
+                                </div>
+                              )}
+                              {sale.changeReturned > 0 && (
+                                <div>
+                                  <p className="text-xs text-gray-400 font-medium">Cambio Entregado</p>
+                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {sale.changeReturned.toLocaleString()}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -430,89 +488,52 @@ export default function SalesPage() {
                               <table className="min-w-full divide-y divide-slate-200 text-sm">
                                 <thead className="bg-slate-50/70">
                                   <tr>
-                                    <th
-                                      scope="col"
-                                      className="w-10 px-2 py-3 text-center"
-                                    ></th>
-                                    <th
-                                      scope="col"
-                                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-16"
-                                    >
-                                      Cant.
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                                    >
-                                      Producto / Descripción
-                                    </th>
-
-                                    <th
-                                      scope="col"
-                                      className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32"
-                                    >
-                                      Precio Unit.
-                                    </th>
+                                    <th scope="col" className="w-10 px-2 py-3 text-center"></th>
+                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider w-16">Cant.</th>
+                                    <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Producto / Descripción</th>
+                                    <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-32">Precio Unit.</th>
                                   </tr>
                                 </thead>
 
                                 <tbody className="divide-y divide-slate-100 bg-white">
                                   {sale.detail
                                     .filter(
-                                      (item: any) => item.isCountable !== false,
+                                      (item: any) =>
+                                        item.isCountable !== false ||
+                                        item.categoryId === 6 ||
+                                        (item.cartItemDetail && item.cartItemDetail.length > 0)
                                     )
                                     .map((item: any, itemIdx: number) => {
-                                      const isModificado =
-                                        item.quantity === 0 && item.price === 0;
+                                      const isModificado = item.quantity === 0 && item.price === 0;
                                       const tieneDesglose =
                                         item.isPromocion ||
-                                        (item.productDetailProduct &&
-                                          item.productDetailProduct.length > 0);
-                                      const isPromoExpanded =
-                                        !!expandedPromos[
-                                        `${sale.id}-${itemIdx}`
-                                        ];
+                                        (item.productDetailProduct && item.productDetailProduct.length > 0) ||
+                                        (item.cartItemDetail && item.cartItemDetail.length > 0);
+                                      const isPromoExpanded = !!expandedPromos[`${sale.id}-${itemIdx}`];
 
                                       return (
                                         <Fragment key={itemIdx}>
-                                          <tr
-                                            className={`transition-colors ${isModificado ? "bg-slate-50/60 italic" : "hover:bg-slate-50/40"}`}
-                                          >
+                                          <tr className={`transition-colors ${isModificado ? "bg-slate-50/60 italic" : "hover:bg-slate-50/40"}`}>
                                             <td className="px-2 py-3.5 text-center whitespace-nowrap">
-                                              {tieneDesglose &&
-                                                !isModificado ? (
+                                              {tieneDesglose && !isModificado ? (
                                                 <button
                                                   type="button"
-                                                  onClick={() =>
-                                                    togglePromo(
-                                                      sale.id,
-                                                      itemIdx,
-                                                    )
-                                                  }
+                                                  onClick={() => togglePromo(sale.id, itemIdx)}
                                                   className="p-1 rounded-md hover:bg-slate-200 text-slate-500 transition-colors focus:outline-none"
                                                 >
-                                                  {isPromoExpanded ? (
-                                                    <ChevronDown className="w-4 h-4" />
-                                                  ) : (
-                                                    <ChevronRight className="w-4 h-4" />
-                                                  )}
+                                                  {isPromoExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                                 </button>
                                               ) : (
                                                 <div className="w-4 h-4" />
                                               )}
                                             </td>
-
                                             <td className="px-4 py-3.5 font-medium text-slate-600 font-mono">
-                                              {isModificado
-                                                ? "-"
-                                                : `${item.quantity}x`}
+                                              {isModificado ? "-" : `${item.quantity}x`}
                                             </td>
                                             <td className="px-4 py-3.5">
                                               <div className="space-y-1">
                                                 <div className="flex items-center gap-2">
-                                                  <span
-                                                    className={`font-medium text-slate-800 ${isModificado ? "line-through text-slate-400" : ""}`}
-                                                  >
+                                                  <span className={`font-medium text-slate-800 ${isModificado ? "line-through text-slate-400" : ""}`}>
                                                     {item.name}
                                                   </span>
                                                   {item.isPromocion && (
@@ -526,97 +547,103 @@ export default function SalesPage() {
                                                     </span>
                                                   )}
                                                 </div>
-
-                                                {item.productFittings &&
-                                                  item.productFittings.length >
-                                                  0 && (
-                                                    <p className="text-xs text-slate-400">
-                                                      <span className="font-medium text-slate-500">
-                                                        Acompañamientos:
-                                                      </span>{" "}
-                                                      {item.productFittings.join(
-                                                        ", ",
-                                                      )}
-                                                    </p>
-                                                  )}
-
+                                                {item.productFittings && item.productFittings.length > 0 && (
+                                                  <p className="text-xs text-slate-400">
+                                                    <span className="font-medium text-slate-500 font-sans">Acompañamientos:</span> {item.productFittings.join(", ")}
+                                                  </p>
+                                                )}
                                                 {item.reasonModification && (
                                                   <p className="text-xs text-slate-500">
-                                                    <span className="font-medium text-slate-600">
-                                                      Nota:
-                                                    </span>{" "}
-                                                    {item.reasonModification}
+                                                    <span className="font-medium text-slate-600">Nota:</span> {item.reasonModification}
                                                   </p>
                                                 )}
                                               </div>
                                             </td>
-
                                             <td className="px-4 py-3.5 text-right font-mono text-slate-600 whitespace-nowrap">
-                                              {isModificado
-                                                ? "-"
-                                                : `Bs ${item.price}`}
+                                              {isModificado ? "-" : `Bs ${item.price}`}
                                             </td>
                                           </tr>
-                                          {tieneDesglose &&
-                                            !isModificado &&
-                                            isPromoExpanded && (
-                                              <>
-                                                {item.productDetailProduct.map(
-                                                  (sub: any) => (
-                                                    <tr
-                                                      key={sub.id}
-                                                      className="bg-slate-50/30 border-b border-slate-100/60 last:border-b-2 hover:bg-slate-50 transition-colors"
-                                                    >
-                                                      <td className="px-2 py-2 text-center text-slate-400 text-xs">
-                                                        •
-                                                      </td>
+                                          {tieneDesglose && !isModificado && isPromoExpanded && (
+                                            <>
+                                              {/* 1. Mapeo de combos / menús estructurados por platos (cartItemDetail) */}
+                                              {item.cartItemDetail && item.cartItemDetail.length > 0 && (
+                                                <>
+                                                  {item.cartItemDetail.map((detail: any, dIdx: number) => {
+                                                    const selectedSubProducts = detail.productDetailProduct?.filter((p: any) => p.selected === true) || [];
+                                                    return (
+                                                      <tr key={`cid-${detail.id}-${dIdx}`} className="bg-slate-50/20 border-b border-slate-100 last:border-b-2 hover:bg-slate-50 transition-colors">
+                                                        <td className="px-2 py-2 text-center text-slate-400 text-xs">↳</td>
+                                                        <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-500">
+                                                          {detail.quantity}x
+                                                        </td>
+                                                        <td className="px-4 py-2 text-xs" colSpan={2}>
+                                                          <div className="space-y-1">
+                                                            <span className="font-semibold text-slate-700 block">{detail.name}</span>
+                                                            {selectedSubProducts.length > 0 && (
+                                                              <div className="pl-3 border-l-2 border-slate-200 space-y-0.5 mt-1">
+                                                                <span className="text-[10px] text-slate-400 font-bold uppercase block">
+                                                                  Plato Seleccionado:
+                                                                </span>
+                                                                {selectedSubProducts.map((p: any) => (
+                                                                  <div key={p.id} className="flex items-center gap-2 text-[11px] text-slate-600">
+                                                                    <span>• {p.name}</span>
+                                                                    {p.price > 0 && (
+                                                                      <span className="text-[10px] font-mono text-slate-400">
+                                                                        (+Bs {p.price})
+                                                                      </span>
+                                                                    )}
+                                                                  </div>
+                                                                ))}
+                                                              </div>
+                                                            )}
+                                                            {detail.reasonModification && (
+                                                              <p className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100/50 inline-block mt-1">
+                                                                Nota: {detail.reasonModification}
+                                                              </p>
+                                                            )}
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    );
+                                                  })}
+                                                </>
+                                              )}
+
+                                              {/* 2. Mapeo de promociones directas / desgloses sin cartItemDetail */}
+                                              {(!item.cartItemDetail || item.cartItemDetail.length === 0) && item.productDetailProduct && item.productDetailProduct.length > 0 && (
+                                                <>
+                                                  {item.productDetailProduct.map((sub: any) => (
+                                                    <tr key={sub.id} className="bg-slate-50/30 border-b border-slate-100/60 last:border-b-2 hover:bg-slate-50 transition-colors">
+                                                      <td className="px-2 py-2 text-center text-slate-400 text-xs">•</td>
                                                       <td className="px-4 py-2 font-mono text-xs font-semibold text-slate-500">
-                                                        {sub.quantity}x
+                                                        {sub.quantity || 1}x
                                                       </td>
-                                                      <td
-                                                        className="px-4 py-2 text-xs"
-                                                        colSpan={2}
-                                                      >
+                                                      <td className="px-4 py-2 text-xs" colSpan={2}>
                                                         <div className="space-y-0.5">
                                                           <div className="flex flex-wrap items-center gap-2">
-                                                            <span className="font-medium text-slate-700">
-                                                              {sub.name}
-                                                            </span>
+                                                            <span className="font-medium text-slate-700">{sub.name}</span>
                                                             {sub.reasonModification && (
                                                               <span
                                                                 className="inline-flex items-center px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium leading-none max-w-[180px] truncate"
-                                                                title={
-                                                                  sub.reasonModification
-                                                                }
+                                                                title={sub.reasonModification}
                                                               >
-                                                                {
-                                                                  sub.reasonModification
-                                                                }
+                                                                {sub.reasonModification}
                                                               </span>
                                                             )}
                                                           </div>
-                                                          {sub.ProductFittings &&
-                                                            sub.ProductFittings
-                                                              .length > 0 && (
-                                                              <span className="text-[11px] text-slate-400 block">
-                                                                <span className="font-medium text-slate-500">
-                                                                  Acompañamientos:
-                                                                </span>{" "}
-                                                                {sub.ProductFittings.join(
-                                                                  ", ",
-                                                                )}
-                                                              </span>
-                                                            )}
+                                                          {sub.ProductFittings && sub.ProductFittings.length > 0 && (
+                                                            <span className="text-[11px] text-slate-400 block font-sans">
+                                                              <span className="font-medium text-slate-500">Acompañamientos:</span> {sub.ProductFittings.join(", ")}
+                                                            </span>
+                                                          )}
                                                         </div>
                                                       </td>
-                                                      <td className="px-4 py-2 text-right font-mono text-xs text-slate-600">
-                                                        Bs {sub.price}
-                                                      </td>
                                                     </tr>
-                                                  ),
-                                                )}
-                                              </>
-                                            )}
+                                                  ))}
+                                                </>
+                                              )}
+                                            </>
+                                          )}
                                         </Fragment>
                                       );
                                     })}
