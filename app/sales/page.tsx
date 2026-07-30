@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { getSales, deleteSale, getAllSalesWithDetails } from "@/services/salesService";
+import { getSales, deleteSale, getAllSalesWithDetails, getAllSalesWithDetailsCombo } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale, User } from "@/types";
 import { Card } from "@/components/ui/card";
@@ -60,8 +60,7 @@ export default function SalesPage() {
   const loadSales = async () => {
     try {
       setLoading(true);
-      const data = await getAllSalesWithDetails();
-      console.log('data:: ', JSON.stringify(data));
+      const data = await getAllSalesWithDetailsCombo();
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
@@ -69,21 +68,6 @@ export default function SalesPage() {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    console.log("sales", sales.map(s => s.id));
-  }, [sales]);
-  // const loadSales = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const data = await getSales();
-  //     console.log('data:: ', JSON.stringify(data))
-  //     handleResponse(data, setSales);
-  //   } catch (error) {
-  //     console.error("Error loading sales:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const loadAll = async () => {
     try {
@@ -103,8 +87,6 @@ export default function SalesPage() {
     .filter((sale) => {
       if (!sale.createdAt) return false;
 
-      // const dateObject = new Date(sale.createdAt);
-      // const saleDate = dateObject.toISOString().split("T")[0];
       const saleDate = DateUtils.obtenerFechaBoliviaLocal(sale.createdAt);
 
       const dateMatch =
@@ -130,7 +112,7 @@ export default function SalesPage() {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
-  // const uniqueUsers = Array.from(new Set(sales.map((s) => s.userId)));
+
   const uniquePaymentTypes = ["cash", "qr", "mixed"];
 
   const qrSales = sales.filter((s) => s.paymentType === "qr");
@@ -172,7 +154,6 @@ export default function SalesPage() {
           </Button>
         }
       />
-      {/* TOOLBAR DE FILTROS */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
         <div className="lg:col-span-1">
           <div className="relative overflow-hidden rounded-lg p-5 text-white shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
@@ -280,7 +261,6 @@ export default function SalesPage() {
         </div>
       </div>
 
-      {/* DATA TABLE */}
       <Card className="overflow-hidden border-none rounded-md shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">

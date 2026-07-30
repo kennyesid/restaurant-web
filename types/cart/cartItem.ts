@@ -19,6 +19,10 @@ export interface CartItem {
   cartItemDetail?: CartItemDetail[];
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
+
+  sales_detail_group_id?: number,
+  saleId?: number,
+
   imageUrl?: string;
   createdAt?: string;
   updatedAt?: string;

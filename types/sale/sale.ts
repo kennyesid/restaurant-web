@@ -6,7 +6,7 @@ import { OrderTypeEnum } from "../enum/orderTypeEnum";
 
 export interface Sale {
   id: number;
-  detail: CartItem[]; 
+  detail: CartItem[];
   userId?: number;
   groupId: number;
   userName?: string;
@@ -19,8 +19,8 @@ export interface Sale {
   changeReturned?: number;
 
 
-  orderNumber: number; 
-  orderStatus: OrderStatusEnum; 
+  orderNumber: number;
+  orderStatus: OrderStatusEnum;
   orderType: OrderTypeEnum;
   payInvoice?: boolean;
   tenantId: number;

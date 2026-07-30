@@ -119,9 +119,6 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
   try {
     const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
-
-    // subDetails:sales_details_details!inner(*)
-
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
@@ -192,7 +189,6 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
         };
       });
 
-      // Retornar la venta completa
       return {
         id: sale.id,
         detail: formattedDetail,
@@ -225,6 +221,250 @@ export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sal
       codigo: error?.code,
     });
     return responderFalla(`Error al obtener las ventas: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+
+    const groupId = configService.getGroupId();
+
+    const { data: sales, error: salesError } = await supabase
+      .from("sales")
+      .select("*")
+      .eq("groupId", groupId)
+      .eq("state", true)
+      .order("createdAt", { ascending: false });
+
+    if (salesError) throw salesError;
+
+    if (!sales || sales.length === 0) {
+      return responderExito([], "Ventas obtenidas con éxito");
+    }
+
+    const saleIds = sales.map(s => s.id);
+
+    const { data: comboGroups, error: comboError } = await supabase
+      .from("sales_detail_group")
+      .select("*")
+      .in("saleId", saleIds);
+
+    if (comboError) throw comboError;
+
+    const { data: details, error: detailError } = await supabase
+      .from("sales_details")
+      .select("*")
+      .in("saleId", saleIds);
+
+    if (detailError) throw detailError;
+
+    const comboMap = new Map<number, any>();
+
+    (comboGroups ?? []).forEach(combo => {
+      comboMap.set(combo.id, {
+        id: combo.productId,
+        name: combo.name,
+        price: combo.price,
+        imageUrl: "",
+        categoryId: 6,
+        isPromotion: false,
+        isCountable: false,
+        productDetailProduct: [],
+        productId: combo.productId,
+        quantity: combo.quantity,
+        subTotal: combo.subtotal,
+        cartItemDetail: [],
+        sales_detail_group_id: combo.id,
+        saleId: combo.saleId
+      });
+    });
+
+    (details ?? []).forEach(detail => {
+      if (!detail.sales_detail_group_id || detail.sales_detail_group_id === 0)
+        return;
+
+      const combo = comboMap.get(detail.sales_detail_group_id);
+
+      if (!combo)
+        return;
+
+      let plate = combo.cartItemDetail.find(
+        (x: any) => x.id === detail.combosecuencia
+      );
+
+      if (!plate) {
+        plate = {
+          id: detail.combosecuencia,
+          cartItemId: combo.productId,
+          name: `${combo.name} - Plato ${detail.combosecuencia}`,
+          price: 0,
+          categoryId: combo.categoryId,
+          productId: combo.productId,
+          quantity: 1,
+          modified: detail.modified,
+          subTotal: 0,
+          modifiedSubtotal: detail.modifiedSubtotal,
+          reasonModification: detail.reasonModification,
+          orderTypeSend: detail.orderTypeSend,
+          isPromotion: false,
+          isCountable: true,
+          imageUrl: "",
+          completed: true,
+          createdAt: detail.createdAt,
+          updatedAt: detail.updatedAt,
+          state: detail.state,
+          productFittings: [],
+          productDetailProduct: [],
+        };
+        combo.cartItemDetail.push(plate);
+      }
+
+      //------------------------------------------------------
+      // Agregar producto al plato
+      //------------------------------------------------------
+
+      plate.productDetailProduct.push({
+        id: detail.id,
+        categoryId: detail.categoryId,
+        productId: detail.productId,
+        name: detail.name,
+        description: detail.description,
+        legend: detail.legend,
+        price: detail.price,
+        isPromotion: detail.isPromotion,
+        imageUrl: detail.imageUrl,
+        isFeatured: detail.isFeatured,
+        isAvailable: true,
+        state: detail.state,
+        groupId: detail.groupId,
+        code: detail.code,
+        displayOrder: detail.displayOrder,
+        piecesOfChicken: detail.piecesOfChicken,
+        createdAt: detail.createdAt,
+        updatedAt: detail.updatedAt,
+        selected: detail.selected,
+        productFittings: [],
+        // productFittings: updatedProductFittings
+      });
+    });
+
+    //==============================================================
+    // 8. AGRUPAR DETALLES POR VENTA
+    //==============================================================
+
+    const detailsBySale = new Map<number, any[]>();
+
+    (details ?? []).forEach(detail => {
+      if (!detailsBySale.has(detail.saleId)) {
+        detailsBySale.set(detail.saleId, []);
+      }
+      detailsBySale.get(detail.saleId)!.push(detail);
+    });
+
+    //==============================================================
+    // 9. AGRUPAR COMBOS POR VENTA
+    //==============================================================
+
+    const combosBySale = new Map<number, any[]>();
+
+    Array.from(comboMap.values()).forEach(combo => {
+
+      if (!combosBySale.has(combo.saleId)) {
+        combosBySale.set(combo.saleId, []);
+      }
+
+      combosBySale.get(combo.saleId)!.push(combo);
+
+    });
+
+    //==============================================================
+    // 10. CONSTRUIR RESPUESTA
+    //==============================================================
+
+    const formattedSales: Sale[] = sales.map((sale: Sale) => {
+
+      //------------------------------------------
+      // Productos normales
+      //------------------------------------------
+
+      const normalProducts = (detailsBySale.get(sale.id) ?? [])
+        .filter(d => !d.sales_detail_group_id || d.sales_detail_group_id === 0)
+        .map((item: CartItem) => {
+          return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            imageUrl: item.imageUrl,
+            categoryId: item.categoryId,
+            productId: item.productId,
+            quantity: item.quantity,
+            subTotal: item.price * item.quantity,
+            modified: item.modified,
+            modifiedSubtotal: item.modifiedSubtotal,
+            reasonModification: item.reasonModification,
+            isPromotion: item.isPromotion,
+            isCountable: item.isCountable,
+            // selected: item.selected ?? false,
+            productFittings: [],
+            // productFittings: updatedProductFittings,
+            productDetailProduct: [],
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            state: item.state
+          };
+        });
+
+      const combos = combosBySale.get(sale.id) ?? [];
+
+      const detail = [
+        ...combos,
+        ...normalProducts
+      ];
+
+      return {
+        id: sale.id,
+        detail,
+        paymentType: sale.paymentType,
+        userId: sale.userId,
+        groupId: sale.groupId,
+        userName: sale.userName,
+        userCustomerId: sale.userCustomerId,
+        userCustomerName: sale.userCustomerName,
+        userDocument: sale.userDocument,
+        orderNumber: sale.orderNumber,
+        orderStatus: sale.orderStatus,
+        tenantId: sale.tenantId,
+        state: sale.state,
+        total: sale.total,
+        amountPaid: sale.amountPaid,
+        changeReturned: sale.changeReturned,
+        orderType: sale.orderType,
+        // shift: sale.shift,
+        // table: sale.table,
+        createdAt: sale.createdAt,
+        updatedAt: sale.updatedAt
+      } as Sale;
+    });
+
+    console.log("formattedSales", JSON.stringify(formattedSales));
+
+    return responderExito(
+      formattedSales,
+      "Ventas obtenidas con éxito"
+    );
+
+  } catch (error: any) {
+
+    console.error("❌ Error en getAllSalesWithDetails:", {
+      mensaje: error?.message,
+      detalles: error?.details,
+      codigo: error?.code,
+    });
+
+    return responderFalla(
+      `Error al obtener las ventas: ${error?.message || "Error de datos"}`
+    );
+
   }
 }
 
@@ -427,174 +667,155 @@ export async function createSaleCombo(
 
     const finalDetail: any[] = [];
 
-    // 2. Filtrar SOLO los items con isCountable: true
-    const countableItems = detail.filter(item => item.isCountable === true);
+    for (const item of detail) {
 
-    if (countableItems && countableItems.length > 0) {
-      for (const item of countableItems) {
+      // ============================================================
+      // PRODUCTO TIPO COMBO (ALMUERZO)
+      // ============================================================
+      if (item.categoryId === 6) {
 
-  // ============================================================
-  // PRODUCTO TIPO COMBO (ALMUERZO)
-  // ============================================================
-  if (item.categoryId === 6) {
+        //-----------------------------------------
+        // 1. Guardar grupo
+        //-----------------------------------------
 
-    //-----------------------------------------
-    // 1. Guardar grupo
-    //-----------------------------------------
+        const { data: groupInserted, error: groupError } = await supabase
+          .from("sales_detail_group")
+          .insert({
+            saleId,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.subTotal
+          })
+          .select()
+          .single();
 
-    const { data: groupInserted, error: groupError } = await supabase
-      .from("sales_detail_group")
-      .insert({
-        saleId,
-        productId: item.productId,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        subtotal: item.subTotal
-      })
-      .select()
-      .single();
+        if (groupError) throw groupError;
 
-    if (groupError) throw groupError;
+        const saleDetailGroupId = groupInserted.id;
 
-    const saleDetailGroupId = groupInserted.id;
+        //-----------------------------------------
+        // 2. Guardar los productos elegidos
+        //-----------------------------------------
 
-    //-----------------------------------------
-    // 2. Recorrer cada plato
-    //-----------------------------------------
+        for (let sequence = 0; sequence < (item.cartItemDetail ?? []).length; sequence++) {
 
-    const insertedCartDetails: any[] = [];
+          const plate = item.cartItemDetail![sequence];
 
-    for (let index = 0; index < (item.cartItemDetail ?? []).length; index++) {
+          for (const product of (plate.productDetailProduct ?? [])) {
 
-      const plate = item.cartItemDetail![index];
+            const fittingIds = Array.isArray(plate.productFittings)
+              ? plate.productFittings
+                .map((f: any) => typeof f === "object" ? f.id : f)
+                .filter(Boolean)
+              : [];
 
-      const fittingIds = Array.isArray(plate.productFittings)
-        ? plate.productFittings
-            .map((f: any) => typeof f === "object" ? f.id : f)
-            .filter(Boolean)
-        : [];
+            const {
+              id,
+              groupId,
+              code,
+              displayOrder,
+              piecesOfChicken,
+              createdAt,
+              ...productData
+            } = product;
 
-      //-----------------------------------------
-      // Guardar plato
-      //-----------------------------------------
+            const { error } = await supabase
+              .from("sales_details")
+              .insert({
+                saleId,
+
+                sales_detail_group_id: saleDetailGroupId,
+                combosecuencia: sequence + 1,
+
+                productId: product.productId,
+                categoryId: product.categoryId,
+
+                name: product.name,
+                price: product.price,
+
+                quantity: 1,
+
+                modified: plate.modified,
+                modifiedSubtotal: plate.modifiedSubtotal,
+                reasonModification: plate.reasonModification,
+
+                isPromotion: product.isPromotion,
+                isCountable: true,
+
+                imageUrl: product.imageUrl,
+
+                productFittings: fittingIds,
+
+                selected: product.selected
+              });
+
+            if (error) throw error;
+          }
+        }
+
+        finalDetail.push(groupInserted);
+
+        continue;
+      }
+
+      // ============================================================
+      // PRODUCTO NORMAL
+      // ============================================================
 
       const {
-        id,
-        productDetailProduct,
+        id: frontId,
         productFittings,
-        ...plateData
-      } = plate;
+        productDetailProduct,
+        cartItemDetail,
+        subTotal,
+        ...cartItemData
+      } = item;
 
-      const { data: insertedPlate, error: plateError } = await supabase
+      const fittingIds = Array.isArray(productFittings)
+        ? productFittings
+          .map((f: any) => typeof f === "object" ? f.id : f)
+          .filter(Boolean)
+        : [];
+
+      const { data: insertedDetail, error: itemError } = await supabase
         .from("sales_details")
         .insert({
-          ...plateData,
+          ...cartItemData,
           saleId,
-          sales_detail_group_id: saleDetailGroupId,
-          combosecuencia: index + 1,
           productFittings: fittingIds
         })
         .select()
         .single();
 
-      if (plateError) throw plateError;
+      if (itemError) throw itemError;
 
-      //-----------------------------------------
-      // Guardar sopa / segundo
-      //-----------------------------------------
+      // const insertedSubDetails: any[] = [];
 
-      const insertedProducts: any[] = [];
+      // for (const subItem of (productDetailProduct ?? [])) {
 
-      for (const product of (productDetailProduct ?? [])) {
+      //   const { id: subFrontId, ...subItemData } = subItem;
 
-        const { id: tmp, ...productData } = product;
+      //   const { data, error } = await supabase
+      //     .from("sales_details_details")
+      //     .insert({
+      //       ...subItemData,
+      //       saleDetailId: insertedDetail.id
+      //     })
+      //     .select()
+      //     .single();
 
-        const { data, error } = await supabase
-          .from("sales_details_details")
-          .insert({
-            ...productData,
-            saleDetailId: insertedPlate.id
-          })
-          .select()
-          .single();
+      //   if (error) throw error;
 
-        if (error) throw error;
+      //   insertedSubDetails.push(data);
+      // }
 
-        insertedProducts.push(data);
-      }
-
-      insertedCartDetails.push({
-        ...insertedPlate,
-        productDetailProduct: insertedProducts
+      finalDetail.push({
+        ...insertedDetail,
+        // productDetailProduct: insertedSubDetails
       });
 
-    }
-
-    finalDetail.push({
-      ...groupInserted,
-      cartItemDetail: insertedCartDetails,
-      productDetailProduct: []
-    });
-
-    continue;
-  }
-
-  // ============================================================
-  // PRODUCTO NORMAL
-  // ============================================================
-
-  const {
-    id: frontId,
-    productFittings,
-    productDetailProduct,
-    ...cartItemData
-  } = item;
-
-  const fittingIds = Array.isArray(productFittings)
-    ? productFittings
-        .map((f: any) => typeof f === "object" ? f.id : f)
-        .filter(Boolean)
-    : [];
-
-  const { data: insertedDetail, error: itemError } = await supabase
-    .from("sales_details")
-    .insert({
-      ...cartItemData,
-      saleId,
-      productFittings: fittingIds
-    })
-    .select()
-    .single();
-
-  if (itemError) throw itemError;
-
-  const insertedSubDetails: any[] = [];
-
-  for (const subItem of (productDetailProduct ?? [])) {
-
-    const { id: subFrontId, ...subItemData } = subItem;
-
-    const { data, error } = await supabase
-      .from("sales_details_details")
-      .insert({
-        ...subItemData,
-        saleDetailId: insertedDetail.id
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    insertedSubDetails.push(data);
-  }
-
-  finalDetail.push({
-    ...insertedDetail,
-    productDetailProduct: insertedSubDetails
-  });
-
-}
     }
 
     // 6. Construir respuesta
