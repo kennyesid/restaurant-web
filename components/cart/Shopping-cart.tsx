@@ -16,6 +16,7 @@ import { Trash2, Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   createSale,
+  createSaleCombo,
   obtenerSiguienteOrdenDiariaSupabase,
 } from "@/services/salesService";
 import { toast } from "sonner";
@@ -261,7 +262,7 @@ export function ShoppingCart() {
         table: table
       };
       console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
-      const response = await createSale(newSaleData);
+      const response = await createSaleCombo(newSaleData);
       const isSuccess = response.codigo >= 200 && response.codigo <= 299;
       const currentToastBody = {
         type: isSuccess ? ToastType.Successfully : ToastType.Fail,

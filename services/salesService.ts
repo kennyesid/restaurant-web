@@ -363,14 +363,8 @@ export async function createSale(
             // 4a. Extraer datos del sub-item
             const {
               id: subFrontId,
-              // productFittings: subFittings,
               ...subItemData
             } = subItem;
-
-            // Transformar fittings del sub-item a array de IDs
-            // const subFittingIds = Array.isArray(subFittings)
-            //   ? subFittings.map((f: any) => (typeof f === 'object' ? f.id : f)).filter(Boolean)
-            //   : [];
 
             // 4b. Insertar en sales_details_details (relacionado con saleDetailId)
             const { data: insertedSubDetail, error: subError } = await supabase
@@ -378,7 +372,6 @@ export async function createSale(
               .insert([{
                 ...subItemData,
                 saleDetailId, // 👈 Relación con el detail padre
-                // productFittings: subFittingIds
               }])
               .select()
               .single();
@@ -394,6 +387,214 @@ export async function createSale(
           productDetailProduct: insertedSubDetails // 👈 Los sub-items guardados
         });
       }
+    }
+
+    // 6. Construir respuesta
+    const responsePayload: Sale = {
+      ...newSale,
+      detail: finalDetail
+    };
+
+    return responderExito(responsePayload, "Venta registrada con éxito");
+  } catch (error: any) {
+    console.error("❌ ERROR CRÍTICO DE SUPABASE:", {
+      mensaje: error?.message,
+      detalles: error?.details,
+      pista: error?.hint,
+      codigo: error?.code,
+      objetoCompleto: error
+    });
+
+    return responderFalla(`No se pudo procesar la venta: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+export async function createSaleCombo(
+  saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
+): Promise<RespuestaGenericaDto<Sale>> {
+  try {
+    const { detail, ...headerVenta } = saleData;
+
+    // 1. Insertar cabecera de la venta
+    const { data: newSale, error: saleError } = await supabase
+      .from("sales")
+      .insert([headerVenta])
+      .select()
+      .single();
+
+    if (saleError) throw saleError;
+    const saleId = newSale.id;
+
+    const finalDetail: any[] = [];
+
+    // 2. Filtrar SOLO los items con isCountable: true
+    const countableItems = detail.filter(item => item.isCountable === true);
+
+    if (countableItems && countableItems.length > 0) {
+      for (const item of countableItems) {
+
+  // ============================================================
+  // PRODUCTO TIPO COMBO (ALMUERZO)
+  // ============================================================
+  if (item.categoryId === 6) {
+
+    //-----------------------------------------
+    // 1. Guardar grupo
+    //-----------------------------------------
+
+    const { data: groupInserted, error: groupError } = await supabase
+      .from("sales_detail_group")
+      .insert({
+        saleId,
+        productId: item.productId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        subtotal: item.subTotal
+      })
+      .select()
+      .single();
+
+    if (groupError) throw groupError;
+
+    const saleDetailGroupId = groupInserted.id;
+
+    //-----------------------------------------
+    // 2. Recorrer cada plato
+    //-----------------------------------------
+
+    const insertedCartDetails: any[] = [];
+
+    for (let index = 0; index < (item.cartItemDetail ?? []).length; index++) {
+
+      const plate = item.cartItemDetail![index];
+
+      const fittingIds = Array.isArray(plate.productFittings)
+        ? plate.productFittings
+            .map((f: any) => typeof f === "object" ? f.id : f)
+            .filter(Boolean)
+        : [];
+
+      //-----------------------------------------
+      // Guardar plato
+      //-----------------------------------------
+
+      const {
+        id,
+        productDetailProduct,
+        productFittings,
+        ...plateData
+      } = plate;
+
+      const { data: insertedPlate, error: plateError } = await supabase
+        .from("sales_details")
+        .insert({
+          ...plateData,
+          saleId,
+          sales_detail_group_id: saleDetailGroupId,
+          combosecuencia: index + 1,
+          productFittings: fittingIds
+        })
+        .select()
+        .single();
+
+      if (plateError) throw plateError;
+
+      //-----------------------------------------
+      // Guardar sopa / segundo
+      //-----------------------------------------
+
+      const insertedProducts: any[] = [];
+
+      for (const product of (productDetailProduct ?? [])) {
+
+        const { id: tmp, ...productData } = product;
+
+        const { data, error } = await supabase
+          .from("sales_details_details")
+          .insert({
+            ...productData,
+            saleDetailId: insertedPlate.id
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        insertedProducts.push(data);
+      }
+
+      insertedCartDetails.push({
+        ...insertedPlate,
+        productDetailProduct: insertedProducts
+      });
+
+    }
+
+    finalDetail.push({
+      ...groupInserted,
+      cartItemDetail: insertedCartDetails,
+      productDetailProduct: []
+    });
+
+    continue;
+  }
+
+  // ============================================================
+  // PRODUCTO NORMAL
+  // ============================================================
+
+  const {
+    id: frontId,
+    productFittings,
+    productDetailProduct,
+    ...cartItemData
+  } = item;
+
+  const fittingIds = Array.isArray(productFittings)
+    ? productFittings
+        .map((f: any) => typeof f === "object" ? f.id : f)
+        .filter(Boolean)
+    : [];
+
+  const { data: insertedDetail, error: itemError } = await supabase
+    .from("sales_details")
+    .insert({
+      ...cartItemData,
+      saleId,
+      productFittings: fittingIds
+    })
+    .select()
+    .single();
+
+  if (itemError) throw itemError;
+
+  const insertedSubDetails: any[] = [];
+
+  for (const subItem of (productDetailProduct ?? [])) {
+
+    const { id: subFrontId, ...subItemData } = subItem;
+
+    const { data, error } = await supabase
+      .from("sales_details_details")
+      .insert({
+        ...subItemData,
+        saleDetailId: insertedDetail.id
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    insertedSubDetails.push(data);
+  }
+
+  finalDetail.push({
+    ...insertedDetail,
+    productDetailProduct: insertedSubDetails
+  });
+
+}
     }
 
     // 6. Construir respuesta
