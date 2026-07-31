@@ -185,38 +185,119 @@ export default function SalesPage() {
         }
       />
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
+
         <div className="lg:col-span-1">
-          <div className="relative overflow-hidden rounded-lg p-5 text-white shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
+          <div className="relative overflow-hidden rounded-xl p-4 text-white shadow-xl bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
+            {/* Efectos decorativos */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
 
-            <div className="relative z-10 mb-2 flex flex-col items-center">
-              <p className="text-xs uppercase tracking-wider opacity-80">
-                Resumen de Ventas
-              </p>
-              <h2 className="text-3xl font-black text-[#facc15]">
-                Bs {totalSales.toLocaleString()}
-              </h2>
-            </div>
-            <div className="relative z-10 grid grid-cols-3 gap-2 text-center">
-              <div>
-                <p className="text-[10px] uppercase opacity-70">Efectivo</p>
-                <p className="text-lg font-bold text-[#facc15]">
-                  {cashSales.length}
-                </p>
+            {/* Layout de dos columnas */}
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2">
+
+              {/* COLUMNA IZQUIERDA - Desglose por tipo de pago con burbujas */}
+              <div className="space-y-2.5">
+                {/* Total General - solo para mobile */}
+                <div className="md:hidden flex flex-col items-center border-b border-white/10 pb-3 mb-1">
+                  <p className="text-xs uppercase tracking-wider opacity-70 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block"></span>
+                    Total Ventas
+                  </p>
+                  <h2 className="text-2xl font-black text-[#facc15] tracking-tight">
+                    Bs {totalSales.toLocaleString()}
+                  </h2>
+                </div>
+
+                {/* Efectivo - Versión simplificada con burbuja */}
+                <div className="bg-white/5 rounded-lg overflow-hidden">
+                  <table className="w-full text-center">
+                    <tbody>
+                      {/* Fila Efectivo */}
+                      <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-1.5 px-2">
+                          <div className="flex items-start justify-start gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-lg shadow-green-400/50"></div>
+                            <span className="text-xs font-medium">Efectivo</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <span className="bg-green-400/20 text-green-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-green-400/30 inline-block min-w-[28px]">
+                            {cashSales.length}
+                          </span>
+                        </td>
+                        <td className="py-1.5 px-2 text-xs font-bold text-green-300 whitespace-nowrap">
+                          Bs {cashSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
+                        </td>
+                      </tr>
+
+                      {/* Fila QR */}
+                      <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td className="py-1.5 px-2">
+                          <div className="flex items-start justify-start gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-lg shadow-blue-400/50"></div>
+                            <span className="text-xs font-medium">QR</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <span className="bg-blue-400/20 text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-blue-400/30 inline-block min-w-[28px]">
+                            {qrSales.length}
+                          </span>
+                        </td>
+                        <td className="py-1.5 px-2 text-xs font-bold text-blue-300 whitespace-nowrap">
+                          Bs {qrSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
+                        </td>
+                      </tr>
+
+                      {/* Fila Mixto */}
+                      <tr className="hover:bg-white/5 transition-colors">
+                        <td className="py-1.5 px-2">
+                          <div className="flex items-start justify-start gap-1.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50"></div>
+                            <span className="text-xs font-medium">Mixto</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <span className="bg-purple-400/20 text-purple-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-purple-400/30 inline-block min-w-[28px]">
+                            {mixedSales.length}
+                          </span>
+                        </td>
+                        <td className="py-1.5 px-2 text-xs font-bold text-purple-300 whitespace-nowrap">
+                          Bs {mixedSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] uppercase opacity-70">QR</p>
-                <p className="text-lg font-bold">{qrSales.length}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase opacity-70">Mixto</p>
-                <p className="text-lg font-bold">{mixedSales.length}</p>
+
+              {/* COLUMNA DERECHA - Métricas resumen simplificadas */}
+              <div className="flex flex-col justify-between">
+                {/* Total General - Desktop */}
+                <div className="hidden md:flex flex-col items-center ">
+                  <p className="text-xs uppercase tracking-wider opacity-70 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block"></span>
+                    Total Ventas
+                  </p>
+                  <h2 className="text-3xl font-black text-[#facc15] tracking-tight">
+                    Bs {totalSales.toLocaleString()}
+                  </h2>
+                </div>
+
+                {/* Solo Cantidad - Quitamos Venta Máxima */}
+                <div className="space-y-2">
+
+                  <p className="text-[9px] uppercase opacity-60 tracking-wider flex items-center justify-center gap-1.5">
+                    Cantidad de Ventas
+                  </p>
+                  <p className="text-2xl font-bold text-white flex items-center justify-center ">
+                    {filteredSales.length}
+                  </p>
+
+                </div>
               </div>
             </div>
           </div>
         </div>
-
         <div className="lg:col-span-3 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -321,7 +402,7 @@ export default function SalesPage() {
                 <th className="px-6 py-3 font-semibold">Tipo Orden</th>
                 <th className="px-6 py-3 font-semibold">Operador</th>
                 <th className="px-6 py-3 font-semibold">Pago</th>
-                <th className="px-6 py-3 font-semibold">Monto Pagado</th>
+                {/* <th className="px-6 py-3 font-semibold">Monto Pagado</th> */}
                 <th className="px-6 py-3 font-semibold">Cambio</th>
                 <th className="px-6 py-3 font-semibold text-right">Total</th>
                 <th className="px-6 py-3 text-center">Acciones</th>
@@ -423,20 +504,53 @@ export default function SalesPage() {
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
                     </td>
-                    <td className="px-6 py-2 text-center">
-                      <span className="font-bold text-base text-[#052A3D]">
-                        Bs {sale.amountPaid?.toLocaleString()}
-                      </span>
+                    {/* <td className="px-6 py-2">
+                      <div className="flex flex-col items-center">
+                        <span className="font-bold text-base text-[#052A3D]">
+                          Bs {sale.amountPaid?.toLocaleString()}
+                        </span>
+                        <span className="text-[9px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200 font-medium">
+                          Pagado
+                        </span>
+                      </div>
+                    </td> */}
+                    <td className="px-6 py-2">
+                      <div className="flex flex-col items-center">
+                        {(sale.amountPaid ?? 0) > 0 ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm text-[#052A3D]">
+                                + Bs {(sale.amountPaid ?? 0)?.toLocaleString()}
+                              </span>
+                              <span className="text-[10px] text-gray-400">recibido</span>
+                            </div>
+                            {(sale.changeReturned ?? 0) > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-[#0b3f5c]">
+                                  - Bs {sale.changeReturned?.toLocaleString()}
+                                </span>
+                                <span className="text-[10px] text-gray-400">cambio</span>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-base text-[#052A3D]">
+                              Bs {sale.total.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] text-gray-400">(sin pago)</span>
+                          </div>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-6 py-2 text-center">
-                      <span className="font-bold text-base text-[#052A3D]">
-                        Bs {sale.changeReturned?.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-2 text-right">
-                      <span className="font-bold text-base text-[#052A3D]">
-                        Bs {sale.total.toLocaleString()}
-                      </span>
+
+                    {/* Total - Con badge */}
+                    <td className="px-6 py-2">
+                      <div className="flex flex-col items-end">
+                        <span className="font-black text-lg text-[#052A3D]">
+                          Bs {sale.total.toLocaleString()}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-2">
                       <div className="flex justify-center gap-2">
@@ -468,16 +582,16 @@ export default function SalesPage() {
                                 <p className="text-xs text-gray-400 font-medium">Total</p>
                                 <span className="font-black text-xl text-[#052A3D]">Bs {sale.total.toLocaleString()}</span>
                               </div>
-                              {sale.amountPaid > 0 && (
+                              {(sale.amountPaid ?? 0) > 0 && (
                                 <div>
                                   <p className="text-xs text-gray-400 font-medium">Monto Recibido</p>
-                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {sale.amountPaid.toLocaleString()}</span>
+                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {(sale.amountPaid ?? 0).toLocaleString()}</span>
                                 </div>
                               )}
-                              {sale.changeReturned > 0 && (
+                              {(sale.changeReturned ?? 0) > 0 && (
                                 <div>
                                   <p className="text-xs text-gray-400 font-medium">Cambio Entregado</p>
-                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {sale.changeReturned.toLocaleString()}</span>
+                                  <span className="font-bold text-sm text-slate-600 font-mono">Bs {(sale.changeReturned ?? 0).toLocaleString()}</span>
                                 </div>
                               )}
                             </div>
