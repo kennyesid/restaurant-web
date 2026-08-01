@@ -65,6 +65,7 @@ export default function SalesPage() {
     try {
       setLoading(true);
       const data = await getAllSalesWithDetailsCombo();
+      console.log("Ventas cargadas:", JSON.stringify(data));
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
@@ -200,7 +201,7 @@ export default function SalesPage() {
                 {/* Total General - solo para mobile */}
                 <div className="md:hidden flex flex-col items-center border-b border-white/10 pb-3 mb-1">
                   <p className="text-xs uppercase tracking-wider opacity-70 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block"></span>
+
                     Total Ventas
                   </p>
                   <h2 className="text-2xl font-black text-[#facc15] tracking-tight">
@@ -402,9 +403,7 @@ export default function SalesPage() {
                 <th className="px-6 py-3 font-semibold">Tipo Orden</th>
                 <th className="px-6 py-3 font-semibold">Operador</th>
                 <th className="px-6 py-3 font-semibold">Pago</th>
-                {/* <th className="px-6 py-3 font-semibold">Monto Pagado</th> */}
-                <th className="px-6 py-3 font-semibold">Cambio</th>
-                <th className="px-6 py-3 font-semibold text-right">Total</th>
+                <th className="px-6 py-3 font-semibold text-center">Total</th>
                 <th className="px-6 py-3 text-center">Acciones</th>
               </tr>
             </thead>
@@ -504,53 +503,23 @@ export default function SalesPage() {
                         {getPaymentTypeLabel(sale.paymentType)}
                       </span>
                     </td>
-                    {/* <td className="px-6 py-2">
-                      <div className="flex flex-col items-center">
-                        <span className="font-bold text-base text-[#052A3D]">
-                          Bs {sale.amountPaid?.toLocaleString()}
-                        </span>
-                        <span className="text-[9px] text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full border border-green-200 font-medium">
-                          Pagado
-                        </span>
-                      </div>
-                    </td> */}
                     <td className="px-6 py-2">
-                      <div className="flex flex-col items-center">
-                        {(sale.amountPaid ?? 0) > 0 ? (
-                          <>
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-sm text-[#052A3D]">
-                                + Bs {(sale.amountPaid ?? 0)?.toLocaleString()}
-                              </span>
-                              <span className="text-[10px] text-gray-400">recibido</span>
-                            </div>
-                            {(sale.changeReturned ?? 0) > 0 && (
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-sm text-[#0b3f5c]">
-                                  - Bs {sale.changeReturned?.toLocaleString()}
-                                </span>
-                                <span className="text-[10px] text-gray-400">cambio</span>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-base text-[#052A3D]">
-                              Bs {sale.total.toLocaleString()}
-                            </span>
-                            <span className="text-[10px] text-gray-400">(sin pago)</span>
+                      {(sale.amountPaid ?? 0) > 0 ? (
+                        <div className="flex flex-col items-center">
+                          <span className="text-base font-black text-[#052A3D]">
+                            Bs {sale.total.toLocaleString()}
+                          </span>
+                          <div className="text-[11px] font-medium text-[#052A3D] mt-0.5">
+                            {(sale.amountPaid ?? 0).toLocaleString()} - {(sale.total.toLocaleString() ?? 0).toLocaleString()} = {(sale.changeReturned ?? 0).toLocaleString()}
                           </div>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Total - Con badge */}
-                    <td className="px-6 py-2">
-                      <div className="flex flex-col items-end">
-                        <span className="font-black text-lg text-[#052A3D]">
-                          Bs {sale.total.toLocaleString()}
-                        </span>
-                      </div>
+                        </div>
+                      ) : (
+                        <div className="flex justify-center">
+                          <span className="text-base font-black text-[#052A3D]">
+                            Bs {sale.total.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-2">
                       <div className="flex justify-center gap-2">
@@ -611,12 +580,7 @@ export default function SalesPage() {
 
                                 <tbody className="divide-y divide-slate-100 bg-white">
                                   {sale.detail
-                                    .filter(
-                                      (item: any) =>
-                                        item.isCountable !== false ||
-                                        item.categoryId === 6 ||
-                                        (item.cartItemDetail && item.cartItemDetail.length > 0)
-                                    )
+                                    .filter((item: any) => true)
                                     .map((item: any, itemIdx: number) => {
                                       const isModificado = item.quantity === 0 && item.price === 0;
                                       const tieneDesglose =
@@ -695,17 +659,9 @@ export default function SalesPage() {
                                                             <span className="font-semibold text-slate-700 block">{detail.name}</span>
                                                             {selectedSubProducts.length > 0 && (
                                                               <div className="pl-3 border-l-2 border-slate-200 space-y-0.5 mt-1">
-                                                                <span className="text-[10px] text-slate-400 font-bold uppercase block">
-                                                                  Plato Seleccionado:
-                                                                </span>
                                                                 {selectedSubProducts.map((p: any) => (
                                                                   <div key={p.id} className="flex items-center gap-2 text-[11px] text-slate-600">
                                                                     <span>• {p.name}</span>
-                                                                    {p.price > 0 && (
-                                                                      <span className="text-[10px] font-mono text-slate-400">
-                                                                        (+Bs {p.price})
-                                                                      </span>
-                                                                    )}
                                                                   </div>
                                                                 ))}
                                                               </div>
@@ -779,41 +735,43 @@ export default function SalesPage() {
             </div>
           )}
         </div>
-        {filteredSales.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-700">
-            <div>
-              Mostrando{" "}
-              <span className="font-bold">{paginatedSales.length}</span> de{" "}
-              <span className="font-bold">{filteredSales.length}</span> ventas
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                className="h-8 px-3"
-              >
-                Anterior
-              </Button>
-              <div className="flex items-center px-2 text-sm font-semibold text-[#052A3D]">
-                Página {currentPage} de {totalPages || 1}
+        {
+          filteredSales.length > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 text-xs font-medium text-gray-700">
+              <div>
+                Mostrando{" "}
+                <span className="font-bold">{paginatedSales.length}</span> de{" "}
+                <span className="font-bold">{filteredSales.length}</span> ventas
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                className="h-8 px-3"
-              >
-                Siguiente
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  className="h-8 px-3"
+                >
+                  Anterior
+                </Button>
+                <div className="flex items-center px-2 text-sm font-semibold text-[#052A3D]">
+                  Página {currentPage} de {totalPages || 1}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  className="h-8 px-3"
+                >
+                  Siguiente
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </Card>
+          )
+        }
+      </Card >
       <AlertDialogComponent
         isOpen={alertOpen}
         onClose={() => {
@@ -833,6 +791,6 @@ export default function SalesPage() {
         confirmText="Eliminar"
         cancelText="Cancelar"
       />
-    </div>
+    </div >
   );
 }

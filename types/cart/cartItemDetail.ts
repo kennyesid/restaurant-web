@@ -14,12 +14,13 @@ export interface CartItemDetail {
   modifiedSubtotal?: number;
   reasonModification?: string;
   orderTypeSend?: string;
-  isPromotion?: boolean;
-  isCountable?: boolean | false;
+  // isPromotion?: boolean;
+  // isCountable?: boolean | false;
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;
   completed?: boolean;
+  selected?: boolean;
   createdAt?: string;
   updatedAt?: string;
   state?: boolean;

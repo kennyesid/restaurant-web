@@ -107,9 +107,7 @@ export function ShoppingCart() {
         const data = await getProducts();
         const onlySingleProducts = data.filter((p) => !p.isPromotion);
         setProductsList(onlySingleProducts);
-
         const timeoutValue = configService.getParameterValue('PERMISION_SHIPPING_CART');
-        // console.log("timeoutValue", JSON.stringify(timeoutValue));
         setAdminPermision(timeoutValue === '1');
       } catch (error) {
         console.error("Error al cargar los productos en el modal:", error);
@@ -123,9 +121,6 @@ export function ShoppingCart() {
       const loadOrderTypes = async () => {
         const types = await getOrderTypes();
         setOrderTypeSendList(types);
-        if (types.length > 0) {
-          setSelectedOrderTypeSend(types[1].code);
-        }
       };
       loadOrderTypes();
     }
@@ -138,13 +133,6 @@ export function ShoppingCart() {
 
   const changeReturned = amountPaid > total ? amountPaid - total : 0;
 
-  const getCurrentShift = (): "morning" | "afternoon" | "night" => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "morning";
-    if (hour < 17) return "afternoon";
-    return "night";
-  };
-
   const handleCheckout = async () => {
     let userSendId = 0;
     if (items.length === 0) {
@@ -153,68 +141,7 @@ export function ShoppingCart() {
     }
     setIsProcessing(true);
     try {
-      console.log('REVIEW N1 :: ' + JSON.stringify(items));
-
-      const normalizedItems: CartItem[] = items.map((item) => {
-        if (item.cartItemDetail && item.cartItemDetail.length > 0) {
-          return item;
-        }
-
-        const detail: CartItemDetail = {
-          id: 1,
-          cartItemId: item.productId,
-          name: item.name,
-          price: item.price,
-          categoryId: item.categoryId,
-          productId: item.productId,
-          quantity: item.quantity,
-          modified: item.modified ?? false,
-          subTotal: item.subTotal ?? item.price * item.quantity,
-          modifiedSubtotal: item.modifiedSubtotal ?? 0,
-          reasonModification: item.reasonModification ?? "",
-          orderTypeSend: item.orderTypeSend ?? "CONSUMO_LOCAL",
-          isPromotion: item.isPromotion ?? false,
-          isCountable: item.isCountable ?? true,
-          productFittings: item.productFittings ?? [],
-          productDetailProduct: [
-            {
-              id: item.id,
-              productId: item.productId,
-              groupId: 1,
-              categoryId: item.categoryId,
-              name: item.name,
-              description: item.name,
-              legend: item.name,
-              price: item.price,
-              isPromotion: item.isPromotion ?? false,
-              imageUrl: item.imageUrl ?? "",
-              isFeatured: false,
-              displayOrder: 0,
-              isAvailable: true,
-              piecesOfChicken: undefined,
-              selected: true,
-              createdAt: item.createdAt ?? null,
-              createdBy: null,
-              state: item.state ?? true,
-            },
-          ],
-          imageUrl: item.imageUrl ?? "",
-          completed: true,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-          state: item.state ?? true,
-        };
-
-        return {
-          ...item,
-          cartItemDetail: [detail],
-        };
-      });
-
-      // Luego usa processedItems en:
-      // - newSaleData.detail
-      // - printPayload.detail
-
+      console.log("carrito", JSON.stringify(items));
       if (selectedClient) {
         if (selectedClient.id === 0) {
           const selectedClientResponse = await createUser({
@@ -239,10 +166,78 @@ export function ShoppingCart() {
         }
       }
 
+      const updatedItems = await Promise.all(
+        items.map(async (currentItem) => {
+          // Si no es categoría 6, devolvemos el ítem tal cual
+          if (currentItem.categoryId !== 6) return currentItem;
+
+          // 2. Verificar si ya tiene detalles con productos seleccionados
+          const hasSelectedProducts = currentItem.cartItemDetail?.some(
+            (detail) => detail.productDetailProduct?.some((p) => p.selected)
+          );
+
+          // 3. Si NO tiene una configuración previa, generamos la estructura por defecto
+          if (!hasSelectedProducts) {
+            console.log("Configurando productos por defecto para la promoción/combo...");
+
+            // Obtener los productos dependientes del plato principal
+            const productByProducts: Product[] = await getProductsByMainId(currentItem.productId);
+
+            // Mapear los productos para que vengan seleccionados por defecto
+            const defaultSelectedProducts: ProductDetailProduct[] = productByProducts.map((product) => ({
+              ...product,
+              productId: product.id,
+              groupId: product.groupId ?? 0,
+              selected: true, // Auto-seleccionado
+            }));
+
+            // Generar los platos según la cantidad que lleva en el carrito (ej: 2 platos si quantity es 2)
+            const autoGeneratedDetails: CartItemDetail[] = Array.from(
+              { length: currentItem.quantity },
+              (_, dishIndex) => ({
+                id: dishIndex + 1,
+                cartItemId: currentItem.id,
+                name: `Plato ${dishIndex + 1}`,
+                price: 0,
+                categoryId: currentItem.categoryId,
+                productId: currentItem.productId,
+                quantity: 1,
+                modified: false,
+                subTotal: 0,
+                modifiedSubtotal: 0,
+                reasonModification: "",
+                orderTypeSend: "",
+                isPromotion: false,
+                isCountable: true,
+                productFittings: [],
+                productDetailProduct: defaultSelectedProducts, // Asignar la lista auto-seleccionada
+                imageUrl: "",
+                completed: true,
+                selected: true,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                state: true,
+              })
+            );
+
+            // Devolvemos un nuevo objeto ítem con los detalles generados (sin mutar el original)
+            return {
+              ...currentItem,
+              cartItemDetail: autoGeneratedDetails
+            };
+          }
+
+          // Si ya tenía productos configurados, lo devolvemos tal cual
+          return currentItem;
+        })
+      );
+
       const numeroOrdenCalculado = await obtenerSiguienteOrdenDiariaSupabase();
 
       const newSaleData: Omit<Sale, "id" | "createdAt" | "updatedAt"> = {
-        detail: normalizedItems,
+        detail: updatedItems,
+        // detail: items,
+        // detail: normalizedItems,
         paymentType: paymentType as PaymentTypeEnum,
         userId: user?.id || 0,
         groupId: user?.groupId || 0,
@@ -258,7 +253,7 @@ export function ShoppingCart() {
         amountPaid: amountPaid,
         changeReturned: changeReturned,
         orderType: orderType as OrderTypeEnum,
-        shift: getCurrentShift(),
+        // shift: getCurrentShift(),
         table: table
       };
       console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))
@@ -321,7 +316,7 @@ export function ShoppingCart() {
           state: true,
           total: total,
           orderType: orderType,
-          shift: getCurrentShift(),
+          // shift: getCurrentShift(),
           createdAt: DateUtils.obtenerFechaBoliviaISO(),
           updatedAt: DateUtils.obtenerFechaBoliviaISO(),
         };
@@ -342,7 +337,10 @@ export function ShoppingCart() {
         );
       }
     } catch (error) {
-      toast.error("Error al procesar la venta");
+      console.error("Error al procesar la venta", error);
+      toast.error(
+        "hubo un problema con la transacción.",
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -368,7 +366,7 @@ export function ShoppingCart() {
       setOpenDish(true)
     }
 
-    setSelectedOrderTypeSend(cartDetail?.orderTypeSend || orderTypeSendList[1].code);
+    setSelectedOrderTypeSend(cartDetail?.orderTypeSend ?? "");
     setFormReason(cartDetail?.reasonModification ?? "");
     setSelectedDishIndex(cartDetail);
   };
@@ -394,6 +392,7 @@ export function ShoppingCart() {
       reasonModification: formReason || currentPlate.reasonModification,
       orderTypeSend: selectedOrderTypeSend,
       completed: true,
+      selected: true,
     };
     const updatedRows = [...promoRows];
     updatedRows[plateIndex] = updatedPlate;
@@ -401,8 +400,7 @@ export function ShoppingCart() {
     setSelectedDishIndex(null);
     setOpenDish(false);
     setFormReason("");
-    setSelectedOrderTypeSend(
-      orderTypeSendList[1].code
+    setSelectedOrderTypeSend(""
     );
     toast.success("Productos agregados al plato correctamente.");
   };
@@ -432,6 +430,7 @@ export function ShoppingCart() {
     setOpenDish(false);
 
     const productByProducts: Product[] = await getProductsByMainId(item.productId);
+    console.log("productByProducts :: ", JSON.stringify(productByProducts));
     const productMap = new Map<number, Product>();
     productByProducts.forEach(p => productMap.set(p.id, p));
 
@@ -472,7 +471,7 @@ export function ShoppingCart() {
           (_, index) => ({
             id: initialDetails.length + index + 1, // 👈 continuar numeración
             cartItemId: item.id,
-            name: `${item.name} - Plato ${initialDetails.length + index + 1}`,
+            name: `Plato ${initialDetails.length + index + 1}`,
             price: 0,
             categoryId: item.categoryId,
             productId: item.productId,
@@ -502,7 +501,7 @@ export function ShoppingCart() {
         (_, index) => ({
           id: index + 1,
           cartItemId: item.id,
-          name: `${item.name} - Plato ${index + 1}`,
+          name: `Plato ${index + 1}`,
           price: 0,
           categoryId: item.categoryId,
           productId: item.productId,
@@ -908,7 +907,7 @@ export function ShoppingCart() {
                   {orderTypeSendList.map((type) => (
                     <button
                       key={type.id}
-                      onClick={() => setSelectedOrderTypeSend(type.code || type.name)}
+                      onClick={() => setSelectedOrderTypeSend(type.code)}
                       className={`flex-1 min-w-[80px] px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${selectedOrderTypeSend === (type.code || type.name)
                         ? "bg-[#052a3d] border-[#052a3d] text-white"
                         : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"

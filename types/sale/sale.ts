@@ -26,7 +26,7 @@ export interface Sale {
   tenantId: number;
   total: number;
   paymentType: PaymentTypeEnum;
-  shift: string;
+  // shift: string;
   table: number;
   createdAt: Date;
   updatedAt: Date;

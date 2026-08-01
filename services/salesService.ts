@@ -296,7 +296,7 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         plate = {
           id: detail.combosecuencia,
           cartItemId: combo.productId,
-          name: `${combo.name} - Plato ${detail.combosecuencia}`,
+          name: `Plato ${detail.combosecuencia}`,
           price: 0,
           categoryId: combo.categoryId,
           productId: combo.productId,
@@ -654,8 +654,6 @@ export async function createSaleCombo(
 ): Promise<RespuestaGenericaDto<Sale>> {
   try {
     const { detail, ...headerVenta } = saleData;
-
-    // 1. Insertar cabecera de la venta
     const { data: newSale, error: saleError } = await supabase
       .from("sales")
       .insert([headerVenta])
@@ -672,11 +670,12 @@ export async function createSaleCombo(
       // ============================================================
       // PRODUCTO TIPO COMBO (ALMUERZO)
       // ============================================================
-      if (item.categoryId === 6) {
+      // if (item.categoryId === 6) {
+      if ((item.cartItemDetail ?? []).length > 0) {
 
-        //-----------------------------------------
-        // 1. Guardar grupo
-        //-----------------------------------------
+        const flagCategoryCombo = item.categoryId === 6;
+        let saleDetailGroupId = 0;
+
 
         const { data: groupInserted, error: groupError } = await supabase
           .from("sales_detail_group")
@@ -692,77 +691,81 @@ export async function createSaleCombo(
           .single();
 
         if (groupError) throw groupError;
-
-        const saleDetailGroupId = groupInserted.id;
-
-        //-----------------------------------------
-        // 2. Guardar los productos elegidos
-        //-----------------------------------------
+        saleDetailGroupId = groupInserted.id;
 
         for (let sequence = 0; sequence < (item.cartItemDetail ?? []).length; sequence++) {
-
           const plate = item.cartItemDetail![sequence];
 
-          for (const product of (plate.productDetailProduct ?? [])) {
+          if ((plate.productDetailProduct ?? []).length > 0) {
+            for (const product of (plate.productDetailProduct ?? [])) {
+              const {
+                id,
+                groupId,
+                code,
+                displayOrder,
+                piecesOfChicken,
+                createdAt,
+                ...productData
+              } = product;
 
-            const fittingIds = Array.isArray(plate.productFittings)
-              ? plate.productFittings
-                .map((f: any) => typeof f === "object" ? f.id : f)
-                .filter(Boolean)
-              : [];
+              const { data: insertedDetailCombo, error } = await supabase
+                .from("sales_details")
+                .insert({
+                  saleId,
+                  sales_detail_group_id: saleDetailGroupId,
+                  combosecuencia: sequence + 1,
+                  productId: product.productId,
+                  categoryId: product.categoryId,
+                  name: product.name,
+                  price: product.price,
+                  quantity: 1,
+                  modified: plate.modified,
+                  modifiedSubtotal: plate.modifiedSubtotal,
+                  reasonModification: plate.reasonModification,
+                  isPromotion: product.isPromotion,
+                  isCountable: true,
+                  imageUrl: product.imageUrl,
+                  productFittings: [],
+                  selected: product.selected
+                });
 
-            const {
-              id,
-              groupId,
-              code,
-              displayOrder,
-              piecesOfChicken,
-              createdAt,
-              ...productData
-            } = product;
+              if (error) throw error;
 
-            const { error } = await supabase
+              finalDetail.push(insertedDetailCombo);
+            }
+          }
+          else {
+            const { data: insertedDetailNoCombo, error: itemError } = await supabase
               .from("sales_details")
               .insert({
                 saleId,
-
-                sales_detail_group_id: saleDetailGroupId,
-                combosecuencia: sequence + 1,
-
-                productId: product.productId,
-                categoryId: product.categoryId,
-
-                name: product.name,
-                price: product.price,
-
-                quantity: 1,
-
-                modified: plate.modified,
+                productId: plate.productId,
+                categoryId: plate.categoryId,
+                name: plate.name,
+                price: plate.price,
+                quantity: plate.quantity ?? 1,
+                modified: plate.modified ?? false,
                 modifiedSubtotal: plate.modifiedSubtotal,
                 reasonModification: plate.reasonModification,
+                // isPromotion: plate.isPromotion ?? false,
+                // isCountable: plate.isCountable ?? false,
+                imageUrl: item.imageUrl,
+                productFittings: [],
+                padreDetailId: 0,
+                sales_detail_group_id: saleDetailGroupId,
+                combosecuencia: sequence + 1,
+                selected: true
+                // selected: false   REVISAR
+              })
+              .select()
+              .single();
 
-                isPromotion: product.isPromotion,
-                isCountable: true,
-
-                imageUrl: product.imageUrl,
-
-                productFittings: fittingIds,
-
-                selected: product.selected
-              });
-
-            if (error) throw error;
+            if (itemError) throw itemError;
+            finalDetail.push(insertedDetailNoCombo);
           }
         }
-
-        finalDetail.push(groupInserted);
-
         continue;
       }
-
-      // ============================================================
-      // PRODUCTO NORMAL
-      // ============================================================
 
       const {
         id: frontId,
@@ -773,52 +776,31 @@ export async function createSaleCombo(
         ...cartItemData
       } = item;
 
-      const fittingIds = Array.isArray(productFittings)
-        ? productFittings
-          .map((f: any) => typeof f === "object" ? f.id : f)
-          .filter(Boolean)
-        : [];
+      // const fittingIds = Array.isArray(productFittings)
+      //   ? productFittings
+      //     .map((f: any) => typeof f === "object" ? f.id : f)
+      //     .filter(Boolean)
+      //   : [];
 
       const { data: insertedDetail, error: itemError } = await supabase
         .from("sales_details")
         .insert({
           ...cartItemData,
           saleId,
-          productFittings: fittingIds
+          selected: true,
+          productFittings: []
         })
         .select()
         .single();
 
       if (itemError) throw itemError;
 
-      // const insertedSubDetails: any[] = [];
-
-      // for (const subItem of (productDetailProduct ?? [])) {
-
-      //   const { id: subFrontId, ...subItemData } = subItem;
-
-      //   const { data, error } = await supabase
-      //     .from("sales_details_details")
-      //     .insert({
-      //       ...subItemData,
-      //       saleDetailId: insertedDetail.id
-      //     })
-      //     .select()
-      //     .single();
-
-      //   if (error) throw error;
-
-      //   insertedSubDetails.push(data);
-      // }
-
       finalDetail.push({
-        ...insertedDetail,
-        // productDetailProduct: insertedSubDetails
+        ...insertedDetail
       });
 
     }
 
-    // 6. Construir respuesta
     const responsePayload: Sale = {
       ...newSale,
       detail: finalDetail
@@ -1341,7 +1323,6 @@ export async function getSaleWithDetailsById(id: number): Promise<RespuestaGener
       amountPaid: sale.amountPaid,
       changeReturned: sale.changeReturned,
       orderType: sale.orderType,
-      shift: sale.shift,
       table: sale.table,
       createdAt: sale.createdAt,
       updatedAt: sale.updatedAt,
