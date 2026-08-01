@@ -80,9 +80,9 @@ export function ImageUpload({
     <div className="flex flex-col gap-4">
       <div
         onClick={() => !disabled && fileInputRef.current?.click()}
-        className={`relative border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer transition-colors ${disabled
+        className={`relative border-2 border-dashed border-blue-500 rounded-lg p-6 text-center cursor-pointer transition-colors ${disabled
           ? "opacity-50 cursor-not-allowed"
-          : "hover:border-primary hover:bg-muted"
+          : "hover:border-blue-500 hover:bg-muted"
           }`}
       >
         <input
@@ -130,7 +130,7 @@ export function ImageUpload({
         </div>
       )}
 
-      {preview && (
+      {/* {preview && (
         <Button
           type="button"
           variant="outline"
@@ -142,7 +142,7 @@ export function ImageUpload({
           <X className="w-4 h-4 mr-2" />
           Eliminar imagen
         </Button>
-      )}
+      )} */}
     </div>
   );
 }

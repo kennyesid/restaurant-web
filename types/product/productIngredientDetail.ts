@@ -3,6 +3,7 @@
 export interface ProductIngredientDetail {
     id: number;
     productId: number;
+    groupId: number;
     name: string;
     description?: string | null;
     createdAt: string | null;

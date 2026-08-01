@@ -58,51 +58,51 @@ export async function getProductsByCategory(categoryId: number): Promise<Product
 }
 
 export async function createProduct(product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>, imageBase64?: string): Promise<Product> {
-  try{
-let imageUrl = product.imageUrl || '';
+  try {
+    let imageUrl = product.imageUrl || '';
 
-  if (imageBase64) {
-    try {
-      imageUrl = await uploadImageToSupabase(imageBase64, 'products');
-    } catch (error) {
-      console.error('Error subiendo imagen:', error);
-      throw new Error('No se pudo guardar la imagen');
+    if (imageBase64) {
+      try {
+        imageUrl = await uploadImageToSupabase(imageBase64, 'products');
+      } catch (error) {
+        console.error('Error subiendo imagen:', error);
+        throw new Error('No se pudo guardar la imagen');
+      }
     }
-  }
 
-  const { productIngredientDetail, productDetailProduct, ...mainProduct } = product;
+    const { productIngredientDetail, productDetailProduct, ...mainProduct } = product;
 
-  const newProduct = await productService.create({ ...mainProduct, imageUrl });
+    const newProduct = await productService.create({ ...mainProduct, imageUrl });
 
-  let insertedIngredients: ProductIngredientDetail[] = [];
-  let insertedDetails: ProductDetailProduct[] = [];
+    let insertedIngredients: ProductIngredientDetail[] = [];
+    let insertedDetails: ProductDetailProduct[] = [];
 
-  if (productIngredientDetail && productIngredientDetail.length > 0) {
-    for (const ingredient of productIngredientDetail) {
-      const savedIngredient = await ingredientService.create({
-        ...ingredient,
-        productId: newProduct.id
-      });
-      insertedIngredients.push(savedIngredient);
+    if (productIngredientDetail && productIngredientDetail.length > 0) {
+      for (const ingredient of productIngredientDetail) {
+        const savedIngredient = await ingredientService.create({
+          ...ingredient,
+          productId: newProduct.id
+        });
+        insertedIngredients.push(savedIngredient);
+      }
     }
-  }
 
-  if (productDetailProduct && productDetailProduct.length > 0) {
-    for (const detail of productDetailProduct) {
-      const savedDetail = await detailProductService.create({
-        ...detail,
-        productId: newProduct.id
-      });
-      insertedDetails.push(savedDetail);
+    if (productDetailProduct && productDetailProduct.length > 0) {
+      for (const detail of productDetailProduct) {
+        const savedDetail = await detailProductService.create({
+          ...detail,
+          productId: newProduct.id
+        });
+        insertedDetails.push(savedDetail);
+      }
     }
-  }
 
-  return {
-    ...newProduct,
-    productIngredientDetail: insertedIngredients,
-    productDetailProduct: insertedDetails
-  };
-  }catch(exception){
+    return {
+      ...newProduct,
+      productIngredientDetail: insertedIngredients,
+      productDetailProduct: insertedDetails
+    };
+  } catch (exception) {
     console.error('Error creando producto:', exception);
     throw new Error('No se pudo crear el producto');
   }
@@ -112,8 +112,58 @@ export async function updateProduct(
   id: number,
   updates: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<Product | null> {
-  return productService.update('id', id, updates);
+  try {
+    const { productIngredientDetail, productDetailProduct, ...cleanUpdates } = updates;
+
+    // 1. Actualizar datos nativos del producto padre
+    const updatedProduct = await productService.update('id', id, cleanUpdates);
+    if (!updatedProduct) return null;
+
+    // 2. Si vienen ingredientes, procesamos de manera secuencial estricta
+    if (productIngredientDetail) {
+      // A. Obtenemos los ingredientes actuales asociados a este producto
+      const currentIngredients = await ingredientService.getAll('id', true)
+        .then(list => list.filter(i => i.productId === id));
+
+      // B. ELIMINACIÓN SECUENCIAL (Esperamos a que termine por completo antes de insertar)
+      if (currentIngredients.length > 0) {
+        for (const i of currentIngredients) {
+          await ingredientService.delete('id', i.id);
+        }
+      }
+
+      // C. INSERCIÓN LIMPIA
+      if (productIngredientDetail.length > 0) {
+        for (const ingredient of productIngredientDetail) {
+          // Copia limpia omitiendo propiedades generadas automáticamente por Postgres
+          const cleanIngredient = {
+            productId: id,
+            name: ingredient.name,
+            description: ingredient.description || null,
+            createdBy: ingredient.createdBy || null,
+            state: ingredient.state ?? true,
+            groupId: Number(ingredient.groupId) || 0
+          };
+
+          // Inserción uno a uno asegurando el orden correcto
+          await ingredientService.create(cleanIngredient);
+        }
+      }
+    }
+
+    return updatedProduct;
+  } catch (error) {
+    console.error('Error al actualizar producto e ingredientes:', error);
+    throw new Error('No se pudo actualizar el producto');
+  }
 }
+
+// export async function updateProduct(
+//   id: number,
+//   updates: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>
+// ): Promise<Product | null> {
+//   return productService.update('id', id, updates);
+// }
 
 export async function deleteProduct(id: number): Promise<boolean> {
   const currentIngredients = await ingredientService.getAll('id', true).then(list => list.filter(i => i.productId === id));

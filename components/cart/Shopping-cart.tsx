@@ -430,7 +430,7 @@ export function ShoppingCart() {
     setOpenDish(false);
 
     const productByProducts: Product[] = await getProductsByMainId(item.productId);
-    console.log("productByProducts :: ", JSON.stringify(productByProducts));
+    // console.log("productByProducts :: ", JSON.stringify(productByProducts));
     const productMap = new Map<number, Product>();
     productByProducts.forEach(p => productMap.set(p.id, p));
 
@@ -884,7 +884,6 @@ export function ShoppingCart() {
                           : "opacity-40 grayscale"
                           }`}
                       />
-                      {/* 👇 NÚMERO DEL PLATO EN EL CENTRO */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                           {plate.id}

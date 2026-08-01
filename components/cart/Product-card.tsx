@@ -15,6 +15,7 @@ interface ProductCardProps {
   onClick?: (product: Product) => void;
   showActions?: boolean;
   className?: string;
+  componentIn?: 'product' | 'shoppingCard' | 'edit';
 }
 
 export function ProductCard({
@@ -24,6 +25,7 @@ export function ProductCard({
   onClick,
   showActions = true,
   className,
+  componentIn = 'shoppingCard'
 }: ProductCardProps) {
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -60,13 +62,37 @@ export function ProductCard({
             </div>
 
             <div className="absolute top-0 right-0 p-2">
-              <span className="bg-black/60 backdrop-blur-md text-white px-3 py-1 text-xs font-mono">
+              <span className="bg-white backdrop-blur-md text-rest-primary px-3 py-1 text-xs font-bold">
                 {product.price.toLocaleString("es-BO", {
                   style: "currency",
                   currency: "BOB",
                 })}
               </span>
             </div>
+
+            {componentIn === "product" && (
+              <div className="absolute bottom-4 right-4 flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.(product);
+                  }}
+                  className="p-1.5 bg-yellow-500 hover:bg-black/20 rounded text-gray-900"
+                >
+                  <Edit2 size={14} />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete?.(product.id);
+                  }}
+                  className="p-1.5 bg-red-600 hover:bg-red-700 rounded text-white"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
+
             {/* <div className="absolute bottom-4 right-4 flex gap-2">
               <button
                 onClick={(e) => {

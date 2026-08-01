@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 import ButtonGeneric from "../button/ButtonGeneric";
 
-export type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+export type ModalSize = "sm" | "md" | "lg" | "xl" | "4xl" | "full";
 
 export interface ResponsiveModalProps {
   isOpen: boolean;
@@ -23,6 +23,7 @@ const sizeClasses: Record<ModalSize, string> = {
   md: "max-w-md w-full max-h-[85vh]",
   lg: "max-w-lg w-full max-h-[85vh]",
   xl: "max-w-2xl w-full max-h-[85vh]",
+  "4xl": "max-w-6xl w-full h-[85vh] max-h-[85vh]",
   full: "max-w-[95vw] h-[90vh] w-full",
 };
 
