@@ -23,7 +23,7 @@ const sizeClasses: Record<ModalSize, string> = {
   md: "max-w-md w-full max-h-[85vh]",
   lg: "max-w-lg w-full max-h-[85vh]",
   xl: "max-w-2xl w-full max-h-[85vh]",
-  "4xl": "max-w-6xl w-full h-[85vh] max-h-[85vh]",
+  "4xl": "max-w-6xl w-full max-h-[85vh]",
   full: "max-w-[95vw] h-[90vh] w-full",
 };
 

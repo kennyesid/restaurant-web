@@ -97,7 +97,7 @@ export function ShoppingCart() {
   const [customNit, setCustomNit] = useState("");
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [orderTypeSendList, setOrderTypeSendList] = useState<OrderTypeSend[]>([]);
-  const [selectedOrderTypeSend, setSelectedOrderTypeSend] = useState<string>("");
+  const [selectedOrderTypeSend, setSelectedOrderTypeSend] = useState<string | null>(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -368,7 +368,7 @@ export function ShoppingCart() {
       setOpenDish(true)
     }
 
-    setSelectedOrderTypeSend(cartDetail?.orderTypeSend ?? "");
+    setSelectedOrderTypeSend(cartDetail?.orderTypeSend ?? null);
     setFormReason(cartDetail?.reasonModification ?? "");
     setSelectedDishIndex(cartDetail);
   };
@@ -402,8 +402,7 @@ export function ShoppingCart() {
     setSelectedDishIndex(null);
     setOpenDish(false);
     setFormReason("");
-    setSelectedOrderTypeSend(""
-    );
+    setSelectedOrderTypeSend(null);
     toast.success("Productos agregados al plato correctamente.");
   };
 
@@ -432,7 +431,6 @@ export function ShoppingCart() {
     setOpenDish(false);
 
     const productByProducts: Product[] = await getProductsByMainId(item.productId);
-    // console.log("productByProducts :: ", JSON.stringify(productByProducts));
     const productMap = new Map<number, Product>();
     productByProducts.forEach(p => productMap.set(p.id, p));
 
@@ -471,7 +469,7 @@ export function ShoppingCart() {
         const emptyPlates: CartItemDetail[] = Array.from(
           { length: remaining },
           (_, index) => ({
-            id: initialDetails.length + index + 1, // 👈 continuar numeración
+            id: initialDetails.length + index + 1,
             cartItemId: item.id,
             name: `Plato ${initialDetails.length + index + 1}`,
             price: 0,
@@ -482,9 +480,7 @@ export function ShoppingCart() {
             subTotal: 0,
             modifiedSubtotal: 0,
             reasonModification: "",
-            orderTypeSend: "",
-            // isPromotion: false,
-            // isCountable: true,
+            orderTypeSend: item.orderTypeSend,
             productFittings: [],
             productDetailProduct: selectedProducts, // Todos los productos disponibles
             imageUrl: "",
@@ -512,11 +508,9 @@ export function ShoppingCart() {
           subTotal: 0,
           modifiedSubtotal: 0,
           reasonModification: "",
-          orderTypeSend: "",
-          // isPromotion: false,
-          // isCountable: true,
+          orderTypeSend: null,
           productFittings: [],
-          productDetailProduct: selectedProducts, // Todos los productos disponibles
+          productDetailProduct: selectedProducts,
           imageUrl: "",
           completed: false,
           createdAt: new Date().toISOString(),
@@ -527,10 +521,14 @@ export function ShoppingCart() {
     }
 
     setPromoRows(initialDetails);
-    setSelectedDishIndex(null);
+
+    setSelectedDishIndex(initialDetails[0]);
+    if (initialDetails[0]?.productDetailProduct?.length) {
+      setOpenDish(true)
+    }
     setIsPromoModalOpen(true);
-    setFormReason("");
-    setFormModifiedPrice("");
+    setFormReason(initialDetails[0]?.reasonModification ?? "");
+    setFormModifiedPrice(initialDetails[0]?.modifiedSubtotal ?? "");
   };
 
   const promoColumns: Column<any>[] = [
@@ -554,26 +552,81 @@ export function ShoppingCart() {
       accessor: (item) => (<span className="font-semibold">{item.quantity} u</span>),
     },
     {
-      header: "Obs",
-      accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>),
-    },
-    {
-      header: "Envío",
+      header: "Observacion",
       accessor: (item: CartItemDetail) => {
-        const type = item.orderTypeSend || "";
-        const isParaLlevar = type.toUpperCase().includes("LLEVAR") || type.toUpperCase() === "PARA_LLEVAR";
-        const label = isParaLlevar ? "Para Llevar" : "En Mesa";
+        // Evaluación del tipo de envío
+        const type = item.orderTypeSend;
+        const isParaLlevar =
+          type &&
+          (type.toUpperCase().includes("LLEVAR") ||
+            type.toUpperCase() === "PARA_LLEVAR");
+
+        const sendLabel = isParaLlevar ? "Para Llevar" : "En Mesa";
+
         return (
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isParaLlevar
-            ? "bg-orange-100 text-orange-700 border border-orange-200"
-            : "bg-blue-100 text-blue-700 border border-blue-200"
-            }`}>
-            {label}
-          </span>
+          <div className="flex flex-col gap-1 items-start max-w-[140px]">
+
+            {type ? (
+              <span
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold tracking-wide ${isParaLlevar
+                  ? "bg-orange-100 text-orange-700 border border-orange-200"
+                  : "bg-blue-100 text-blue-700 border border-blue-200"
+                  }`}
+              >
+                {sendLabel}
+              </span>
+            ) : (
+              <span className="text-slate-300 italic text-xs">-</span>
+            )}
+
+            <span className="text-slate-600 font-medium text-xs break-words leading-tight">
+              {item.reasonModification ? (
+                item.reasonModification
+              ) : (
+                <span className="text-slate-300 italic">Sin obs.</span>
+              )}
+            </span>
+          </div>
         );
       },
-    },
+    }
+    // {
+    //   header: "Obs",
+    //   accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>),
+    // },
+    // {
+    //   header: "Envío",
+    //   accessor: (item: CartItemDetail) => {
+    //     // 1. Si no hay tipo de envío asignado, no renderizamos nada
+    //     if (!item.orderTypeSend) {
+    //       return null; // o <span className="text-gray-400">-</span> si prefieres mostrar un guion
+    //     }
+
+    //     const type = item.orderTypeSend;
+    //     const isParaLlevar = type.toUpperCase().includes("LLEVAR") || type.toUpperCase() === "PARA_LLEVAR";
+    //     const label = isParaLlevar ? "Para Llevar" : "En Mesa";
+
+    //     return (
+    //       <span
+    //         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isParaLlevar
+    //           ? "bg-orange-100 text-orange-700 border border-orange-200"
+    //           : "bg-blue-100 text-blue-700 border border-blue-200"
+    //           }`}
+    //       >
+    //         {label}
+    //       </span>
+    //     );
+    //   },
+    // }
   ];
+
+  const handleSelect = (typeCode: string) => {
+    if (selectedOrderTypeSend === typeCode) {
+      setSelectedOrderTypeSend(null);
+    } else {
+      setSelectedOrderTypeSend(typeCode);
+    }
+  };
 
   return (
     <>
@@ -758,248 +811,286 @@ export function ShoppingCart() {
           title={selectedPromo?.name || "Detalle de Promoción"}
           subtitle="Personaliza los platos incluidos en este combo"
           confirmText="Confirmar"
-          size="lg"
+          size="4xl"
         >
-          {adminPermision && (
-            <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="flex flex-col gap-1 md:col-span-1">
-                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                  Precio (Bs)
-                </label>
-                <input
-                  onFocus={(e) => e.target.select()}
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={
-                    selectedPromo.modifiedSubtotal ??
-                    selectedPromo.price * (selectedPromo.quantity || 1)
-                  }
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    const parts = raw.split(".");
-                    let sanitized = parts[0];
-                    if (parts.length > 1)
-                      sanitized += "." + parts.slice(1).join("");
-                    const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
-                    setSelectedPromo({
-                      ...selectedPromo,
-                      price: selectedPromo.price * (selectedPromo.quantity || 1),
-                      modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
-                    });
-                  }}
-                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                  Motivo Cambio
-                </label>
-                <input
-                  type="text"
-                  value={selectedPromo.reasonModification || ""}
-                  onChange={(e) => {
-                    setSelectedPromo({
-                      ...selectedPromo,
-                      reasonModification: e.target.value,
-                    });
-                  }}
-                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
-                  placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
-                />
-              </div>
-            </div>
-          )}
-          {/* <RoleGuard allowedRoles="ADMIN">
-            <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="flex flex-col gap-1 md:col-span-1">
-                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                  Precio (Bs)
-                </label>
-                <input
-                  onFocus={(e) => e.target.select()}
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  value={
-                    selectedPromo.modifiedSubtotal ??
-                    selectedPromo.price * (selectedPromo.quantity || 1)
-                  }
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    const parts = raw.split(".");
-                    let sanitized = parts[0];
-                    if (parts.length > 1)
-                      sanitized += "." + parts.slice(1).join("");
-                    const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
-                    setSelectedPromo({
-                      ...selectedPromo,
-                      price: selectedPromo.price * (selectedPromo.quantity || 1),
-                      modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
-                    });
-                  }}
-                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
-                />
-              </div>
-              <div className="flex flex-col gap-1 md:col-span-2">
-                <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-                  Motivo Cambio
-                </label>
-                <input
-                  type="text"
-                  value={selectedPromo.reasonModification || ""}
-                  onChange={(e) => {
-                    setSelectedPromo({
-                      ...selectedPromo,
-                      reasonModification: e.target.value,
-                    });
-                  }}
-                  className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
-                  placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
-                />
-              </div>
-            </div>
-          </RoleGuard> */}
-          {promoRows.length && (
-            <div className="mb-2 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-              <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center mb-2">
-                Seleccione un Plato
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 mb-2">
-                {promoRows.map((plate, index) => {
-                  const isSelected = selectedDishIndex?.id === plate.id ? true : false;
-                  return (
-                    <div
-                      key={plate.id}
-                      onClick={() => handleDishClick(plate)}
-                      className={`relative w-14 h-14 md:w-14 md:h-14 lg:w-15 lg:h-15 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition ${isSelected
-                        ? "border-2 border-green-500 ring-2 ring-green-300"
-                        : "bg-gray-300 border-2 border-transparent"
-                        }`}
-                    >
-                      <Image
-                        src="/images/others/select-dish.avif"
-                        alt={`Plato ${index + 1}`}
-                        fill
-                        className={`w-full h-full object-cover transition ${isSelected || plate.completed
-                          ? "opacity-100 saturate-100"
-                          : "opacity-40 grayscale"
-                          }`}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                          {plate.id}
-                        </span>
-                      </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
-                      {plate.completed && (
-                        <div className="absolute top-0.5 right-0.5 bg-green-500 text-white rounded-full p-0.5 shadow-md">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mb-3">
-                <div className="flex flex-wrap gap-2">
-                  {orderTypeSendList.map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => setSelectedOrderTypeSend(type.code)}
-                      className={`flex-1 min-w-[80px] px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 ${selectedOrderTypeSend === (type.code || type.name)
-                        ? "bg-[#052a3d] border-[#052a3d] text-white"
-                        : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
-                        }`}
-                    >
-                      {type.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 md:col-span-3 mb-3">
-                <label className="text-xs text-slate-500 font-medium">
-                  Comentario:
-                </label>
-                <input
-                  type="text"
-                  value={formReason}
-                  onChange={(e) => setFormReason(e.target.value)}
-                  placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
-                  className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
-                />
-              </div>
-              {openDish && (
-                <div className="flex flex-wrap justify-center gap-3 mb-3">
-                  {selectedDishIndex?.productDetailProduct?.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => handleSelectProductForDish(product)}
-                      className={`group relative flex flex-col items-center p-0 rounded-xl transition-all border text-center w-25 h-25 ${product.selected
-                        ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
-                        : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
-                        }`}
-                    >
-                      {/* Contenedor de la imagen cuadrada */}
-                      <div
-                        className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${product.selected
-                          ? "border-green-500 ring-2 ring-green-300 shadow-lg"
-                          : "border-gray-200 opacity-60 hover:opacity-100"
-                          }`}
-                      >
-                        <Image
-                          src={product.imageUrl || "/images/others/select-dish.avif"}
-                          alt={product.name ?? ""}
-                          fill
-                          className={`object-cover transition ${product.selected
-                            ? "opacity-100 saturate-100"
-                            : "opacity-40 grayscale"
-                            }`}
-                        />
-                        {/* Nombre centrado en la parte inferior dentro de la imagen */}
-                        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
-                          <span
-                            className={`block text-base font-medium text-center text-white line-clamp-2 ${product.selected ? "font-semibold" : ""
-                              }`}
-                          >
-                            {product.name}
-                          </span>
-                        </div>
-                        {product.selected && (
-                          <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                    </button>
-                  ))}
+            {/* ========================================== */}
+            {/* SECCIÓN DERECHA: TABLA DE RESUMEN DE PROMOS*/}
+            {/* ========================================== */}
+            <div className="lg:col-span-5 w-full">
+              {promoRows.length > 0 && (
+                <div className="border rounded-xl overflow-hidden shadow-sm bg-white">
+                  <GenericDataTable
+                    columns={promoColumns}
+                    data={promoRows}
+                    showActions={true}
+                    rowKey="id"
+                  />
                 </div>
               )}
-              <div className="flex justify-end pt-1">
-                <ButtonGeneric
-                  variant="confirmYellow"
-                  onClick={handleAcceptPromo}
-                >
-                  + Agregar a la Lista
-                </ButtonGeneric>
-              </div>
             </div>
-          )}
 
-          {promoRows.length > 0 && (
-            <div className="mt-4 border rounded-xl overflow-hidden shadow-sm">
-              <GenericDataTable
-                columns={promoColumns}
-                data={promoRows}
-                showActions={true}
-                rowKey="id"
-              />
+            {/* ========================================== */}
+            {/* SECCIÓN IZQUIERDA: FORMULARIO Y SELECCIÓN  */}
+            {/* ========================================== */}
+            <div className="lg:col-span-7 flex flex-col gap-4">
+
+              {/* 1. Modificación de Precio / Permiso Admin */}
+              {adminPermision && (
+                <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1 md:col-span-1">
+                    <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                      Precio (Bs)
+                    </label>
+                    <input
+                      onFocus={(e) => e.target.select()}
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*\.?[0-9]*"
+                      value={
+                        selectedPromo.modifiedSubtotal ??
+                        selectedPromo.price * (selectedPromo.quantity || 1)
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        const parts = raw.split(".");
+                        let sanitized = parts[0];
+                        if (parts.length > 1)
+                          sanitized += "." + parts.slice(1).join("");
+                        const newPrice = sanitized === "" ? 0 : parseFloat(sanitized);
+                        setSelectedPromo({
+                          ...selectedPromo,
+                          price: selectedPromo.price * (selectedPromo.quantity || 1),
+                          modifiedSubtotal: isNaN(newPrice) ? 0 : newPrice,
+                        });
+                      }}
+                      className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 font-bold text-slate-800 text-sm"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1 md:col-span-2">
+                    <label className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                      Motivo Cambio
+                    </label>
+                    <input
+                      type="text"
+                      value={selectedPromo.reasonModification || ""}
+                      onChange={(e) => {
+                        setSelectedPromo({
+                          ...selectedPromo,
+                          reasonModification: e.target.value,
+                        });
+                      }}
+                      className="w-full p-2 bg-white border border-yellow-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-500 text-sm font-medium text-slate-700"
+                      placeholder="Ej: Descuento autorizado por administrador / Ajuste de precio..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Configuración de Platos y Productos */}
+              {promoRows.length > 0 && (
+                <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                  <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center">
+                    Seleccione un Plato
+                  </p>
+
+                  {/* Slots de platos */}
+                  <div className="flex flex-wrap justify-center gap-3">
+                    {promoRows.map((plate, index) => {
+                      const isSelected = selectedDishIndex?.id === plate.id;
+                      return (
+                        <div
+                          key={plate.id}
+                          onClick={() => handleDishClick(plate)}
+                          className={`relative w-14 h-14 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition ${isSelected
+                            ? "border-2 border-green-500 ring-2 ring-green-300"
+                            : "bg-gray-300 border-2 border-transparent"
+                            }`}
+                        >
+                          <Image
+                            src="/images/others/select-dish.avif"
+                            alt={`Plato ${index + 1}`}
+                            fill
+                            className={`w-full h-full object-cover transition ${isSelected || plate.completed
+                              ? "opacity-100 saturate-100"
+                              : "opacity-40 grayscale"
+                              }`}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                              {plate.id}
+                            </span>
+                          </div>
+
+                          {plate.completed && (
+                            <div className="absolute top-0.5 right-0.5 bg-green-500 text-white rounded-full p-0.5 shadow-md">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-3 w-3"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Tipo de envío / orden */}
+                  <div className="grid grid-cols-12 gap-3 items-end">
+                    <div className="col-span-12 sm:col-span-6 flex flex-col gap-1">
+                      <label className="text-xs text-slate-500 font-medium">
+                        Comentario:
+                      </label>
+                      <input
+                        type="text"
+                        value={formReason}
+                        onChange={(e) => setFormReason(e.target.value)}
+                        placeholder="Ej: Sin cebolla, término medio..."
+                        className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700 h-[38px]"
+                      />
+                    </div>
+                    <div className="col-span-12 sm:col-span-6 flex gap-2">
+                      {orderTypeSendList.map((type) => {
+                        const valueToSelect = type.code || type.name;
+                        const isSelected = selectedOrderTypeSend === valueToSelect;
+
+                        return (
+                          <button
+                            key={type.id}
+                            type="button"
+                            onClick={() => handleSelect(valueToSelect)}
+                            aria-pressed={isSelected}
+                            className={`w-1/2 px-3 py-2 text-xs md:text-sm font-medium rounded-lg border-2 transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#052a3d]/30 text-center ${isSelected
+                              ? "bg-[#052a3d] border-[#052a3d] text-white shadow-sm"
+                              : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
+                              }`}
+                          >
+                            {type.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* <div>
+                    <div className="flex flex-wrap gap-2">
+                      {orderTypeSendList.map((type) => {
+                        const valueToSelect = type.code || type.name;
+                        const isSelected = selectedOrderTypeSend === valueToSelect;
+
+                        return (
+                          <button
+                            key={type.id}
+                            type="button"
+                            onClick={() => handleSelect(valueToSelect)}
+                            aria-pressed={isSelected}
+                            className={`flex-1 min-w-[80px] px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#052a3d]/30 ${isSelected
+                              ? "bg-[#052a3d] border-[#052a3d] text-white shadow-sm"
+                              : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
+                              }`}
+                          >
+                            {type.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs text-slate-500 font-medium">
+                      Comentario:
+                    </label>
+                    <input
+                      type="text"
+                      value={formReason}
+                      onChange={(e) => setFormReason(e.target.value)}
+                      placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
+                      className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
+                    />
+                  </div> */}
+
+                  {/* Opciones de Productos para el plato seleccionado */}
+                  {openDish && (
+                    <div className="flex flex-wrap justify-center gap-3 my-1">
+                      {selectedDishIndex?.productDetailProduct?.map((product) => (
+                        <button
+                          key={product.id}
+                          onClick={() => handleSelectProductForDish(product)}
+                          className={`group relative flex flex-col items-center p-0 rounded-xl transition-all border text-center w-25 h-25 ${product.selected
+                            ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
+                            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                            }`}
+                        >
+                          <div
+                            className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${product.selected
+                              ? "border-green-500 ring-2 ring-green-300 shadow-lg"
+                              : "border-gray-200 opacity-60 hover:opacity-100"
+                              }`}
+                          >
+                            <Image
+                              src={
+                                product.imageUrl || "/images/others/select-dish.avif"
+                              }
+                              alt={product.name ?? ""}
+                              fill
+                              className={`object-cover transition ${product.selected
+                                ? "opacity-100 saturate-100"
+                                : "opacity-40 grayscale"
+                                }`}
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+                              <span
+                                className={`block text-base font-medium text-center text-white line-clamp-2 ${product.selected ? "font-semibold" : ""
+                                  }`}
+                              >
+                                {product.name}
+                              </span>
+                            </div>
+                            {product.selected && (
+                              <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-3 w-3"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Botón de Agregar */}
+                  <div className="flex justify-end pt-1">
+                    <ButtonGeneric
+                      variant="confirmYellow"
+                      onClick={handleAcceptPromo}
+                    >
+                      + Agregar a la Lista
+                    </ButtonGeneric>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+
+
+
+          </div>
         </ResponsiveModal>
       )}
       <GenericModal

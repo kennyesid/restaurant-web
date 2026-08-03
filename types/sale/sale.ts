@@ -17,8 +17,6 @@ export interface Sale {
   userCustomerName?: string;
   amountPaid?: number;
   changeReturned?: number;
-
-
   orderNumber: number;
   orderStatus: OrderStatusEnum;
   orderType: OrderTypeEnum;
@@ -26,7 +24,6 @@ export interface Sale {
   tenantId: number;
   total: number;
   paymentType: PaymentTypeEnum;
-  // shift: string;
   table: number;
   createdAt: Date;
   updatedAt: Date;

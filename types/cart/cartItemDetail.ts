@@ -13,7 +13,7 @@ export interface CartItemDetail {
   subTotal?: number;
   modifiedSubtotal?: number;
   reasonModification?: string;
-  orderTypeSend?: string;
+  orderTypeSend?: string | null;
   // isPromotion?: boolean;
   // isCountable?: boolean | false;
   productFittings?: ProductFittings[];

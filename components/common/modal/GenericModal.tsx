@@ -408,7 +408,7 @@ export function GenericModal({
         </table>
       </div>
       <div className="border-t space-y-4 bg-gray-50/50 p-3 rounded-xl border border-slate-100">
-        {/* <div className="space-y-2">
+        <div className="space-y-2">
           <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
             Tipo de Orden
           </label>
@@ -421,7 +421,7 @@ export function GenericModal({
                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                 }`}
             >
-              Para Consumir Aquí
+              Para la Mesa
             </button>
             <button
               type="button"
@@ -434,7 +434,7 @@ export function GenericModal({
               Para Llevar
             </button>
           </div>
-        </div> */}
+        </div>
 
         {/* <hr className="border-slate-200/60" /> */}
         <div className="space-y-3">

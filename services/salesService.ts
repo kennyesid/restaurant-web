@@ -468,6 +468,216 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
   }
 }
 
+export async function getAllSalesWithDetailsComboChef(): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+
+    const groupId = configService.getGroupId();
+
+    const { data: sales, error: salesError } = await supabase
+      .from("sales")
+      .select("*")
+      .eq("groupId", groupId)
+      .eq("orderStatus", 2)
+      .eq("state", true)
+      .order("createdAt", { ascending: false });
+
+    if (salesError) throw salesError;
+
+    if (!sales || sales.length === 0) {
+      return responderExito([], "Ventas obtenidas con éxito");
+    }
+
+    const saleIds = sales.map(s => s.id);
+
+    const { data: comboGroups, error: comboError } = await supabase
+      .from("sales_detail_group")
+      .select("*")
+      .in("saleId", saleIds);
+
+    if (comboError) throw comboError;
+
+    const { data: details, error: detailError } = await supabase
+      .from("sales_details")
+      .select("*")
+      .eq("selected", true)
+      .in("saleId", saleIds);
+
+    if (detailError) throw detailError;
+
+    const comboMap = new Map<number, any>();
+
+    (comboGroups ?? []).forEach(combo => {
+      comboMap.set(combo.id, {
+        id: combo.productId,
+        name: combo.name,
+        price: combo.price,
+        imageUrl: "",
+        categoryId: 6,
+        productDetailProduct: [],
+        productId: combo.productId,
+        quantity: combo.quantity,
+        subTotal: combo.subtotal,
+        cartItemDetail: [],
+        sales_detail_group_id: combo.id,
+        saleId: combo.saleId
+      });
+    });
+
+    (details ?? []).forEach(detail => {
+      if (!detail.sales_detail_group_id || detail.sales_detail_group_id === 0)
+        return;
+
+      const combo = comboMap.get(detail.sales_detail_group_id);
+
+      if (!combo)
+        return;
+
+      let plate = combo.cartItemDetail.find(
+        (x: any) => x.id === detail.combosecuencia
+      );
+
+      if (!plate) {
+        plate = {
+          id: detail.combosecuencia,
+          cartItemId: combo.productId,
+          name: `Plato ${detail.combosecuencia}`,
+          price: 0,
+          categoryId: combo.categoryId,
+          productId: combo.productId,
+          quantity: 1,
+          modified: detail.modified,
+          subTotal: 0,
+          modifiedSubtotal: detail.modifiedSubtotal,
+          reasonModification: detail.reasonModification,
+          orderTypeSend: detail.orderTypeSend,
+          imageUrl: "",
+          completed: true,
+          createdAt: detail.createdAt,
+          updatedAt: detail.updatedAt,
+          state: detail.state,
+          productFittings: [],
+          productDetailProduct: [],
+        };
+        combo.cartItemDetail.push(plate);
+      }
+
+      plate.productDetailProduct.push({
+        id: detail.id,
+        categoryId: detail.categoryId,
+        productId: detail.productId,
+        name: detail.name,
+        description: detail.description,
+        legend: detail.legend,
+        price: detail.price,
+        imageUrl: detail.imageUrl,
+        isFeatured: detail.isFeatured,
+        isAvailable: true,
+        state: detail.state,
+        groupId: detail.groupId,
+        code: detail.code,
+        displayOrder: detail.displayOrder,
+        piecesOfChicken: detail.piecesOfChicken,
+        createdAt: detail.createdAt,
+        updatedAt: detail.updatedAt,
+        selected: detail.selected,
+        productFittings: [],
+      });
+    });
+
+    const detailsBySale = new Map<number, any[]>();
+
+    (details ?? []).forEach(detail => {
+      if (!detailsBySale.has(detail.saleId)) {
+        detailsBySale.set(detail.saleId, []);
+      }
+      detailsBySale.get(detail.saleId)!.push(detail);
+    });
+
+    const combosBySale = new Map<number, any[]>();
+
+    Array.from(comboMap.values()).forEach(combo => {
+
+      if (!combosBySale.has(combo.saleId)) {
+        combosBySale.set(combo.saleId, []);
+      }
+
+      combosBySale.get(combo.saleId)!.push(combo);
+
+    });
+
+    const formattedSales: Sale[] = sales.map((sale: Sale) => {
+
+      const normalProducts = (detailsBySale.get(sale.id) ?? [])
+        .filter(d => !d.sales_detail_group_id || d.sales_detail_group_id === 0)
+        .map((item: CartItem) => {
+          return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            imageUrl: item.imageUrl,
+            categoryId: item.categoryId,
+            productId: item.productId,
+            quantity: item.quantity,
+            subTotal: item.price * item.quantity,
+            modified: item.modified,
+            modifiedSubtotal: item.modifiedSubtotal,
+            reasonModification: item.reasonModification,
+            productFittings: [],
+            productDetailProduct: [],
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            state: item.state
+          };
+        });
+
+      const combos = combosBySale.get(sale.id) ?? [];
+
+      const detail = [
+        ...combos,
+        ...normalProducts
+      ];
+
+      return {
+        id: sale.id,
+        detail,
+        paymentType: sale.paymentType,
+        userId: sale.userId,
+        groupId: sale.groupId,
+        userName: sale.userName,
+        userCustomerId: sale.userCustomerId,
+        userCustomerName: sale.userCustomerName,
+        userDocument: sale.userDocument,
+        orderNumber: sale.orderNumber,
+        orderStatus: sale.orderStatus,
+        tenantId: sale.tenantId,
+        state: sale.state,
+        total: sale.total,
+        amountPaid: sale.amountPaid,
+        changeReturned: sale.changeReturned,
+        orderType: sale.orderType,
+        createdAt: sale.createdAt,
+        updatedAt: sale.updatedAt
+      } as Sale;
+    });
+
+    console.log("formattedSales", JSON.stringify(formattedSales));
+
+    return responderExito(
+      formattedSales,
+      "Ventas obtenidas con éxito"
+    );
+  } catch (error: any) {
+    console.error("❌ Error en getAllSalesWithDetails:", {
+      mensaje: error?.message,
+      detalles: error?.details,
+      codigo: error?.code,
+    });
+    return responderFalla(
+      `Error al obtener las ventas: ${error?.message || "Error de datos"}`
+    );
+  }
+}
+
 // export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
 //   try {
 //     const groupId = configService.getGroupId();
@@ -722,6 +932,7 @@ export async function createSaleCombo(
                   modified: plate.modified,
                   modifiedSubtotal: plate.modifiedSubtotal,
                   reasonModification: plate.reasonModification,
+                  orderTypeSend: plate.orderTypeSend,
                   // isPromotion: product.isPromotion,
                   // isCountable: true,
                   imageUrl: product.imageUrl,
@@ -747,6 +958,7 @@ export async function createSaleCombo(
                 modified: plate.modified ?? false,
                 modifiedSubtotal: plate.modifiedSubtotal,
                 reasonModification: plate.reasonModification,
+                orderTypeSend: plate.orderTypeSend,
                 // isPromotion: plate.isPromotion ?? false,
                 // isCountable: plate.isCountable ?? false,
                 imageUrl: item.imageUrl,
@@ -776,20 +988,12 @@ export async function createSaleCombo(
         ...cartItemData
       } = item;
 
-      // delete (cartItemData as any).isCountable;
-      // delete (cartItemData as any).isPromotion;
-
-      // const fittingIds = Array.isArray(productFittings)
-      //   ? productFittings
-      //     .map((f: any) => typeof f === "object" ? f.id : f)
-      //     .filter(Boolean)
-      //   : [];
-
       const { data: insertedDetail, error: itemError } = await supabase
         .from("sales_details")
         .insert({
           ...cartItemData,
           saleId,
+          orderTypeSend: item.orderTypeSend,
           selected: true,
           productFittings: []
         })
@@ -1045,103 +1249,122 @@ export async function obtenerSiguienteOrdenDiariaSupabase(): Promise<number> {
     return 1;
   }
 }
-
-// ========================================================
-// MÉTRICA: VENTAS POR USUARIO (userDocument)
-// ========================================================
-// export async function getSalesByUserDocument(): Promise<RespuestaGenericaDto<{ userDocument: string; count: number; totalAmount: number; userName?: string }[]>> {
-//   try {
-//     const groupId = configService.getGroupId();
-
-//     const { data: sales, error } = await supabase
-//       .from("sales")
-//       .select("userDocument, total, userName")
-//       .eq("groupId", groupId)
-//       .eq("state", true);
-
-//     if (error) throw error;
-
-//     // Agrupar por userDocument
-//     const userMap = new Map<string, {
-//       userDocument: string;
-//       count: number;
-//       totalAmount: number;
-//       userName?: string
-//     }>();
-
-//     (sales || []).forEach((sale) => {
-//       const doc = sale.userDocument || "SIN_DOCUMENTO";
-//       const total = Number(sale.total) || 0;
-
-//       if (userMap.has(doc)) {
-//         const existing = userMap.get(doc)!;
-//         existing.count += 1;
-//         existing.totalAmount += total;
-//         // Si no tiene nombre, intentar asignar el primero que aparezca
-//         if (!existing.userName && sale.userName) {
-//           existing.userName = sale.userName;
-//         }
-//       } else {
-//         userMap.set(doc, {
-//           userDocument: doc,
-//           count: 1,
-//           totalAmount: total,
-//           userName: sale.userName || undefined
-//         });
-//       }
-//     });
-
-//     const result = Array.from(userMap.values())
-//       .sort((a, b) => b.count - a.count); // Ordenar por cantidad descendente
-
-//     return responderExito(result);
-//   } catch (error) {
-//     console.error(error);
-//     return responderFalla("Error al obtener ventas por usuario");
-//   }
-// }
-
-// Cantidad total de ventas
-// export async function getTotalSalesCount(): Promise<RespuestaGenericaDto<number>> {
-//   try {
-//     const groupId = configService.getGroupId();
-
-//     const { count, error } = await supabase
-//       .from("sales")
-//       .select("*", { count: "exact", head: true })
-//       .eq("groupId", groupId)
-//       .eq("state", true);
-
-//     if (error) throw error;
-
-//     return responderExito(count || 0);
-//   } catch (error) {
-//     console.error(error);
-//     return responderFalla("Error al obtener el total de ventas");
-//   }
-// }
-
 // ========================================================
 // OBTENER VENTAS PENDIENTES DE LA COCINA (orderStatus = 2)
 // ========================================================
+// 1. Tipos TypeScript (Interfaces para la respuesta agrupada)
+
+export interface GroupedKitchenItem {
+  reasonModification: string | null;
+  items: any[]; // Detalles / ítems filtrados que pertenecen a esta modificación
+}
+
+export interface GroupedByOrderTypeSend {
+  orderTypeSend: string;
+  reasons: GroupedKitchenItem[];
+}
+
+export interface GroupedKitchenResponse {
+  groups: GroupedByOrderTypeSend[];
+}
+
+// 2. Método Refactorizado
+export async function getSalesInKitchenGrouped(): Promise<RespuestaGenericaDto<GroupedByOrderTypeSend[]>> {
+  try {
+    const groupId = configService.getGroupId();
+
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select(`
+        *,
+        detail:sales_details(*)
+      `)
+      .eq("groupId", groupId)
+      .eq("state", true)
+      .eq("orderStatus", 2)
+      .order("createdAt", { ascending: true });
+
+    if (error) throw error;
+
+    const groupedMap = new Map<string, { orderTypeGlobal: string; reasons: Map<string, any[]> }>();
+
+    (sales || []).forEach((sale: any) => {
+      const orderTypeGlobal = sale.orderType || "SIN_TIPO";
+
+      (sale.detail || []).forEach((item: any) => {
+        if (!item.selected) return;
+
+        const orderTypeSendKey = item.orderTypeSend || "SIN_TIPO";
+
+        if (!groupedMap.has(orderTypeSendKey)) {
+          groupedMap.set(orderTypeSendKey, {
+            orderTypeGlobal,
+            reasons: new Map<string, any[]>(),
+          });
+        }
+
+        const group = groupedMap.get(orderTypeSendKey)!;
+
+        const reasonKey = item.reasonModification || "SIN_MODIFICACION";
+
+        if (!group.reasons.has(reasonKey)) {
+          group.reasons.set(reasonKey, []);
+        }
+
+        const formattedItem = {
+          id: item.id,
+          saleId: sale.id,
+          orderNumber: sale.orderNumber,
+          userName: sale.userName,
+          userCustomerName: sale.userCustomerName,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          categoryId: item.categoryId,
+          productId: item.productId,
+          productFittings: [],
+          productDetailProduct: [],
+          isCountable: item.isCountable ?? true,
+          reasonModification: item.reasonModification || null,
+          modifiedSubtotal: item.modifiedSubtotal,
+          subTotal: item.subTotal,
+          state: item.state ?? true,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          imageUrl: item.imageUrl,
+          description: item.description,
+          selected: item.selected,
+        };
+
+        group.reasons.get(reasonKey)!.push(formattedItem);
+      });
+    });
+
+    const formattedAgroupation: GroupedByOrderTypeSend[] = Array.from(groupedMap.entries()).map(
+      ([orderTypeSend, group]) => ({
+        orderTypeSend,
+        orderTypeGlobal: group.orderTypeGlobal,
+        reasons: Array.from(group.reasons.entries()).map(([reasonModification, items]) => ({
+          reasonModification: reasonModification === "SIN_MODIFICACION" ? null : reasonModification,
+          items,
+        })),
+      })
+    );
+
+    return responderExito(
+      formattedAgroupation,
+      "Ventas de cocina agrupadas por tipo de envío y modificación obtenidas con éxito"
+    );
+  } catch (error: any) {
+    console.error("❌ Error en getSalesInKitchenGrouped:", error);
+    return responderFalla(`Error al obtener ventas de cocina: ${error?.message || "Error de datos"}`);
+  }
+}
+
 export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
     const groupId = configService.getGroupId();
-    const fitingMasterList = await ProductFittingsService.getAll();
 
-    // const { data: sales, error } = await supabase
-    //   .from("sales")
-    //   .select(`
-    //     *,
-    //     detail:sales_details(
-    //       *,
-    //       subDetails:sales_details_details(*)
-    //     )
-    //   `)
-    //   .eq("groupId", groupId)
-    //   .eq("state", true)
-    //   .eq("orderStatus", 2)
-    //   .order("createdAt", { ascending: true });
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
@@ -1157,18 +1380,8 @@ export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>>
 
     const formattedSales = (sales || []).map((sale: any) => {
       const formattedDetail = (sale.detail || []).map((item: any) => {
-        const updatedProductFittings = Array.isArray(item.productFittings)
-          ? item.productFittings
-            .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
-            .filter(Boolean)
-          : [];
 
         const formattedSubDetails = (item.subDetails || []).map((sub: any) => {
-          const updatedSubFittings = Array.isArray(sub.productFittings)
-            ? sub.productFittings
-              .map((fittingId: number) => fitingMasterList.find((f) => f.id === fittingId))
-              .filter(Boolean)
-            : [];
 
           return {
             id: sub.id,
@@ -1177,7 +1390,7 @@ export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>>
             price: sub.price || 0,
             reasonModification: sub.reasonModification || null,
             quantity: sub.quantity || 0,
-            productFittings: updatedSubFittings.map((f: any) => f.name),
+            productFittings: [],
             state: sub.state ?? true,
             categoryId: sub.categoryId,
             isCountable: sub.isCountable ?? false,
@@ -1196,7 +1409,7 @@ export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>>
           price: item.price,
           categoryId: item.categoryId,
           productId: item.productId,
-          productFittings: updatedProductFittings.map((f: any) => f.name),
+          productFittings: [],
           productDetailProduct: formattedSubDetails,
           isCountable: item.isCountable ?? true,
           reasonModification: item.reasonModification || null,

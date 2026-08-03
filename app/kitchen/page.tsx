@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { getSalesInKitchen, updateSaleOrderStatus, getSaleWithDetailsById } from "@/services/salesService";
+import { getSalesInKitchen, updateSaleOrderStatus, getSaleWithDetailsById, getSalesInKitchenGrouped, getAllSalesWithDetailsComboChef } from "@/services/salesService";
 import { Sale, ToastType } from "@/types";
 import { supabase } from "@/lib/dataBase/supabaseClient";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ export default function KitchenPage() {
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Record<number, boolean>>({});
   const [now, setNow] = useState(new Date());
+  const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
 
   // Realtime connection status
   const [realtimeStatus, setRealtimeStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
@@ -100,6 +101,13 @@ export default function KitchenPage() {
       } else {
         toast.error(res.mensaje || "Error al cargar pedidos");
       }
+
+      const resGrouped = await getSalesInKitchenGrouped();
+      // console.log("Sales grouped:", JSON.stringify(resGrouped));
+
+      const getDetailsComboChef = await getAllSalesWithDetailsComboChef();
+      console.log("getDetailsComboChef:", JSON.stringify(getDetailsComboChef));
+
     } catch (error) {
       console.error("Error cargando pedidos:", error);
       toast.error("Ocurrió un error al cargar la cola de cocina");
@@ -234,7 +242,12 @@ export default function KitchenPage() {
     return "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/60";
   };
 
-
+  const toggleItem = (idx: number) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [idx]: !prev[idx],
+    }));
+  };
 
   return (
     <div className="space-y-6">

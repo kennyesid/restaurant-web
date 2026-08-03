@@ -166,6 +166,7 @@ export default function SalesPage() {
         Cargando historial...
       </div>
     );
+
   const togglePromo = (saleId: number, itemIdx: number) => {
     const key = `${saleId}-${itemIdx}`;
     setExpandedPromos((prev) => ({
@@ -173,6 +174,7 @@ export default function SalesPage() {
       [key]: !prev[key],
     }));
   };
+
   return (
     <div className="space-y-3">
       <PageHeader
@@ -423,9 +425,9 @@ export default function SalesPage() {
                         <span className="font-bold text-[#052A3D]">
                           #{sale.orderNumber}
                         </span>
-                        <span className="text-[10px] text-muted-foreground font-mono">
+                        {/* <span className="text-[10px] text-muted-foreground font-mono">
                           ID Venta: {sale.id}
-                        </span>
+                        </span> */}
                       </div>
                     </td>
                     <td className="px-6 py-2">
@@ -608,16 +610,6 @@ export default function SalesPage() {
                                                   <span className={`font-medium text-slate-800 ${isModificado ? "line-through text-slate-400" : ""}`}>
                                                     {item.name}
                                                   </span>
-                                                  {item.isPromocion && (
-                                                    <span className="text-[10px] px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-md font-medium uppercase tracking-wider">
-                                                      Promoción
-                                                    </span>
-                                                  )}
-                                                  {!item.isCountable && (
-                                                    <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 border border-slate-200 rounded font-medium">
-                                                      Modificador
-                                                    </span>
-                                                  )}
                                                 </div>
                                                 {item.productFittings && item.productFittings.length > 0 && (
                                                   <p className="text-xs text-slate-400">
@@ -656,6 +648,11 @@ export default function SalesPage() {
                                                                 {selectedSubProducts.map((p: any) => (
                                                                   <div key={p.id} className="flex items-center gap-2 text-[11px] text-slate-600">
                                                                     <span>• {p.name}</span>
+                                                                    {detail?.orderTypeSend && (
+                                                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-orange-100 text-orange-700 border border-orange-200 leading-none">
+                                                                        {detail.orderTypeSend}
+                                                                      </span>
+                                                                    )}
                                                                   </div>
                                                                 ))}
                                                               </div>
