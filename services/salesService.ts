@@ -1129,19 +1129,29 @@ export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>>
     const groupId = configService.getGroupId();
     const fitingMasterList = await ProductFittingsService.getAll();
 
+    // const { data: sales, error } = await supabase
+    //   .from("sales")
+    //   .select(`
+    //     *,
+    //     detail:sales_details(
+    //       *,
+    //       subDetails:sales_details_details(*)
+    //     )
+    //   `)
+    //   .eq("groupId", groupId)
+    //   .eq("state", true)
+    //   .eq("orderStatus", 2)
+    //   .order("createdAt", { ascending: true });
     const { data: sales, error } = await supabase
       .from("sales")
       .select(`
-        *,
-        detail:sales_details(
-          *,
-          subDetails:sales_details_details(*)
-        )
-      `)
+    *,
+    detail:sales_details(*)
+  `)
       .eq("groupId", groupId)
       .eq("state", true)
       .eq("orderStatus", 2)
-      .order("createdAt", { ascending: true }); // Las más antiguas primero para que salgan en orden de llegada
+      .order("createdAt", { ascending: true });
 
     if (error) throw error;
 
