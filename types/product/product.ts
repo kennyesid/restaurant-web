@@ -12,7 +12,7 @@ export interface Product {
   code?: string;
   legend: string;
   price: number;
-  isPromotion: boolean;
+  // isPromotion: boolean;
   imageUrl: string; // base64 or image URL
   isFeatured: boolean;
   displayOrder?: number;

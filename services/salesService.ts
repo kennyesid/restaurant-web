@@ -267,8 +267,8 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         price: combo.price,
         imageUrl: "",
         categoryId: 6,
-        isPromotion: false,
-        isCountable: false,
+        // isPromotion: false,
+        // isCountable: false,
         productDetailProduct: [],
         productId: combo.productId,
         quantity: combo.quantity,
@@ -306,8 +306,8 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
           modifiedSubtotal: detail.modifiedSubtotal,
           reasonModification: detail.reasonModification,
           orderTypeSend: detail.orderTypeSend,
-          isPromotion: false,
-          isCountable: true,
+          // isPromotion: false,
+          // isCountable: true,
           imageUrl: "",
           completed: true,
           createdAt: detail.createdAt,
@@ -331,7 +331,7 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         description: detail.description,
         legend: detail.legend,
         price: detail.price,
-        isPromotion: detail.isPromotion,
+        // isPromotion: detail.isPromotion,
         imageUrl: detail.imageUrl,
         isFeatured: detail.isFeatured,
         isAvailable: true,
@@ -402,8 +402,8 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
             modified: item.modified,
             modifiedSubtotal: item.modifiedSubtotal,
             reasonModification: item.reasonModification,
-            isPromotion: item.isPromotion,
-            isCountable: item.isCountable,
+            // isPromotion: item.isPromotion,
+            // isCountable: item.isCountable,
             // selected: item.selected ?? false,
             productFittings: [],
             // productFittings: updatedProductFittings,
@@ -559,8 +559,8 @@ export async function createSale(
     const finalDetail: any[] = [];
 
     // 2. Filtrar SOLO los items con isCountable: true
-    const countableItems = detail.filter(item => item.isCountable === true);
-
+    // const countableItems = detail.filter(item => item.isCountable === true);
+    const countableItems = detail;
     if (countableItems && countableItems.length > 0) {
       for (const item of countableItems) {
         // 3. Procesar item principal (sales_details)
@@ -722,8 +722,8 @@ export async function createSaleCombo(
                   modified: plate.modified,
                   modifiedSubtotal: plate.modifiedSubtotal,
                   reasonModification: plate.reasonModification,
-                  isPromotion: product.isPromotion,
-                  isCountable: true,
+                  // isPromotion: product.isPromotion,
+                  // isCountable: true,
                   imageUrl: product.imageUrl,
                   productFittings: [],
                   selected: product.selected
@@ -775,6 +775,9 @@ export async function createSaleCombo(
         subTotal,
         ...cartItemData
       } = item;
+
+      // delete (cartItemData as any).isCountable;
+      // delete (cartItemData as any).isPromotion;
 
       // const fittingIds = Array.isArray(productFittings)
       //   ? productFittings

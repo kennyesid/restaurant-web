@@ -14,8 +14,8 @@ export interface CartItemDataBase {
   modifiedSubtotal?: number;
   reasonModification?: string;
   orderTypeSend?: string;
-  isPromotion?: boolean;
-  isCountable?: boolean | false;
+  // isPromotion?: boolean;
+  // isCountable?: boolean | false;
   cartItemDetail?: CartItemDetail[];
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];

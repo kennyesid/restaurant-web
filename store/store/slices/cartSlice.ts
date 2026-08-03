@@ -22,15 +22,12 @@ const cartSlice = createSlice({
         existingItem.quantity += newQuantity;
         existingItem.subTotal = existingItem.price * existingItem.quantity;
       } else {
-        // state.items.push(action.payload);
         state.items.push({
           id: product.id,
           name: product.name,
           price: product.price,
           imageUrl: product.imageUrl,
           categoryId: product.categoryId,
-          isPromotion: product.isPromotion,
-          isCountable: product.isCountable,
           productDetailProduct: product.productDetailProduct,
           productId: product.id,
           quantity: 1,
@@ -76,20 +73,20 @@ const cartSlice = createSlice({
 
 
     updateCartItemDetail: (
-    state,
-    action: PayloadAction<{
-        id:number;
+      state,
+      action: PayloadAction<{
+        id: number;
         cartItemDetail: CartItemDetail[];
-    }>
-    )=>{
+      }>
+    ) => {
       //  console.log("ACTION:", action.payload)
-        const item = state.items.find(
-            x=>x.id===action.payload.id
-        );
-// console.log("ITEM ENCONTRADO:", item);
-        if(item){
-            item.cartItemDetail = action.payload.cartItemDetail;
-        }
+      const item = state.items.find(
+        x => x.id === action.payload.id
+      );
+      // console.log("ITEM ENCONTRADO:", item);
+      if (item) {
+        item.cartItemDetail = action.payload.cartItemDetail;
+      }
     },
 
 

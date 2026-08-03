@@ -23,8 +23,8 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
         categoryId: product.categoryId,
         productId: product.id,
         quantity: 1,
-        isPromotion: product.isPromotion,
-        isCountable: false,
+        // isPromotion: product.isPromotion,
+        // isCountable: false,
         productDetailProduct: product.productDetailProduct,
         // productDetailProduct: product.productDetailProduct?.map(sub => ({
         //   ...sub,

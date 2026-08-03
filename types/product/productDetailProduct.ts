@@ -15,7 +15,7 @@ export interface ProductDetailProduct {
   code?: string;
   legend: string;
   price: number;
-  isPromotion: boolean;
+  // isPromotion: boolean;
   imageUrl: string;
   isFeatured: boolean;
   displayOrder?: number;
@@ -29,7 +29,7 @@ export interface ProductDetailProduct {
 
 
 // productIngredientDetail?: ProductIngredientDetail[];
-  // productDetailProduct?: ProductDetailProduct[];
+// productDetailProduct?: ProductDetailProduct[];
 
 
 // export interface ProductDetailProduct {

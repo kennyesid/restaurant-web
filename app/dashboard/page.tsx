@@ -363,17 +363,6 @@ export default function DashboardRecap() {
       });
     });
 
-    ///  PRUEBA BORRAR
-    // filteredSales.forEach((sale) => {
-    //   console.log(
-    //     "VENTA",
-    //     sale.createdAt,
-    //     sale.total
-    //   );
-    // });
-
-
-
     // Convertir a array para Recharts
     return Array.from(catMap.entries()).map(([category, values]) => ({
       category,
@@ -456,89 +445,88 @@ export default function DashboardRecap() {
 
   return (
     <div className="space-y-4 md:pt-0">
-      <div className="flex flex-col gap-4">
 
-        <PageHeader
-          title="REPORTE"
-          subtitle="Gestion de Reporte"
-        />
+      <PageHeader
+        title="REPORTE"
+        subtitle="Gestion de Reporte"
+      />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
-              >
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
-                <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
-                <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
-                <span className="truncate">Inicio: {safeFormat(dateRange.from, "dd/MM/yyyy", { locale: es })}</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={dateRange.from} onSelect={handleFromSelect} numberOfMonths={1} defaultMonth={dateRange.from} disabled={(date) => date > (dateRange.to || new Date())} />
-            </PopoverContent>
-          </Popover>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
-              >
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
-                <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
-                <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
-                <span className="truncate">Fin: {safeFormat(dateRange.to, "dd/MM/yyyy", { locale: es })}</span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={dateRange.to} onSelect={handleToSelect} numberOfMonths={1} defaultMonth={dateRange.to} disabled={(date) => date < (dateRange.from || subDays(new Date(), 30))} />
-            </PopoverContent>
-          </Popover>
-          <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
+            >
               <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
               <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
-              <SelectValue placeholder="Todos los usuarios" className="text-white" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los usuarios</SelectItem>
-              {users.map((user) => (
-                <SelectItem key={user.id} value={user.id.toString()}>{user.fullName}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+              <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
+              <span className="truncate">Inicio: {safeFormat(dateRange.from, "dd/MM/yyyy", { locale: es })}</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateRange.from} onSelect={handleFromSelect} numberOfMonths={1} defaultMonth={dateRange.from} disabled={(date) => date > (dateRange.to || new Date())} />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full justify-start text-left font-normal shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden"
+            >
               <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
               <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
-              <SelectValue placeholder="Todas las categorías" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas las categorías</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={String(selectedProduct)} onValueChange={(val) => setSelectedProduct(Number(val))}>
-            <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
-              <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
-              <SelectValue placeholder="Todos los productos" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0">Todos los productos</SelectItem>
-              {products.map((product) => (
-                <SelectItem key={product.id} value={String(product.id)}>
-                  {product.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+              <CalendarIcon className="h-4 w-4 mr-2 flex-shrink-0 text-[#facc15]" />
+              <span className="truncate">Fin: {safeFormat(dateRange.to, "dd/MM/yyyy", { locale: es })}</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateRange.to} onSelect={handleToSelect} numberOfMonths={1} defaultMonth={dateRange.to} disabled={(date) => date < (dateRange.from || subDays(new Date(), 30))} />
+          </PopoverContent>
+        </Popover>
+        <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+          <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+            <SelectValue placeholder="Todos los usuarios" className="text-white" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los usuarios</SelectItem>
+            {users.map((user) => (
+              <SelectItem key={user.id} value={user.id.toString()}>{user.fullName}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+          <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todas las categorías</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={String(selectedProduct)} onValueChange={(val) => setSelectedProduct(Number(val))}>
+          <SelectTrigger className="w-full shadow-lg bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D] text-white hover:from-[#0b3f5c] hover:to-[#052A3D] border-0 relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-20 h-20 bg-white/5 rounded-full blur-2xl"></div>
+            <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-2xl"></div>
+            <SelectValue placeholder="Todos los productos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="0">Todos los productos</SelectItem>
+            {products.map((product) => (
+              <SelectItem key={product.id} value={String(product.id)}>
+                {product.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
           <Card className=" h-full border-0 shadow-none bg-transparent">

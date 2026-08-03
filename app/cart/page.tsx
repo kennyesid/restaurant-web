@@ -67,13 +67,6 @@ export default function CartPage() {
     );
   }
 
-  const handleDebuugTest = () => {
-    let vg = "";
-    console.log("prueba del handleDebuugTest");
-    alert('asdasd');
-    const hhgg = "sadsad";
-  }
-
   return (
     <div className="space-y-3">
       <PageHeader

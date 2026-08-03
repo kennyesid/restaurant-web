@@ -145,10 +145,9 @@ export default function SalesPage() {
   );
 
   const uniquePaymentTypes = ["cash", "qr", "mixed"];
-
-  const qrSales = sales.filter((s) => s.paymentType === "qr");
-  const cashSales = sales.filter((s) => s.paymentType === "cash");
-  const mixedSales = sales.filter((s) => s.paymentType === "mixed");
+  const qrSales = filteredSales.filter((s) => s.paymentType === "qr");
+  const cashSales = filteredSales.filter((s) => s.paymentType === "cash");
+  const mixedSales = filteredSales.filter((s) => s.paymentType === "mixed");
 
   const totalSales = filteredSales.reduce((acc, sale) => acc + sale.total, 0);
 
@@ -214,55 +213,50 @@ export default function SalesPage() {
                   <table className="w-full text-center">
                     <tbody>
                       {/* Fila Efectivo */}
+                      {/* Fila Efectivo */}
                       <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="py-1.5 px-2">
-                          <div className="flex items-start justify-start gap-1.5">
+                        <td className="py-1.5 px-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-400 shadow-lg shadow-green-400/50"></div>
                             <span className="text-xs font-medium">Efectivo</span>
                           </div>
-                        </td>
-                        <td className="py-1.5 px-2">
-                          <span className="bg-green-400/20 text-green-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-green-400/30 inline-block min-w-[28px]">
+                          <span className="bg-green-400/20 text-green-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-green-400/30 inline-block">
                             {cashSales.length}
                           </span>
                         </td>
-                        <td className="py-1.5 px-2 text-xs font-bold text-green-300 whitespace-nowrap">
+                        <td className="py-1.5 px-2 text-xs font-bold text-green-300 whitespace-nowrap text-right">
                           Bs {cashSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
                         </td>
                       </tr>
 
                       {/* Fila QR */}
                       <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="py-1.5 px-2">
-                          <div className="flex items-start justify-start gap-1.5">
+                        <td className="py-1.5 px-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-lg shadow-blue-400/50"></div>
                             <span className="text-xs font-medium">QR</span>
                           </div>
-                        </td>
-                        <td className="py-1.5 px-2">
-                          <span className="bg-blue-400/20 text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-blue-400/30 inline-block min-w-[28px]">
+                          <span className="bg-blue-400/20 text-blue-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-blue-400/30 inline-block">
                             {qrSales.length}
                           </span>
                         </td>
-                        <td className="py-1.5 px-2 text-xs font-bold text-blue-300 whitespace-nowrap">
+                        <td className="py-1.5 px-2 text-xs font-bold text-blue-300 whitespace-nowrap text-right">
                           Bs {qrSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
                         </td>
                       </tr>
 
                       {/* Fila Mixto */}
                       <tr className="hover:bg-white/5 transition-colors">
-                        <td className="py-1.5 px-2">
-                          <div className="flex items-start justify-start gap-1.5">
+                        <td className="py-1.5 px-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
                             <div className="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-lg shadow-purple-400/50"></div>
                             <span className="text-xs font-medium">Mixto</span>
                           </div>
-                        </td>
-                        <td className="py-1.5 px-2">
-                          <span className="bg-purple-400/20 text-purple-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-purple-400/30 inline-block min-w-[28px]">
+                          <span className="bg-purple-400/20 text-purple-300 font-bold text-xs px-2.5 py-0.5 rounded-full border border-purple-400/30 inline-block">
                             {mixedSales.length}
                           </span>
                         </td>
-                        <td className="py-1.5 px-2 text-xs font-bold text-purple-300 whitespace-nowrap">
+                        <td className="py-1.5 px-2 text-xs font-bold text-purple-300 whitespace-nowrap text-right">
                           Bs {mixedSales.reduce((acc, sale) => acc + sale.total, 0).toLocaleString()}
                         </td>
                       </tr>

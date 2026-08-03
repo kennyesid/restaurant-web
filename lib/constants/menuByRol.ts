@@ -9,6 +9,8 @@ import {
   Tag,
   Users,
   ShoppingCart,
+  ChefHat,
+  File,
 } from "lucide-react";
 
 export type MenuItem = {
@@ -29,8 +31,9 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
       { label: "Carrito de Compras", icon: ShoppingCart, href: "/cart" },
       { label: "Ventas", icon: Beef, href: "/sales" },
       { label: "Productos", icon: Package, href: "/product" },
-      // { label: "Reportes", icon: Package, href: "/report" },
-      // { label: "Cocina", icon: Package, href: "/kitchen" },
+      { label: "Reportes", icon: File, href: "/report" },
+      { label: "Cocina", icon: ChefHat, href: "/kitchen" },
+      // lucide lucide-chef-hat
     ],
     second: [
       { label: "Ingredientes", icon: Package, href: "/ingredient" },
@@ -49,8 +52,11 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
     ],
     second: [],
   },
-  CHEFT: {
-    first: [{ label: "Ventas", icon: Beef, href: "/sales" }],
+  CHEF: {
+    first: [
+      { label: "Cocina", icon: ChefHat, href: "/kitchen" },
+    ],
+
     second: [],
   },
   VISITOR: {

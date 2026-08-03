@@ -13,8 +13,8 @@ export interface SalesDetailsDetails {
   subTotal?: number;
   modifiedSubtotal?: number;
   reasonModification?: string;
-  isPromotion?: boolean;
-  isCountable?: boolean | false;
+  // isPromotion?: boolean;
+  // isCountable?: boolean | false;
   productFittings?: ProductFittings[];
   productDetailProduct?: ProductDetailProduct[];
   imageUrl?: string;

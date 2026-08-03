@@ -105,7 +105,8 @@ export function ShoppingCart() {
         const productFittings = await ProductFittingsService.getAll();
         setProductFittings(productFittings);
         const data = await getProducts();
-        const onlySingleProducts = data.filter((p) => !p.isPromotion);
+        // const onlySingleProducts = data.filter((p) => !p.isPromotion);
+        const onlySingleProducts = data;
         setProductsList(onlySingleProducts);
         const timeoutValue = configService.getParameterValue('PERMISION_SHIPPING_CART');
         setAdminPermision(timeoutValue === '1');
@@ -207,8 +208,8 @@ export function ShoppingCart() {
                 modifiedSubtotal: 0,
                 reasonModification: "",
                 orderTypeSend: "",
-                isPromotion: false,
-                isCountable: true,
+                // isPromotion: false,
+                // isCountable: true,
                 productFittings: [],
                 productDetailProduct: defaultSelectedProducts, // Asignar la lista auto-seleccionada
                 imageUrl: "",
@@ -283,10 +284,11 @@ export function ShoppingCart() {
             id: item.id,
             name: item.name,
             quantity: item.quantity,
-            price: item.isCountable ? item.price : 0,
+            // price: item.isCountable ? item.price : 0,
+            price: item.price,
             categoryId: item.categoryId,
             reasonModification: item.reasonModification || "",
-            isCountable: item.isCountable,
+            // isCountable: item.isCountable,
             productFittings: Array.isArray((item as any).productFittings)
               ? (item as any).productFittings.map((f: any) => f.name || f)
               : [],
@@ -481,8 +483,8 @@ export function ShoppingCart() {
             modifiedSubtotal: 0,
             reasonModification: "",
             orderTypeSend: "",
-            isPromotion: false,
-            isCountable: true,
+            // isPromotion: false,
+            // isCountable: true,
             productFittings: [],
             productDetailProduct: selectedProducts, // Todos los productos disponibles
             imageUrl: "",
@@ -511,8 +513,8 @@ export function ShoppingCart() {
           modifiedSubtotal: 0,
           reasonModification: "",
           orderTypeSend: "",
-          isPromotion: false,
-          isCountable: true,
+          // isPromotion: false,
+          // isCountable: true,
           productFittings: [],
           productDetailProduct: selectedProducts, // Todos los productos disponibles
           imageUrl: "",
@@ -600,7 +602,7 @@ export function ShoppingCart() {
                   <div className="flex items-center gap-2 min-w-0">
                     <div
                       onClick={() => handlePromoSelected(item)}
-                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item.isPromotion
+                      className={`relative h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0 border transition-all ${item
                         ? "border-rest-yellow ring-2 ring-rest-yellow/20 cursor-pointer hover:opacity-80 scale-105 z-10"
                         : "border-border"
                         }`}
@@ -613,11 +615,11 @@ export function ShoppingCart() {
                         priority
                         className="object-cover"
                       />
-                      {item.isPromotion && (
+                      {/* {item.isPromotion && (
                         <span className="absolute bottom-0 right-0 bg-rest-yellow text-[8px] text-rest-primary font-black px-1 rounded-tl-sm uppercase tracking-tighter">
                           OPCION
                         </span>
-                      )}
+                      )} */}
                     </div>
 
                     <div className="min-w-0">

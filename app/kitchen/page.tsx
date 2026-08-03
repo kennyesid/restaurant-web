@@ -18,6 +18,7 @@ import {
   User,
   UtensilsCrossed
 } from "lucide-react";
+import PageHeader from "@/components/page/header/PageHeader";
 
 export default function KitchenPage() {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -233,67 +234,62 @@ export default function KitchenPage() {
     return "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/60";
   };
 
+
+
   return (
     <div className="space-y-6">
-      {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-card p-6 rounded-xl border border-border shadow-sm gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-primary/10 text-primary rounded-lg border border-primary/20">
-            <ChefHat className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Panel de Cocina</h1>
-            <p className="text-sm text-muted-foreground">Monitoreo y despacho de pedidos en tiempo real</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          {/* Connection Status Badge */}
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${realtimeStatus === "connected"
+      <PageHeader
+        title="Panel de Cocina"
+        subtitle="Monitoreo y despacho de pedidos en tiempo real"
+        action={
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            {/* Connection Status Badge */}
+            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${realtimeStatus === "connected"
               ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30"
               : realtimeStatus === "connecting"
                 ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30 animate-pulse"
                 : "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30"
-            }`}>
-            {realtimeStatus === "connected" ? (
-              <>
-                <Wifi className="h-3.5 w-3.5" />
-                <span>Tiempo Real</span>
-              </>
-            ) : realtimeStatus === "connecting" ? (
-              <>
-                <Wifi className="h-3.5 w-3.5 animate-spin" />
-                <span>Conectando...</span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-3.5 w-3.5" />
-                <span>Desconectado</span>
-              </>
-            )}
-          </div>
+              }`}>
+              {realtimeStatus === "connected" ? (
+                <>
+                  <Wifi className="h-3.5 w-3.5" />
+                  <span>Tiempo Real</span>
+                </>
+              ) : realtimeStatus === "connecting" ? (
+                <>
+                  <Wifi className="h-3.5 w-3.5 animate-spin" />
+                  <span>Conectando...</span>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3.5 w-3.5" />
+                  <span>Desconectado</span>
+                </>
+              )}
+            </div>
 
-          {/* Sound Toggle Button */}
-          <button
-            onClick={toggleMute}
-            className={`inline-flex items-center justify-center p-2 rounded-lg border transition shadow-sm cursor-pointer ${isMuted
+            {/* Sound Toggle Button */}
+            <button
+              onClick={toggleMute}
+              className={`inline-flex items-center justify-center p-2 rounded-lg border transition shadow-sm cursor-pointer ${isMuted
                 ? "bg-slate-50 border-border text-slate-500 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-700"
                 : "bg-primary/10 border-primary/20 text-primary hover:bg-primary/20"
-              }`}
-            title={isMuted ? "Activar Sonido" : "Silenciar"}
-          >
-            {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-          </button>
+                }`}
+              title={isMuted ? "Activar Sonido" : "Silenciar"}
+            >
+              {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+            </button>
 
-          {/* Pending Orders Count Badge */}
-          <div className="inline-flex items-center gap-2 bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm">
-            <span>Pendientes</span>
-            <span className="bg-primary text-primary-foreground dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded text-xs font-bold">
-              {sales.length}
-            </span>
+            {/* Pending Orders Count Badge */}
+            <div className="inline-flex items-center gap-2 bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm">
+              <span>Pendientes</span>
+              <span className="bg-primary text-primary-foreground dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded text-xs font-bold">
+                {sales.length}
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* ORDERS GRID AREA */}
       {loading ? (
@@ -332,8 +328,8 @@ export default function KitchenPage() {
                         #{sale.orderNumber}
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${isTable
-                          ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
-                          : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
+                        ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
+                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
                         }`}>
                         {sale.orderType || "SIN TIPO"}
                       </span>
@@ -392,26 +388,12 @@ export default function KitchenPage() {
                               <div key={subItem.id} className="text-xs text-slate-600 dark:text-slate-400">
                                 <div className="flex items-start gap-1 flex-wrap">
                                   <span className="font-bold text-[10px] text-slate-500 mt-0.5">
-                                    {subItem.quantity}x
+                                    {(subItem as any).quantity ?? 0}x
                                   </span>
                                   <span className="font-medium text-foreground dark:text-slate-200">
                                     {subItem.name}
                                   </span>
-                                  {subItem.reasonModification && (
-                                    <span className="inline-block bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 text-[9px] px-1 rounded border border-amber-100 dark:border-amber-900/30 uppercase font-bold">
-                                      {subItem.reasonModification}
-                                    </span>
-                                  )}
                                 </div>
-
-                                {/* Sub Fittings */}
-                                {subItem.productFittings && subItem.productFittings.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-0.5 pl-3 text-[10px] text-slate-500">
-                                    {subItem.productFittings.map((fit, idx) => (
-                                      <span key={idx}>+ {fit}</span>
-                                    ))}
-                                  </div>
-                                )}
                               </div>
                             ))}
                           </div>
