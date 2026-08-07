@@ -499,7 +499,7 @@ export function ShoppingCart() {
         (_, index) => ({
           id: index + 1,
           cartItemId: item.id,
-          name: `Plato ${index + 1}`,
+          name: productByProducts.length ? `Plato ${index + 1}` : item.name,
           price: 0,
           categoryId: item.categoryId,
           productId: item.productId,
@@ -816,7 +816,7 @@ export function ShoppingCart() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
 
             {/* ========================================== */}
-            {/* SECCIÓN DERECHA: TABLA DE RESUMEN DE PROMOS*/}
+            {/* SECCIÓN IZQUIERDA: TABLA DE RESUMEN DE PROMOS*/}
             {/* ========================================== */}
             <div className="lg:col-span-5 w-full">
               {promoRows.length > 0 && (
@@ -832,11 +832,9 @@ export function ShoppingCart() {
             </div>
 
             {/* ========================================== */}
-            {/* SECCIÓN IZQUIERDA: FORMULARIO Y SELECCIÓN  */}
+            {/* SECCIÓN DERECHA: FORMULARIO Y SELECCIÓN  */}
             {/* ========================================== */}
             <div className="lg:col-span-7 flex flex-col gap-4">
-
-              {/* 1. Modificación de Precio / Permiso Admin */}
               {adminPermision && (
                 <div className="bg-yellow-50/60 p-4 rounded-xl border border-yellow-200 grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="flex flex-col gap-1 md:col-span-1">
@@ -887,209 +885,179 @@ export function ShoppingCart() {
                   </div>
                 </div>
               )}
-
-              {/* 2. Configuración de Platos y Productos */}
               {promoRows.length > 0 && (
                 <div className="p-4 bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
-                  <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center">
-                    Seleccione un Plato
-                  </p>
+                  {/* Grid principal de 12 columnas */}
+                  <div className="grid grid-cols-12 gap-4 items-start">
 
-                  {/* Slots de platos */}
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {promoRows.map((plate, index) => {
-                      const isSelected = selectedDishIndex?.id === plate.id;
-                      return (
-                        <div
-                          key={plate.id}
-                          onClick={() => handleDishClick(plate)}
-                          className={`relative w-14 h-14 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition ${isSelected
-                            ? "border-2 border-green-500 ring-2 ring-green-300"
-                            : "bg-gray-300 border-2 border-transparent"
-                            }`}
-                        >
-                          <Image
-                            src="/images/others/select-dish.avif"
-                            alt={`Plato ${index + 1}`}
-                            fill
-                            className={`w-full h-full object-cover transition ${isSelected || plate.completed
-                              ? "opacity-100 saturate-100"
-                              : "opacity-40 grayscale"
-                              }`}
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                              {plate.id}
-                            </span>
-                          </div>
+                    {/* SECCIÓN IZQUIERDA (6 de 12): Comentario + Botones */}
+                    <div className="col-span-12 md:col-span-6 flex flex-col gap-3">
+                      {/* Comentario */}
+                      <div className="flex flex-col gap-1 w-full">
+                        <label className="text-xs text-slate-500 font-medium">
+                          Comentario:
+                        </label>
+                        <input
+                          type="text"
+                          value={formReason}
+                          onChange={(e) => setFormReason(e.target.value)}
+                          placeholder="Ej: Sin cebolla, término medio..."
+                          className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700 h-[38px]"
+                        />
+                      </div>
 
-                          {plate.completed && (
-                            <div className="absolute top-0.5 right-0.5 bg-green-500 text-white rounded-full p-0.5 shadow-md">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-3 w-3"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                      {/* Botones orderTypeSendList */}
+                      <div className="flex gap-2 w-full">
+                        {orderTypeSendList.map((type) => {
+                          const valueToSelect = type.code || type.name;
+                          const isSelected = selectedOrderTypeSend === valueToSelect;
 
-                  {/* Tipo de envío / orden */}
-                  <div className="grid grid-cols-12 gap-3 items-end">
-                    <div className="col-span-12 sm:col-span-6 flex flex-col gap-1">
-                      <label className="text-xs text-slate-500 font-medium">
-                        Comentario:
-                      </label>
-                      <input
-                        type="text"
-                        value={formReason}
-                        onChange={(e) => setFormReason(e.target.value)}
-                        placeholder="Ej: Sin cebolla, término medio..."
-                        className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700 h-[38px]"
-                      />
-                    </div>
-                    <div className="col-span-12 sm:col-span-6 flex gap-2">
-                      {orderTypeSendList.map((type) => {
-                        const valueToSelect = type.code || type.name;
-                        const isSelected = selectedOrderTypeSend === valueToSelect;
-
-                        return (
-                          <button
-                            key={type.id}
-                            type="button"
-                            onClick={() => handleSelect(valueToSelect)}
-                            aria-pressed={isSelected}
-                            className={`w-1/2 px-3 py-2 text-xs md:text-sm font-medium rounded-lg border-2 transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#052a3d]/30 text-center ${isSelected
-                              ? "bg-[#052a3d] border-[#052a3d] text-white shadow-sm"
-                              : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
-                              }`}
-                          >
-                            {type.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  {/* <div>
-                    <div className="flex flex-wrap gap-2">
-                      {orderTypeSendList.map((type) => {
-                        const valueToSelect = type.code || type.name;
-                        const isSelected = selectedOrderTypeSend === valueToSelect;
-
-                        return (
-                          <button
-                            key={type.id}
-                            type="button"
-                            onClick={() => handleSelect(valueToSelect)}
-                            aria-pressed={isSelected}
-                            className={`flex-1 min-w-[80px] px-3 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#052a3d]/30 ${isSelected
-                              ? "bg-[#052a3d] border-[#052a3d] text-white shadow-sm"
-                              : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
-                              }`}
-                          >
-                            {type.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-slate-500 font-medium">
-                      Comentario:
-                    </label>
-                    <input
-                      type="text"
-                      value={formReason}
-                      onChange={(e) => setFormReason(e.target.value)}
-                      placeholder="Ej: Sin cebolla, término medio, cambio de ingrediente..."
-                      className="w-full p-2 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-yellow-400 text-sm text-slate-700"
-                    />
-                  </div> */}
-
-                  {/* Opciones de Productos para el plato seleccionado */}
-                  {openDish && (
-                    <div className="flex flex-wrap justify-center gap-3 my-1">
-                      {selectedDishIndex?.productDetailProduct?.map((product) => (
-                        <button
-                          key={product.id}
-                          onClick={() => handleSelectProductForDish(product)}
-                          className={`group relative flex flex-col items-center p-0 rounded-xl transition-all border text-center w-25 h-25 ${product.selected
-                            ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
-                            : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
-                            }`}
-                        >
-                          <div
-                            className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${product.selected
-                              ? "border-green-500 ring-2 ring-green-300 shadow-lg"
-                              : "border-gray-200 opacity-60 hover:opacity-100"
-                              }`}
-                          >
-                            <Image
-                              src={
-                                product.imageUrl || "/images/others/select-dish.avif"
-                              }
-                              alt={product.name ?? ""}
-                              fill
-                              className={`object-cover transition ${product.selected
-                                ? "opacity-100 saturate-100"
-                                : "opacity-40 grayscale"
+                          return (
+                            <button
+                              key={type.id}
+                              type="button"
+                              onClick={() => handleSelect(valueToSelect)}
+                              aria-pressed={isSelected}
+                              className={`w-1/2 px-3 py-2 text-xs md:text-sm font-medium rounded-lg border-2 transition-all duration-200 select-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#052a3d]/30 text-center ${isSelected
+                                ? "bg-[#052a3d] border-[#052a3d] text-white shadow-sm"
+                                : "bg-white border-gray-200 text-gray-700 hover:border-[#052a3d] hover:bg-gray-50"
                                 }`}
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
-                              <span
-                                className={`block text-base font-medium text-center text-white line-clamp-2 ${product.selected ? "font-semibold" : ""
-                                  }`}
-                              >
-                                {product.name}
-                              </span>
-                            </div>
-                            {product.selected && (
-                              <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-3 w-3"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                        </button>
-                      ))}
+                            >
+                              {type.name}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  )}
 
-                  {/* Botón de Agregar */}
-                  <div className="flex justify-end pt-1">
-                    <ButtonGeneric
-                      variant="confirmYellow"
-                      onClick={handleAcceptPromo}
-                    >
-                      + Agregar a la Lista
-                    </ButtonGeneric>
+                    {/* SECCIÓN DERECHA (6 de 12): Selección de Plato */}
+                    <div className="col-span-12 md:col-span-6 flex flex-col gap-2 border-t md:border-t-0 md:border-l border-gray-100 pt-3 md:pt-0 md:pl-4">
+                      <p className="font-semibold text-base text-[#052A3D] tracking-wider text-center">
+                        Seleccione un Plato
+                      </p>
+
+                      <div className="flex flex-wrap justify-center gap-3">
+                        {promoRows.map((plate, index) => {
+                          const isSelected = selectedDishIndex?.id === plate.id;
+                          return (
+                            <div
+                              key={plate.id}
+                              onClick={() => handleDishClick(plate)}
+                              className={`relative w-14 h-14 rounded-lg overflow-hidden shadow-sm flex-shrink-0 cursor-pointer hover:opacity-80 transition ${isSelected
+                                ? "border-2 border-green-500 ring-2 ring-green-300"
+                                : "bg-gray-300 border-2 border-transparent"
+                                }`}
+                            >
+                              <Image
+                                src="/images/others/select-dish.avif"
+                                alt={`Plato ${index + 1}`}
+                                fill
+                                className={`w-full h-full object-cover transition ${isSelected || plate.completed
+                                  ? "opacity-100 saturate-100"
+                                  : "opacity-40 grayscale"
+                                  }`}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span className="text-white text-2xl md:text-3xl font-black drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                                  {plate.id}
+                                </span>
+                              </div>
+
+                              {plate.completed && (
+                                <div className="absolute top-0.5 right-0.5 bg-green-500 text-white rounded-full p-0.5 shadow-md">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* SECCIÓN OPEN DISH (Ocupa las 12 columnas debajo) */}
+                    {openDish && (
+                      <div className="col-span-12 flex flex-wrap justify-center gap-3 my-1 border-t border-gray-100 pt-3">
+                        {selectedDishIndex?.productDetailProduct?.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleSelectProductForDish(product)}
+                            className={`group relative flex flex-col items-center p-0 rounded-xl transition-all border text-center w-25 h-25 ${product.selected
+                              ? "bg-blue-50/50 border-blue-500 shadow-sm ring-1 ring-blue-500"
+                              : "bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                              }`}
+                          >
+                            <div
+                              className={`relative w-full aspect-square rounded-xl overflow-hidden border-2 transition-all ${product.selected
+                                ? "border-green-500 ring-2 ring-green-300 shadow-lg"
+                                : "border-gray-200 opacity-60 hover:opacity-100"
+                                }`}
+                            >
+                              <Image
+                                src={
+                                  product.imageUrl || "/images/others/select-dish.avif"
+                                }
+                                alt={product.name ?? ""}
+                                fill
+                                className={`object-cover transition ${product.selected
+                                  ? "opacity-100 saturate-100"
+                                  : "opacity-40 grayscale"
+                                  }`}
+                              />
+                              <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 via-black/40 to-transparent">
+                                <span
+                                  className={`block text-base font-medium text-center text-white line-clamp-2 ${product.selected ? "font-semibold" : ""
+                                    }`}
+                                >
+                                  {product.name}
+                                </span>
+                              </div>
+                              {product.selected && (
+                                <div className="absolute top-1.5 right-1.5 bg-green-500 text-white rounded-full p-1 shadow-md z-10">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* SECCIÓN BOTÓN FINAL (Ocupa las 12 columnas abajo a la derecha) */}
+                    <div className="col-span-12 flex justify-end pt-1">
+                      <ButtonGeneric
+                        variant="confirmYellow"
+                        onClick={handleAcceptPromo}
+                      >
+                        + Agregar a la Lista
+                      </ButtonGeneric>
+                    </div>
+
                   </div>
                 </div>
               )}
             </div>
-
-
-
           </div>
         </ResponsiveModal>
       )}

@@ -350,7 +350,8 @@ export function GenericModal({
                                 </button>
 
                                 <span className="font-medium">
-                                  🍽 Plato {index + 1}
+                                  {detail.name}
+                                  {/* 🍽 Plato {index + 1} */}
                                 </span>
 
                                 {detail.orderTypeSend && (
