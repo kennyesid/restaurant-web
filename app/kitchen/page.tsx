@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { getSalesInKitchen, updateSaleOrderStatus, getSaleWithDetailsById, getSalesInKitchenGrouped, getAllSalesWithDetailsComboChef } from "@/services/salesService";
-import { Sale, ToastType } from "@/types";
+import { getSalesInKitchen, updateSaleOrderStatus, getSaleWithDetailsById, getSalesInKitchenGrouped, getAllSalesWithDetailsComboChef, transformKitchenOrders, transformKitchenPreparation, getAllSalesWithDetailsComboChefById } from "@/services/salesService";
+import { KitchenPreparationGroup, Sale, ToastType } from "@/types";
 import { supabase } from "@/lib/dataBase/supabaseClient";
 import { toast } from "sonner";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
@@ -19,6 +19,7 @@ import {
   UtensilsCrossed
 } from "lucide-react";
 import PageHeader from "@/components/page/header/PageHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
 
 export default function KitchenPage() {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -26,6 +27,7 @@ export default function KitchenPage() {
   const [updatingIds, setUpdatingIds] = useState<Record<number, boolean>>({});
   const [now, setNow] = useState(new Date());
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
+  const [preparation, setPreparation] = useState<KitchenPreparationGroup[]>([]);
 
   // Realtime connection status
   const [realtimeStatus, setRealtimeStatus] = useState<"connected" | "disconnected" | "connecting">("connecting");
@@ -94,19 +96,48 @@ export default function KitchenPage() {
   // Load active orders (with orderStatus = 2)
   const loadOrders = async () => {
     try {
-      setLoading(true);
-      const res = await getSalesInKitchen();
-      if (res.codigo === 200 && res.contenido) {
-        setSales(res.contenido);
-      } else {
-        toast.error(res.mensaje || "Error al cargar pedidos");
-      }
 
-      const resGrouped = await getSalesInKitchenGrouped();
+      setLoading(true);
+
+      const response = await getAllSalesWithDetailsComboChef();
+
+      setSales(response?.contenido ?? []);
+      // setLoading(true);
+
+      // const response = await getAllSalesWithDetailsComboChef();
+
+      // const sales = response.contenido ?? [];
+
+      // const orders = transformKitchenOrders(sales);
+
+      // const preparation = transformKitchenPreparation(sales);
+
+      // setSales(orders);
+      // setPreparation(preparation);
+
+
+      // const res = await getAllSalesWithDetailsComboChef();
+
+      // if (res.codigo === 200 && res.contenido) {
+      //   setSales(res.contenido);
+      // } else {
+      //   toast.error(res.mensaje || "Error al cargar pedidos");
+      // }
+
+      // const res = await getSalesInKitchen();
+      // if (res.codigo === 200 && res.contenido) {
+      //   setSales(res.contenido);
+      // } else {
+      //   toast.error(res.mensaje || "Error al cargar pedidos");
+      // }
+      // console.log("Salessssssssssssssssssssssssssssssssssss:", JSON.stringify(res));
+
+
+      // const resGrouped = await getSalesInKitchenGrouped();
       // console.log("Sales grouped:", JSON.stringify(resGrouped));
 
-      const getDetailsComboChef = await getAllSalesWithDetailsComboChef();
-      console.log("getDetailsComboChef:", JSON.stringify(getDetailsComboChef));
+      // const getDetailsComboChef = await getAllSalesWithDetailsComboChef();
+      // console.log("getDetailsComboChef:", JSON.stringify(getDetailsComboChef));
 
     } catch (error) {
       console.error("Error cargando pedidos:", error);
@@ -141,6 +172,8 @@ export default function KitchenPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const pendingReloads = useRef<Map<number, NodeJS.Timeout>>(new Map());
+
   // Realtime subscription setup
   useEffect(() => {
     let isMounted = true;
@@ -158,27 +191,32 @@ export default function KitchenPage() {
         },
         async (payload: any) => {
           if (!isMounted) return;
-          console.log("Realtime payload:", payload);
+          // console.log("Realtime payload:", payload);
           const { eventType, new: newRow, old: oldRow } = payload;
           const currentGroupId = configService.getGroupId();
-
           if ((eventType === "INSERT" || eventType === "UPDATE") && newRow.orderStatus === 2 && newRow.state === true) {
             // Check if matches active groupId
             if (newRow.groupId !== currentGroupId) return;
-
-            // Fetch details
-            const detailRes = await getSaleWithDetailsById(newRow.id);
-            if (detailRes.codigo === 200 && detailRes.contenido) {
-              const fullSale = detailRes.contenido;
-              setSales(prevSales => {
-                const exists = prevSales.some(s => s.id === fullSale.id);
-                if (exists) {
-                  return prevSales.map(s => s.id === fullSale.id ? fullSale : s);
-                } else {
-                  // New order! Play chime
+            const saleId = newRow.id;
+            // Si ya había una espera para esta venta la cancelamos
+            const existingTimeout = pendingReloads.current.get(saleId);
+            if (existingTimeout) {
+              clearTimeout(existingTimeout);
+            }
+            const timeout = setTimeout(async () => {
+              const detailRes = await getAllSalesWithDetailsComboChefById(saleId);
+              if (detailRes.codigo === 200 && detailRes.contenido) {
+                const fullSale = detailRes.contenido;
+                setSales(prevSales => {
+                  const exists = prevSales.some(s => s.id === fullSale.id);
+                  if (exists) {
+                    return prevSales.map(s =>
+                      s.id === fullSale.id
+                        ? fullSale
+                        : s
+                    );
+                  }
                   playNotificationSound();
-
-                  // Show custom toast alert
                   toast.custom((t) => (
                     <CustomNotification
                       t={t}
@@ -189,13 +227,13 @@ export default function KitchenPage() {
                       }}
                     />
                   ));
-
                   return [...prevSales, fullSale];
-                }
-              });
-            }
+                });
+              }
+              pendingReloads.current.delete(saleId);
+            }, 6000);
+            pendingReloads.current.set(saleId, timeout);
           }
-          // Remove order if status changed to something else (e.g. 3) or logically deleted
           else if (eventType === "UPDATE" || eventType === "DELETE") {
             const targetId = eventType === "DELETE" ? oldRow.id : newRow.id;
             if (eventType === "DELETE" || newRow.orderStatus !== 2 || newRow.state === false) {
@@ -225,9 +263,10 @@ export default function KitchenPage() {
     const diffMs = now.getTime() - new Date(createdAtStr).getTime();
     const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 1) return "Recién llegado";
-    if (diffMins < 60) return `Hace ${diffMins} min`;
+    if (diffMins < 60) return `${diffMins} min`;
     const diffHours = Math.floor(diffMins / 60);
-    return `Hace ${diffHours}h ${diffMins % 60}m`;
+    return `${diffHours}h ${diffMins % 60}m`;
+    // return `Hace ${diffHours}h ${diffMins % 60}m`;
   };
 
   const getElapsedBadgeClass = (createdAtStr: string | Date) => {
@@ -331,106 +370,281 @@ export default function KitchenPage() {
             return (
               <div
                 key={sale.id}
-                className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden hover:shadow-md transition duration-200"
+                className={`flex flex-col rounded-xl border shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${isTable
+                  ? "bg-[#052a3d] text-slate-100 border-[#031d2b]"
+                  : "bg-[#facc15] text-slate-900 border-yellow-500"
+                  }`}
               >
                 {/* CARD HEADER */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-800/30 border-b border-border space-y-3">
+                <div
+                  className={`p-4 border-b space-y-3 ${isTable
+                    ? "bg-[#031d2a]/60 border-slate-700/50"
+                    : "bg-yellow-400/50 border-yellow-600/30"
+                    }`}
+                >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-extrabold text-foreground tracking-tight">
+                      <span
+                        className={`text-xl font-black tracking-tight ${isTable ? "text-white" : "text-slate-950"
+                          }`}
+                      >
                         #{sale.orderNumber}
                       </span>
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold border ${isTable
-                        ? "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30"
-                        : "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30"
-                        }`}>
+                      <span className="font-bold">{sale.userCustomerName || ""}</span>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs ${isTable
+                          ? "bg-sky-500/20 text-sky-300 border-sky-400/30"
+                          : "bg-slate-950 text-yellow-400 border-slate-900"
+                          }`}
+                      >
                         {sale.orderType || "SIN TIPO"}
                       </span>
                     </div>
+
                     {/* Time Counter Badge */}
-                    <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border ${getElapsedBadgeClass(sale.createdAt)}`}>
+                    <div
+                      className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-xs ${isTable
+                        ? "bg-slate-900/80 text-sky-200 border-slate-700"
+                        : "bg-slate-900 text-white border-slate-950"
+                        }`}
+                    >
                       <Clock className="h-3.5 w-3.5" />
                       <span>{getElapsedTimeStr(sale.createdAt)}</span>
                     </div>
                   </div>
-
-                  <div className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                    <User className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="font-semibold">{sale.userName || "Cliente"}</span>
-                    {sale.userCustomerName && (
-                      <span className="text-xs text-muted-foreground">
-                        ({sale.userCustomerName})
-                      </span>
-                    )}
-                  </div>
                 </div>
 
-                {/* CARD BODY: ITEMS LIST */}
-                <div className="p-4 flex-1 space-y-3 divide-y divide-border/60 max-h-[350px] overflow-y-auto">
-                  {sale.detail?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-start gap-2.5 pt-3 first:pt-0"
+                {/* TABS CON DISEÑO Y VIDA */}
+                <Tabs defaultValue="preparacion" className="flex-1 flex flex-col">
+                  <div className="px-3 pt-3">
+                    <TabsList
+                      className={`grid w-full grid-cols-2 p-1 rounded-xl shadow-inner ${isTable
+                        ? "bg-slate-950/60 border border-slate-800"
+                        : "bg-yellow-500/40 border border-yellow-600/30"
+                        }`}
                     >
-                      <span className="inline-flex items-center justify-center font-bold text-xs bg-primary/10 text-primary border border-primary/20 rounded px-1.5 py-0.5 min-w-[24px] h-6 mt-0.5">
-                        {item.quantity}x
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground text-sm break-words">
-                          {item.name}
-                        </p>
+                      <TabsTrigger
+                        value="pedido"
+                        className={`rounded-lg py-1.5 text-xs font-extrabold transition-all duration-200 ${isTable
+                          ? "text-slate-400 data-[state=active]:bg-sky-500 data-[state=active]:text-white data-[state=active]:shadow-md"
+                          : "text-slate-800 data-[state=active]:bg-slate-950 data-[state=active]:text-yellow-400 data-[state=active]:shadow-md"
+                          }`}
+                      >Pedido
+                      </TabsTrigger>
 
-                        {/* Main Product Fittings */}
-                        {item.productFittings && item.productFittings.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item.productFittings.map((fit, idx) => (
+                      <TabsTrigger
+                        value="preparacion"
+                        className={`rounded-lg py-1.5 text-xs font-extrabold transition-all duration-200 ${isTable
+                          ? "text-slate-400 data-[state=active]:bg-sky-500 data-[state=active]:text-white data-[state=active]:shadow-md"
+                          : "text-slate-800 data-[state=active]:bg-slate-950 data-[state=active]:text-yellow-400 data-[state=active]:shadow-md"
+                          }`}
+                      >Preparación
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+
+                  {/* ================= PEDIDO ================= */}
+                  <TabsContent value="pedido" className="m-0 flex-1">
+                    <div
+                      className={`p-4 space-y-3 divide-y max-h-[350px] overflow-y-auto ${isTable ? "divide-slate-800/80" : "divide-yellow-600/30"
+                        }`}
+                    >
+                      {sale.detail?.map((item) => {
+                        const isCombo =
+                          item.cartItemDetail && item.cartItemDetail.length > 0;
+
+                        if (!isCombo) {
+                          return (
+                            <div
+                              key={item.id}
+                              className="flex items-start gap-2.5 pt-3 first:pt-0"
+                            >
                               <span
-                                key={idx}
-                                className="inline-block bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] px-1 rounded"
+                                className={`inline-flex items-center justify-center font-black text-xs rounded-md px-2 py-0.5 min-w-[26px] h-6 mt-0.5 shadow-sm ${isTable
+                                  ? "bg-sky-500 text-white"
+                                  : "bg-slate-950 text-yellow-400"
+                                  }`}
                               >
-                                {typeof fit === "string" ? fit : (fit as any)?.name}
+                                {item.quantity}x
                               </span>
-                            ))}
-                          </div>
-                        )}
 
-                        {/* Nested SubDetails (productDetailProduct) */}
-                        {item.productDetailProduct && item.productDetailProduct.length > 0 && (
-                          <div className="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-700 space-y-1.5">
-                            {item.productDetailProduct.map((subItem) => (
-                              <div key={subItem.id} className="text-xs text-slate-600 dark:text-slate-400">
-                                <div className="flex items-start gap-1 flex-wrap">
-                                  <span className="font-bold text-[10px] text-slate-500 mt-0.5">
-                                    {(subItem as any).quantity ?? 0}x
-                                  </span>
-                                  <span className="font-medium text-foreground dark:text-slate-200">
-                                    {subItem.name}
-                                  </span>
-                                </div>
+                              <div className="flex-1">
+                                <p className="font-bold text-sm tracking-tight">
+                                  {item.name}
+                                </p>
+
+                                {(item.productFittings?.length ?? 0) > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1.5">
+                                    {item.productFittings?.map((fit, idx) => (
+                                      <span
+                                        key={idx}
+                                        className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded border ${isTable
+                                          ? "bg-slate-900/80 text-sky-300 border-slate-700"
+                                          : "bg-yellow-300/80 text-slate-900 border-yellow-500/50"
+                                          }`}
+                                      >
+                                        {typeof fit === "string"
+                                          ? fit
+                                          : (fit as any).name}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                            </div>
+                          );
+                        }
 
-                {/* CARD FOOTER */}
-                <div className="p-4 bg-slate-50 dark:bg-slate-900/20 border-t border-border mt-auto">
+                        return (
+                          <div key={item.id} className="pt-3 first:pt-0">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`inline-flex items-center justify-center font-black text-xs rounded-md px-2 py-0.5 min-w-[26px] h-6 shadow-sm ${isTable
+                                  ? "bg-sky-500 text-white"
+                                  : "bg-slate-950 text-yellow-400"
+                                  }`}
+                              >
+                                {item.quantity}x
+                              </span>
+
+                              <span className="font-extrabold text-sm uppercase tracking-wide">
+                                {item.name}
+                              </span>
+                            </div>
+
+                            <div className="ml-7 mt-2 space-y-2.5">
+                              {item.cartItemDetail?.map((plate, index) => (
+                                <div
+                                  key={plate.id}
+                                  className={`border-l-2 pl-3 ${isTable ? "border-sky-500/60" : "border-slate-950/60"
+                                    }`}
+                                >
+                                  <div
+                                    className={`font-bold text-xs uppercase ${isTable ? "text-sky-300" : "text-slate-900"
+                                      }`}
+                                  >
+                                    {plate.name}
+                                    {/* Plato {index + 1} */}
+                                    {plate.reasonModification &&
+                                      ` (${plate.reasonModification})`}
+                                  </div>
+
+                                  <div className="mt-1 space-y-1">
+                                    {plate.productDetailProduct?.map((product) => (
+                                      <div
+                                        key={product.id}
+                                        className="flex gap-2 text-sm font-medium"
+                                      >
+                                        <span
+                                          className={
+                                            isTable ? "text-sky-400" : "text-slate-950"
+                                          }
+                                        >
+                                          •
+                                        </span>
+                                        <span>{product.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </TabsContent>
+
+                  {/* ================= PREPARACION ================= */}
+                  <TabsContent value="preparacion" className="m-0 flex-1">
+                    <div className="p-4 space-y-1 max-h-[350px] overflow-y-auto">
+                      {transformKitchenPreparation([sale]).map((group, index) => (
+                        <div
+                          key={index}
+                          className={`rounded-xl border p-3 shadow-xs ${isTable
+                            ? "bg-slate-900/60 border-slate-700/60 text-white"
+                            : "bg-yellow-400/40 border-yellow-600/40 text-slate-900"
+                            }`}
+                        >
+                          <div
+                            className={`font-black text-xs uppercase tracking-wider ${isTable ? "text-sky-400" : "text-slate-950"
+                              }`}
+                          >
+                            {group.orderTypeSend}
+                            {group.reasons.map((onlyreason) => (
+                              onlyreason.reasonModification && (
+                                <span
+                                  key={onlyreason.reasonModification ?? null}
+                                  className={`text-[11px] font-bold italic ${isTable ? "text-slate-400" : "text-slate-800"
+                                    }`}
+                                >
+                                  {` - ${onlyreason.reasonModification ?? null}`}
+                                </span>
+                              )))}
+                          </div>
+
+                          {group.reasons.map((reason) => (
+                            <div
+                              key={reason.reasonModification ?? null}
+                              className="mt-2"
+                            >
+                              {/* <div
+                                className={`text-[11px] font-bold italic ${isTable ? "text-slate-400" : "text-slate-800"
+                                  }`}
+                              >
+                                {reason.reasonModification ?? null}
+                              </div> */}
+
+                              <div className="mt-1.5 space-y-1">
+                                {reason.items.map((item) => (
+                                  <div
+                                    key={item.id}
+                                    className="flex gap-2 text-sm font-semibold"
+                                  >
+                                    <span
+                                      className={`font-black ${isTable ? "text-sky-400" : "text-slate-950"
+                                        }`}
+                                    >
+                                      {item.quantity}x
+                                    </span>
+                                    <span>{item.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+
+                {/* FOOTER */}
+                <div
+                  className={`p-4 border-t mt-auto ${isTable
+                    ? "bg-[#031d2a]/80 border-slate-800"
+                    : "bg-yellow-400/60 border-yellow-500"
+                    }`}
+                >
                   <button
                     onClick={() => handleAcceptOrder(sale.id, sale.orderNumber)}
                     disabled={updatingIds[sale.id]}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-150 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer"
+                    className={`w-full inline-flex items-center justify-center gap-2 font-black py-2.5 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer ${isTable
+                      ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
+                      : "bg-slate-950 hover:bg-slate-800 text-yellow-400"
+                      }`}
                   >
                     {updatingIds[sale.id] ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                        <div
+                          className={`animate-spin rounded-full h-4 w-4 border-2 border-t-transparent ${isTable ? "border-slate-950" : "border-yellow-400"
+                            }`}
+                        />
                         <span>Despachando...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="h-4 w-4" />
+                        <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
                         <span>Listo / Despachar</span>
                       </>
                     )}
