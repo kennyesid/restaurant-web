@@ -21,7 +21,7 @@ import {
 } from "@/services/salesService";
 import { toast } from "sonner";
 // SelectedProduct
-import { CartItem, CartItemDetail, OrderTypeSend, ProductDetailProduct, Sale } from "@/types";
+import { CartItem, CartItemDetail, OrderTypeSend, ProductDetailProduct, Sale, ShoppingCartProps } from "@/types";
 import { CustomNotification } from "@/components/common/toast/CustomNotification";
 import { ToastType } from "@/types";
 import { getImageUrl } from "@/utils/format";
@@ -590,34 +590,6 @@ export function ShoppingCart() {
         );
       },
     }
-    // {
-    //   header: "Obs",
-    //   accessor: (item) => (<span className="text-slate-600 font-medium text-xs break-words max-w-[150px] block"> {item.reasonModification || (<span className="text-slate-300 italic"> Ninguna </span>)} </span>),
-    // },
-    // {
-    //   header: "Envío",
-    //   accessor: (item: CartItemDetail) => {
-    //     // 1. Si no hay tipo de envío asignado, no renderizamos nada
-    //     if (!item.orderTypeSend) {
-    //       return null; // o <span className="text-gray-400">-</span> si prefieres mostrar un guion
-    //     }
-
-    //     const type = item.orderTypeSend;
-    //     const isParaLlevar = type.toUpperCase().includes("LLEVAR") || type.toUpperCase() === "PARA_LLEVAR";
-    //     const label = isParaLlevar ? "Para Llevar" : "En Mesa";
-
-    //     return (
-    //       <span
-    //         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${isParaLlevar
-    //           ? "bg-orange-100 text-orange-700 border border-orange-200"
-    //           : "bg-blue-100 text-blue-700 border border-blue-200"
-    //           }`}
-    //       >
-    //         {label}
-    //       </span>
-    //     );
-    //   },
-    // }
   ];
 
   const handleSelect = (typeCode: string) => {
@@ -748,7 +720,8 @@ export function ShoppingCart() {
             ))
           )}
         </div>
-        {items.length > 0 && (
+        {/* ROJO REVISAR QR */}
+        {/* {items.length > 0 && (
           <div className="border-t border-border p-4 space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2 text-rest-primary">
@@ -800,7 +773,7 @@ export function ShoppingCart() {
               </Button>
             )}
           </div>
-        )}
+        )} */}
       </Card>
 
       {isPromoModalOpen && selectedPromo && (

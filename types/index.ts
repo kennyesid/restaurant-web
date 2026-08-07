@@ -7,9 +7,9 @@ export type { Product } from "@/types/product/product";
 export type { SelectedProduct } from "@/types/product/selectedproduct";
 export type { ProductDetailProduct } from "@/types/product/productDetailProduct";
 export type { ProductIngredientDetail } from "@/types/product/productIngredientDetail";
-export type { KitchenPreparationItem } from "@/types/sale/KitchenPreparationItem";
-export type { KitchenReasonGroup } from "@/types/sale/KitchenPreparationItem";
-export type { KitchenPreparationGroup } from "@/types/sale/KitchenPreparationItem";
+export type { KitchenPreparationItem } from "@/types/sale/kitchenPreparationItem";
+export type { KitchenReasonGroup } from "@/types/sale/kitchenPreparationItem";
+export type { KitchenPreparationGroup } from "@/types/sale/kitchenPreparationItem";
 
 export type { Sale } from "@/types/sale/sale";
 export type { RespuestaGenericaDto } from "@/types/generic/respuestaGenericaDto";
@@ -25,6 +25,7 @@ export type { UnitMeasurement } from "@/types/ingredient/UnitMeasurement";
 export type { OrderTypeSend } from "@/types/parameter/orderTypeSend";
 export type { CartItemDetail } from "@/types/cart/cartItemDetail";
 export type { CartItemDetailMistake } from "@/types/cart/cartItemDetailMistake";
+export type { ShoppingCartProps } from "@/types/cart/shoppingCartProps";
 export { ToastType } from "@/types/enum/toasType";
 export { BolivianCashCuts } from "@/types/enum/bolivianCashCuts";
 

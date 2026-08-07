@@ -16,6 +16,7 @@ import {
   Sun,
   ChevronDown,
   ChevronRight,
+  Pencil,
 } from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
@@ -529,6 +530,13 @@ export default function SalesPage() {
                         >
                           <Trash2 size={18} />
                         </button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                        // onClick={() => handleEditSale(sale.id)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
