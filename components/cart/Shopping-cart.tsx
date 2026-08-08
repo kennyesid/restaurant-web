@@ -48,8 +48,6 @@ import { ProductFittingsService } from "@/services/productFittingsService";
 import { getProductsByMainId } from "@/services/productByProducts";
 import { getOrderTypes } from "@/services/parameter/orderTypeSendService";
 import { configService } from "@/services/configService";
-// import { CartItemDetailDetails } from "@/types/cart/cartItemDetailDetails";
-
 
 export function ShoppingCart() {
   const dispatch = useAppDispatch();
@@ -721,9 +719,9 @@ export function ShoppingCart() {
           )}
         </div>
         {/* ROJO REVISAR QR */}
-        {/* {items.length > 0 && (
+        {items.length > 0 && (
           <div className="border-t border-border p-4 space-y-4">
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-2 text-rest-primary">
                 Método de Pago
               </label>
@@ -745,7 +743,7 @@ export function ShoppingCart() {
                   </button>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             <div className="space-y-2 pt-2">
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
@@ -773,7 +771,7 @@ export function ShoppingCart() {
               </Button>
             )}
           </div>
-        )} */}
+        )}
       </Card>
 
       {isPromoModalOpen && selectedPromo && (
@@ -803,7 +801,6 @@ export function ShoppingCart() {
                 </div>
               )}
             </div>
-
             {/* ========================================== */}
             {/* SECCIÓN DERECHA: FORMULARIO Y SELECCIÓN  */}
             {/* ========================================== */}

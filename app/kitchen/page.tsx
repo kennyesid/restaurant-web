@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/page/header/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import ButtonGeneric from "@/components/common/button/ButtonGeneric";
 
 export default function KitchenPage() {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -96,49 +97,9 @@ export default function KitchenPage() {
   // Load active orders (with orderStatus = 2)
   const loadOrders = async () => {
     try {
-
       setLoading(true);
-
       const response = await getAllSalesWithDetailsComboChef();
-
       setSales(response?.contenido ?? []);
-      // setLoading(true);
-
-      // const response = await getAllSalesWithDetailsComboChef();
-
-      // const sales = response.contenido ?? [];
-
-      // const orders = transformKitchenOrders(sales);
-
-      // const preparation = transformKitchenPreparation(sales);
-
-      // setSales(orders);
-      // setPreparation(preparation);
-
-
-      // const res = await getAllSalesWithDetailsComboChef();
-
-      // if (res.codigo === 200 && res.contenido) {
-      //   setSales(res.contenido);
-      // } else {
-      //   toast.error(res.mensaje || "Error al cargar pedidos");
-      // }
-
-      // const res = await getSalesInKitchen();
-      // if (res.codigo === 200 && res.contenido) {
-      //   setSales(res.contenido);
-      // } else {
-      //   toast.error(res.mensaje || "Error al cargar pedidos");
-      // }
-      // console.log("Salessssssssssssssssssssssssssssssssssss:", JSON.stringify(res));
-
-
-      // const resGrouped = await getSalesInKitchenGrouped();
-      // console.log("Sales grouped:", JSON.stringify(resGrouped));
-
-      // const getDetailsComboChef = await getAllSalesWithDetailsComboChef();
-      // console.log("getDetailsComboChef:", JSON.stringify(getDetailsComboChef));
-
     } catch (error) {
       console.error("Error cargando pedidos:", error);
       toast.error("Ocurrió un error al cargar la cola de cocina");
@@ -147,7 +108,6 @@ export default function KitchenPage() {
     }
   };
 
-  // Accept/Complete order (transition status to 3 = LISTO)
   const handleAcceptOrder = async (saleId: number, orderNumber: number) => {
     try {
       setUpdatingIds(prev => ({ ...prev, [saleId]: true }));
@@ -166,7 +126,6 @@ export default function KitchenPage() {
     }
   };
 
-  // Clock tick to refresh "elapsed time" counter on cards every 30 seconds
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(timer);
@@ -174,7 +133,6 @@ export default function KitchenPage() {
 
   const pendingReloads = useRef<Map<number, NodeJS.Timeout>>(new Map());
 
-  // Realtime subscription setup
   useEffect(() => {
     let isMounted = true;
 
@@ -266,7 +224,6 @@ export default function KitchenPage() {
     if (diffMins < 60) return `${diffMins} min`;
     const diffHours = Math.floor(diffMins / 60);
     return `${diffHours}h ${diffMins % 60}m`;
-    // return `Hace ${diffHours}h ${diffMins % 60}m`;
   };
 
   const getElapsedBadgeClass = (createdAtStr: string | Date) => {
@@ -363,29 +320,29 @@ export default function KitchenPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {sales.map((sale) => {
             const isTable = sale.orderType?.toUpperCase() === "PARA MESA";
 
             return (
               <div
                 key={sale.id}
-                className={`flex flex-col rounded-xl border shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${isTable
+                className={`flex flex-col rounded-2xl border-2 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${isTable
                   ? "bg-[#052a3d] text-slate-100 border-[#031d2b]"
-                  : "bg-[#facc15] text-slate-900 border-yellow-500"
+                  : "bg-white text-slate-900 border-slate-200"
                   }`}
               >
                 {/* CARD HEADER */}
                 <div
                   className={`p-4 border-b space-y-3 ${isTable
                     ? "bg-[#031d2a]/60 border-slate-700/50"
-                    : "bg-yellow-400/50 border-yellow-600/30"
+                    : "bg-slate-50 border-slate-200"
                     }`}
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xl font-black tracking-tight ${isTable ? "text-white" : "text-slate-950"
+                        className={`text-3xl font-black tracking-tight ${isTable ? "text-white" : "text-slate-950"
                           }`}
                       >
                         #{sale.orderNumber}
@@ -394,7 +351,7 @@ export default function KitchenPage() {
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border shadow-xs ${isTable
                           ? "bg-sky-500/20 text-sky-300 border-sky-400/30"
-                          : "bg-slate-950 text-yellow-400 border-slate-900"
+                          : "bg-slate-900 text-white border-slate-900"
                           }`}
                       >
                         {sale.orderType || "SIN TIPO"}
@@ -418,25 +375,25 @@ export default function KitchenPage() {
                 <Tabs defaultValue="preparacion" className="flex-1 flex flex-col">
                   <div className="px-3 pt-3">
                     <TabsList
-                      className={`grid w-full grid-cols-2 p-1 rounded-xl shadow-inner ${isTable
+                      className={`grid w-full grid-cols-2 p-1.5 rounded-xl shadow-inner ${isTable
                         ? "bg-slate-950/60 border border-slate-800"
-                        : "bg-yellow-500/40 border border-yellow-600/30"
+                        : "bg-slate-100 border border-slate-200"
                         }`}
                     >
                       <TabsTrigger
                         value="pedido"
-                        className={`rounded-lg py-1.5 text-xs font-extrabold transition-all duration-200 ${isTable
+                        className={`rounded-lg py-2 text-sm font-extrabold transition-all duration-200 ${isTable
                           ? "text-slate-400 data-[state=active]:bg-sky-500 data-[state=active]:text-white data-[state=active]:shadow-md"
-                          : "text-slate-800 data-[state=active]:bg-slate-950 data-[state=active]:text-yellow-400 data-[state=active]:shadow-md"
+                          : "text-slate-700 data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-md"
                           }`}
                       >Pedido
                       </TabsTrigger>
 
                       <TabsTrigger
                         value="preparacion"
-                        className={`rounded-lg py-1.5 text-xs font-extrabold transition-all duration-200 ${isTable
+                        className={`rounded-lg py-2 text-sm font-extrabold transition-all duration-200 ${isTable
                           ? "text-slate-400 data-[state=active]:bg-sky-500 data-[state=active]:text-white data-[state=active]:shadow-md"
-                          : "text-slate-800 data-[state=active]:bg-slate-950 data-[state=active]:text-yellow-400 data-[state=active]:shadow-md"
+                          : "text-slate-700 data-[state=active]:bg-slate-900 data-[state=active]:text-white data-[state=active]:shadow-md"
                           }`}
                       >Preparación
                       </TabsTrigger>
@@ -446,7 +403,7 @@ export default function KitchenPage() {
                   {/* ================= PEDIDO ================= */}
                   <TabsContent value="pedido" className="m-0 flex-1">
                     <div
-                      className={`p-4 space-y-3 divide-y max-h-[350px] overflow-y-auto ${isTable ? "divide-slate-800/80" : "divide-yellow-600/30"
+                      className={`p-5 space-y-4 divide-y-2 max-h-[480px] overflow-y-auto ${isTable ? "divide-slate-800/80" : "divide-yellow-600/30"
                         }`}
                     >
                       {sale.detail?.map((item) => {
@@ -462,7 +419,7 @@ export default function KitchenPage() {
                               <span
                                 className={`inline-flex items-center justify-center font-black text-xs rounded-md px-2 py-0.5 min-w-[26px] h-6 mt-0.5 shadow-sm ${isTable
                                   ? "bg-sky-500 text-white"
-                                  : "bg-slate-950 text-yellow-400"
+                                  : "bg-slate-900 text-white"
                                   }`}
                               >
                                 {item.quantity}x
@@ -480,7 +437,7 @@ export default function KitchenPage() {
                                         key={idx}
                                         className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded border ${isTable
                                           ? "bg-slate-900/80 text-sky-300 border-slate-700"
-                                          : "bg-yellow-300/80 text-slate-900 border-yellow-500/50"
+                                          : "bg-slate-100 text-slate-800 border-slate-300"
                                           }`}
                                       >
                                         {typeof fit === "string"
@@ -499,7 +456,7 @@ export default function KitchenPage() {
                           <div key={item.id} className="pt-3 first:pt-0">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`inline-flex items-center justify-center font-black text-xs rounded-md px-2 py-0.5 min-w-[26px] h-6 shadow-sm ${isTable
+                                className={`inline-flex items-center justify-center font-black text-lg rounded-md px-2 py-0.5 min-w-[26px] h-6 shadow-sm ${isTable
                                   ? "bg-sky-500 text-white"
                                   : "bg-slate-950 text-yellow-400"
                                   }`}
@@ -507,7 +464,7 @@ export default function KitchenPage() {
                                 {item.quantity}x
                               </span>
 
-                              <span className="font-extrabold text-sm uppercase tracking-wide">
+                              <span className="font-extrabold text-lg uppercase tracking-wide">
                                 {item.name}
                               </span>
                             </div>
@@ -520,11 +477,10 @@ export default function KitchenPage() {
                                     }`}
                                 >
                                   <div
-                                    className={`font-bold text-xs uppercase ${isTable ? "text-sky-300" : "text-slate-900"
+                                    className={`font-bold text-lg uppercase ${isTable ? "text-sky-300" : "text-slate-900"
                                       }`}
                                   >
                                     {plate.name}
-                                    {/* Plato {index + 1} */}
                                     {plate.reasonModification &&
                                       ` (${plate.reasonModification})`}
                                   </div>
@@ -533,7 +489,7 @@ export default function KitchenPage() {
                                     {plate.productDetailProduct?.map((product) => (
                                       <div
                                         key={product.id}
-                                        className="flex gap-2 text-sm font-medium"
+                                        className="flex gap-2 text-lg font-medium"
                                       >
                                         <span
                                           className={
@@ -557,25 +513,25 @@ export default function KitchenPage() {
 
                   {/* ================= PREPARACION ================= */}
                   <TabsContent value="preparacion" className="m-0 flex-1">
-                    <div className="p-4 space-y-1 max-h-[350px] overflow-y-auto">
+                    <div className="p-5 space-y-2 max-h-[480px] overflow-y-auto">
                       {transformKitchenPreparation([sale]).map((group, index) => (
                         <div
                           key={index}
                           className={`rounded-xl border p-3 shadow-xs ${isTable
                             ? "bg-slate-900/60 border-slate-700/60 text-white"
-                            : "bg-yellow-400/40 border-yellow-600/40 text-slate-900"
+                            : "bg-slate-50 border-slate-200 text-slate-900"
                             }`}
                         >
                           <div
-                            className={`font-black text-xs uppercase tracking-wider ${isTable ? "text-sky-400" : "text-slate-950"
+                            className={`font-black text-lg uppercase tracking-wider ${isTable ? "text-sky-400" : "text-slate-950"
                               }`}
                           >
-                            {group.orderTypeSend}
+                            {group.orderTypeSend == "PARA_LLEVAR" ? "Para Llevar" : "Para Mesa"}
                             {group.reasons.map((onlyreason) => (
                               onlyreason.reasonModification && (
                                 <span
                                   key={onlyreason.reasonModification ?? null}
-                                  className={`text-[11px] font-bold italic ${isTable ? "text-slate-400" : "text-slate-800"
+                                  className={`text-lg font-bold italic ${isTable ? "text-slate-400" : "text-slate-800"
                                     }`}
                                 >
                                   {` - ${onlyreason.reasonModification ?? null}`}
@@ -588,18 +544,11 @@ export default function KitchenPage() {
                               key={reason.reasonModification ?? null}
                               className="mt-2"
                             >
-                              {/* <div
-                                className={`text-[11px] font-bold italic ${isTable ? "text-slate-400" : "text-slate-800"
-                                  }`}
-                              >
-                                {reason.reasonModification ?? null}
-                              </div> */}
-
                               <div className="mt-1.5 space-y-1">
                                 {reason.items.map((item) => (
                                   <div
                                     key={item.id}
-                                    className="flex gap-2 text-sm font-semibold"
+                                    className="flex gap-2 text-lg font-semibold"
                                   >
                                     <span
                                       className={`font-black ${isTable ? "text-sky-400" : "text-slate-950"
@@ -623,13 +572,13 @@ export default function KitchenPage() {
                 <div
                   className={`p-4 border-t mt-auto ${isTable
                     ? "bg-[#031d2a]/80 border-slate-800"
-                    : "bg-yellow-400/60 border-yellow-500"
+                    : "bg-slate-50 border-slate-200"
                     }`}
                 >
-                  <button
+                  {/* <button
                     onClick={() => handleAcceptOrder(sale.id, sale.orderNumber)}
                     disabled={updatingIds[sale.id]}
-                    className={`w-full inline-flex items-center justify-center gap-2 font-black py-2.5 px-4 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer ${isTable
+                    className={`w-full inline-flex items-center justify-center gap-2.5 font-black py-3.5 px-5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer ${isTable
                       ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
                       : "bg-slate-950 hover:bg-slate-800 text-yellow-400"
                       }`}
@@ -644,11 +593,18 @@ export default function KitchenPage() {
                       </>
                     ) : (
                       <>
-                        <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
+                        <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
                         <span>Listo / Despachar</span>
                       </>
                     )}
-                  </button>
+                  </button> */}
+                  <ButtonGeneric
+                    onClick={() => handleAcceptOrder(sale.id, sale.orderNumber)}
+                    disabled={updatingIds[sale.id]}
+                    variant={isTable ? "cancelGray" : "primary"}
+                  >
+                    Listo / Despachar
+                  </ButtonGeneric>
                 </div>
               </div>
             );

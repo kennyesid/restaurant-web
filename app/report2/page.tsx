@@ -231,8 +231,8 @@ export default function SalesPage() {
   return (
     <div className="space-y-3">
       <PageHeader
-        title="Control De Ventas"
-        subtitle="Gestiona y audita las transacciones del sistema"
+        title="Reportes"
+        subtitle="Reportes de las ventas del sistema"
         action={
           <Button onClick={loadSales} variant="outline" size="sm">
             Actualizar Datos

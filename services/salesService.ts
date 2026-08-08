@@ -661,7 +661,7 @@ export async function getAllSalesWithDetailsComboChef(): Promise<RespuestaGeneri
       } as Sale;
     });
 
-    // console.log("formattedSales", JSON.stringify(formattedSales));
+    console.log("formattedSales", JSON.stringify(formattedSales));
 
     return responderExito(
       formattedSales,
@@ -1240,6 +1240,172 @@ export async function createSaleCombo(
   }
 }
 
+export async function updateSaleCombo(
+  saleId: number,
+  saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
+): Promise<RespuestaGenericaDto<Sale>> {
+  try {
+    const { detail, ...headerVenta } = saleData;
+
+    // 1. Actualizar cabecera de la venta
+    const { data: updatedSale, error: saleError } = await supabase
+      .from("sales")
+      .update({
+        ...headerVenta,
+        updatedAt: new Date().toISOString()
+      })
+      .eq("id", saleId)
+      .select()
+      .single();
+
+    if (saleError) throw saleError;
+
+    // 2. Eliminar detalles previos de la venta para evitar duplicados
+    const { error: deleteDetailsError } = await supabase
+      .from("sales_details")
+      .delete()
+      .eq("saleId", saleId);
+    if (deleteDetailsError) throw deleteDetailsError;
+
+    const { error: deleteGroupError } = await supabase
+      .from("sales_detail_group")
+      .delete()
+      .eq("saleId", saleId);
+    if (deleteGroupError) throw deleteGroupError;
+
+    // 3. Re-insertar detalles nuevos
+    const finalDetail: any[] = [];
+
+    for (const item of detail) {
+      if ((item.cartItemDetail ?? []).length > 0) {
+        let saleDetailGroupId = 0;
+
+        const { data: groupInserted, error: groupError } = await supabase
+          .from("sales_detail_group")
+          .insert({
+            saleId,
+            productId: item.productId,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.subTotal
+          })
+          .select()
+          .single();
+
+        if (groupError) throw groupError;
+        saleDetailGroupId = groupInserted.id;
+
+        for (let sequence = 0; sequence < (item.cartItemDetail ?? []).length; sequence++) {
+          const plate = item.cartItemDetail![sequence];
+
+          if ((plate.productDetailProduct ?? []).length > 0) {
+            for (const product of (plate.productDetailProduct ?? [])) {
+              const {
+                id,
+                groupId,
+                code,
+                displayOrder,
+                piecesOfChicken,
+                createdAt,
+                ...productData
+              } = product;
+
+              const { data: insertedDetailCombo, error } = await supabase
+                .from("sales_details")
+                .insert({
+                  saleId,
+                  sales_detail_group_id: saleDetailGroupId,
+                  combosecuencia: sequence + 1,
+                  productId: product.productId,
+                  categoryId: product.categoryId,
+                  name: product.name,
+                  price: product.price,
+                  quantity: 1,
+                  modified: plate.modified,
+                  modifiedSubtotal: plate.modifiedSubtotal,
+                  reasonModification: plate.reasonModification,
+                  orderTypeSend: plate.orderTypeSend,
+                  imageUrl: product.imageUrl,
+                  productFittings: [],
+                  selected: product.selected
+                })
+                .select()
+                .single();
+
+              if (error) throw error;
+              finalDetail.push(insertedDetailCombo);
+            }
+          }
+          else {
+            const { data: insertedDetailNoCombo, error: itemError } = await supabase
+              .from("sales_details")
+              .insert({
+                saleId,
+                productId: plate.productId,
+                categoryId: plate.categoryId,
+                name: plate.name,
+                price: plate.price,
+                quantity: plate.quantity ?? 1,
+                modified: plate.modified ?? false,
+                modifiedSubtotal: plate.modifiedSubtotal,
+                reasonModification: plate.reasonModification,
+                orderTypeSend: plate.orderTypeSend,
+                imageUrl: item.imageUrl,
+                productFittings: [],
+                padreDetailId: 0,
+                sales_detail_group_id: saleDetailGroupId,
+                combosecuencia: sequence + 1,
+                selected: true
+              })
+              .select()
+              .single();
+
+            if (itemError) throw itemError;
+            finalDetail.push(insertedDetailNoCombo);
+          }
+        }
+        continue;
+      }
+
+      const {
+        id: frontId,
+        productFittings,
+        productDetailProduct,
+        cartItemDetail,
+        subTotal,
+        ...cartItemData
+      } = item;
+
+      const { data: insertedDetail, error: itemError } = await supabase
+        .from("sales_details")
+        .insert({
+          ...cartItemData,
+          saleId,
+          orderTypeSend: item.orderTypeSend,
+          selected: true,
+          productFittings: []
+        })
+        .select()
+        .single();
+
+      if (itemError) throw itemError;
+      finalDetail.push(insertedDetail);
+    }
+
+    const responsePayload: Sale = {
+      ...updatedSale,
+      detail: finalDetail
+    };
+
+    return responderExito(responsePayload, "Venta actualizada con éxito");
+  } catch (error: any) {
+    console.error("❌ ERROR CRÍTICO DE SUPABASE AL ACTUALIZAR:", error);
+    return responderFalla(`No se pudo actualizar la venta: ${error?.message || 'Error de datos'}`);
+  }
+}
+
+
 // export async function createSale(
 //   saleData: Omit<Sale, "id" | "createdAt" | "updatedAt">
 // ): Promise<RespuestaGenericaDto<Sale>> {
@@ -1578,25 +1744,144 @@ export function transformKitchenOrders(sales: any[]) {
   return sales;
 }
 
+// export function transformKitchenPreparation(
+//   sales: any[]
+// ): KitchenPreparationGroup[] {
+//   const groups = new Map<string, KitchenPreparationGroup>();
+
+//   for (const sale of sales) {
+//     const defaultOrderType = sale.orderType || "PARA MESA";
+
+//     for (const detail of sale.detail) {
+//       // CASO 1: Ítems simples sin detalle de sub-platos (ej. Refresco, Pollo al Horno directo)
+//       if (!detail.cartItemDetail || detail.cartItemDetail.length === 0) {
+//         const orderTypeSend = defaultOrderType;
+//         const reason = detail.reasonModification?.trim() || null;
+
+//         // La clave ahora distingue por Tipo de Orden
+//         const key = `${orderTypeSend}__${reason ?? "SIN_RAZON"}`;
+
+//         if (!groups.has(key)) {
+//           groups.set(key, {
+//             orderTypeSend,
+//             orderTypeGlobal: sale.orderType,
+//             reasons: [],
+//           });
+//         }
+
+//         const group = groups.get(key)!;
+//         let reasonGroup = group.reasons.find(
+//           (r) => r.reasonModification === reason
+//         );
+
+//         if (!reasonGroup) {
+//           reasonGroup = {
+//             reasonModification: reason,
+//             items: [],
+//           };
+//           group.reasons.push(reasonGroup);
+//         }
+
+//         // Buscamos si el producto ya existe en la lista para agrupar/sumar cantidades
+//         const existingItem = reasonGroup.items.find(
+//           (i) => i.id === detail.id || (i.productId === detail.productId && i.saleId === sale.id)
+//         );
+
+//         if (existingItem) {
+//           existingItem.quantity += detail.quantity;
+//         } else {
+//           reasonGroup.items.push({
+//             ...detail,
+//             saleId: sale.id,
+//             orderNumber: sale.orderNumber,
+//             userName: sale.userName,
+//             userCustomerName: sale.userCustomerName,
+//           });
+//         }
+
+//         continue;
+//       }
+
+//       // CASO 2: Ítems compuestos (ej. Almuerzo Sábado con cartItemDetail)
+//       for (const plate of detail.cartItemDetail) {
+//         // Si el plato no define un orderTypeSend específico, hereda el de la Venta
+//         const orderTypeSend = plate.orderTypeSend?.trim() || defaultOrderType;
+//         const reason = plate.reasonModification?.trim() || null;
+//         const key = `${orderTypeSend}__${reason ?? "SIN_RAZON"}`;
+
+//         if (!groups.has(key)) {
+//           groups.set(key, {
+//             orderTypeSend,
+//             orderTypeGlobal: sale.orderType,
+//             reasons: [],
+//           });
+//         }
+
+//         const group = groups.get(key)!;
+//         let reasonGroup = group.reasons.find(
+//           (r) => r.reasonModification === reason
+//         );
+
+//         if (!reasonGroup) {
+//           reasonGroup = {
+//             reasonModification: reason,
+//             items: [],
+//           };
+//           group.reasons.push(reasonGroup);
+//         }
+
+//         for (const product of plate.productDetailProduct) {
+//           // Agrupamos por producto dentro de la misma venta y grupo de razones
+//           const existingProduct = reasonGroup.items.find(
+//             (i) => i.productId === product.productId && i.saleId === sale.id
+//           );
+
+//           if (existingProduct) {
+//             existingProduct.quantity += plate.quantity;
+//           } else {
+//             reasonGroup.items.push({
+//               ...product,
+//               saleId: sale.id,
+//               orderNumber: sale.orderNumber,
+//               userName: sale.userName,
+//               userCustomerName: sale.userCustomerName,
+//               quantity: plate.quantity,
+//               reasonModification: reason,
+//               modifiedSubtotal: plate.modifiedSubtotal,
+//             });
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   const result = Array.from(groups.values());
+
+//   // Ordenamiento: "PARA LLEVAR" primero
+//   result.sort((a, b) => {
+//     const isALllevar = a.orderTypeSend?.toUpperCase().includes("LLEVAR");
+//     const isBLllevar = b.orderTypeSend?.toUpperCase().includes("LLEVAR");
+
+//     if (isALllevar && !isBLllevar) return -1;
+//     if (!isALllevar && isBLllevar) return 1;
+
+//     return (a.orderTypeSend ?? "").localeCompare(b.orderTypeSend ?? "");
+//   });
+
+//   return result;
+// }
+
 export function transformKitchenPreparation(
   sales: any[]
 ): KitchenPreparationGroup[] {
-
   const groups = new Map<string, KitchenPreparationGroup>();
-
+  console.log("sales: ", JSON.stringify(sales));
   for (const sale of sales) {
-
     for (const detail of sale.detail) {
-
-      // PRODUCTOS COMUNES
       if (!detail.cartItemDetail || detail.cartItemDetail.length === 0) {
-
-        // const orderTypeSend = "SIN_TIPO";
         const orderTypeSend = "";
         const reason = null;
-
         const key = `${orderTypeSend}__${reason}`;
-
         if (!groups.has(key)) {
           groups.set(key, {
             orderTypeSend,
@@ -1604,22 +1889,17 @@ export function transformKitchenPreparation(
             reasons: []
           });
         }
-
         const group = groups.get(key)!;
-
         let reasonGroup = group.reasons.find(
           r => r.reasonModification === reason
         );
-
         if (!reasonGroup) {
           reasonGroup = {
             reasonModification: reason,
             items: []
           };
-
           group.reasons.push(reasonGroup);
         }
-
         reasonGroup.items.push({
           ...detail,
           saleId: sale.id,
@@ -1627,15 +1907,12 @@ export function transformKitchenPreparation(
           userName: sale.userName,
           userCustomerName: sale.userCustomerName
         });
-
         continue;
       }
-
       for (const plate of detail.cartItemDetail) {
         const orderTypeSend = plate.orderTypeSend ?? "";
         const reason = plate.reasonModification?.trim() || null;
         const key = `${orderTypeSend}__${reason}`;
-
         if (!groups.has(key)) {
           groups.set(key, {
             orderTypeSend,
@@ -1643,13 +1920,10 @@ export function transformKitchenPreparation(
             reasons: []
           });
         }
-
         const group = groups.get(key)!;
-
         let reasonGroup = group.reasons.find(
           r => r.reasonModification === reason
         );
-
         if (!reasonGroup) {
           reasonGroup = {
             reasonModification: reason,
@@ -1657,19 +1931,37 @@ export function transformKitchenPreparation(
           };
           group.reasons.push(reasonGroup);
         }
-
         for (const product of plate.productDetailProduct) {
-          reasonGroup.items.push({
-            ...product,
-            saleId: sale.id,
-            orderNumber: sale.orderNumber,
-            userName: sale.userName,
-            userCustomerName: sale.userCustomerName,
-            quantity: plate.quantity,
-            reasonModification: reason,
-            modifiedSubtotal: plate.modifiedSubtotal
-          });
+          const existingItem = reasonGroup.items.find(
+            item => item.productId === product.productId
+          );
+          if (existingItem) {
+            existingItem.quantity += plate.quantity;
+          } else {
+            reasonGroup.items.push({
+              ...product,
+              saleId: sale.id,
+              orderNumber: sale.orderNumber,
+              userName: sale.userName,
+              userCustomerName: sale.userCustomerName,
+              quantity: plate.quantity,
+              reasonModification: reason,
+              modifiedSubtotal: plate.modifiedSubtotal
+            });
+          }
         }
+        // for (const product of plate.productDetailProduct) {
+        //   reasonGroup.items.push({
+        //     ...product,
+        //     saleId: sale.id,
+        //     orderNumber: sale.orderNumber,
+        //     userName: sale.userName,
+        //     userCustomerName: sale.userCustomerName,
+        //     quantity: plate.quantity,
+        //     reasonModification: reason,
+        //     modifiedSubtotal: plate.modifiedSubtotal
+        //   });
+        // }
       }
     }
   }
@@ -1677,7 +1969,6 @@ export function transformKitchenPreparation(
   const result = Array.from(groups.values());
 
   result.sort((a, b) => {
-    // Primero PARA MESA
     if (a.orderTypeSend === "PARA_LLEVAR" && b.orderTypeSend !== "PARA_LLEVAR") {
       return -1;
     }
@@ -1689,8 +1980,6 @@ export function transformKitchenPreparation(
   });
   console.log("transformKitchenPreparation: ", JSON.stringify(result));
   return result;
-
-  // return Array.from(groups.values());
 }
 
 export async function getSalesInKitchen(): Promise<RespuestaGenericaDto<Sale[]>> {

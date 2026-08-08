@@ -4,7 +4,7 @@ export type { CartState } from "@/types/cart/cartState";
 export type { Category } from "@/types/category/category";
 
 export type { Product } from "@/types/product/product";
-export type { SelectedProduct } from "@/types/product/selectedproduct";
+export type { SelectedProduct } from "@/types/product/selectedProduct";
 export type { ProductDetailProduct } from "@/types/product/productDetailProduct";
 export type { ProductIngredientDetail } from "@/types/product/productIngredientDetail";
 export type { KitchenPreparationItem } from "@/types/sale/kitchenPreparationItem";

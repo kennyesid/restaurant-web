@@ -6,6 +6,13 @@ const initialState: CartState = {
   items: [],
   paymentType: "cash",
   isCartOpen: true,
+  editingSaleId: null,
+  table: undefined,
+  orderType: undefined,
+  userCustomerName: undefined,
+  userDocument: undefined,
+  orderNumber: undefined,
+  amountPaid: undefined,
 };
 
 const cartSlice = createSlice({
@@ -56,6 +63,37 @@ const cartSlice = createSlice({
       state.items = [];
       state.paymentType = "cash";
       state.mixedPayment = undefined;
+      state.editingSaleId = null;
+      state.table = undefined;
+      state.orderType = undefined;
+      state.userCustomerName = undefined;
+      state.userDocument = undefined;
+      state.orderNumber = undefined;
+      state.amountPaid = undefined;
+    },
+    startEditSale: (
+      state,
+      action: PayloadAction<{
+        saleId: number;
+        items: CartItem[];
+        paymentType: "cash" | "qr" | "mixed";
+        table?: number;
+        orderType?: string;
+        userCustomerName?: string;
+        userDocument?: string;
+        orderNumber?: number;
+        amountPaid?: number;
+      }>
+    ) => {
+      state.editingSaleId = action.payload.saleId;
+      state.items = action.payload.items;
+      state.paymentType = action.payload.paymentType;
+      state.table = action.payload.table;
+      state.orderType = action.payload.orderType;
+      state.userCustomerName = action.payload.userCustomerName;
+      state.userDocument = action.payload.userDocument;
+      state.orderNumber = action.payload.orderNumber;
+      state.amountPaid = action.payload.amountPaid;
     },
     setPaymentType: (state, action: PayloadAction<"cash" | "qr" | "mixed">) => {
       state.paymentType = action.payload;
@@ -112,5 +150,6 @@ export const {
   toggleCartSide,
   setToggleCartFalse,
   updateCartItemDetail,
+  startEditSale,
 } = cartSlice.actions;
 export default cartSlice.reducer;

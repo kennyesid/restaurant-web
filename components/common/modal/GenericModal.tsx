@@ -7,6 +7,8 @@ import { storage } from "@/lib/storage";
 import { Fragment, useEffect, useState } from "react";
 import { OrderTypeEnum } from "@/types/enum/orderTypeEnum";
 import { ResponsiveModal } from "./ResponsiveModal";
+import { useAppDispatch, useAppSelector } from "@/store/store/hooks";
+import { setPaymentType } from "@/store/store/slices/cartSlice";
 
 interface SaleModalProps {
   isOpen: boolean;
@@ -51,11 +53,17 @@ export function GenericModal({
   orderType,
   setOrderType,
 }: SaleModalProps) {
+  const dispatch = useAppDispatch();
   const [isNewClient, setIsNewClient] = useState(false);
   const [editableItems, setEditableItems] = useState<CartItem[]>(items);
   const [isLocked, setIsLocked] = useState(false);
   const [expandedItems, setExpandedItems] = useState<number[]>([]);
   const [expandedDetails, setExpandedDetails] = useState<string[]>([]);
+  const { paymentType } = useAppSelector((state) => ({
+    paymentType: state.cart.paymentType,
+  })) as {
+    paymentType: string;
+  };
 
   const handleSearchClient = (query: string) => {
     if (!query || query.length < 3) {
@@ -107,38 +115,6 @@ export function GenericModal({
     }
   };
 
-  // MODIFICATION CATEGORY
-  // const handleSaveModifications = () => {
-  //   const normalizedItems = editableItems.map((item) => {
-  //     // ✅ Procesar item principal
-  //     const processedItem = {
-  //       ...item,
-  //       reasonModification: item.reasonModification?.trim() || "Venta Modificada",
-  //       // ✅ Asegurar categoryId en productDetailProduct
-  //       productDetailProduct: item.productDetailProduct?.map(subItem => ({
-  //         ...subItem,
-  //         categoryId: subItem.categoryId ?? item.categoryId ?? 0
-  //       }))
-  //     };
-
-  //     if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
-  //       return processedItem;
-  //     }
-  //     return processedItem;
-  //   });
-
-  //   const newTotal = normalizedItems.reduce(
-  //     (sum, item) =>
-  //       sum + (item.modifiedSubtotal ?? item.price * item.quantity),
-  //     0,
-  //   );
-
-  //   setIsLocked(true);
-  //   changeSubTotal(normalizedItems);
-  //   setEditableItems(normalizedItems);
-  //   setIsEditMode(false);
-  // };
-  // MODIFICATION CATEGORY
   const handleSaveModifications = () => {
     const normalizedItems = editableItems.map((item) => {
       if (item.modifiedSubtotal !== undefined || item.reasonModification !== undefined) {
@@ -180,14 +156,6 @@ export function GenericModal({
     setEditableItems(items);
     console.log('revisionn joder:' + JSON.stringify(items));
   }, [items]);
-  // useEffect(() => {
-  //   setEditableItems(
-  //     items.map((item) => ({
-  //       ...item,
-  //       modified: false,
-  //     })),
-  //   );
-  // }, [items]);
 
   return (
     <ResponsiveModal
@@ -196,359 +164,346 @@ export function GenericModal({
       onConfirm={onConfirm}
       title="Confirmar Venta"
       subtitle="Revisa los detalles antes de completar la transacción."
-      size="xl"
+      size="4xl"
       confirmText={isProcessing ? "Procesando..." : "Confirmar"}
       cancelText="Cancelar"
       isProcessing={isProcessing || isEditMode}
     >
-      {/* </div> */}
-      <div className="max-h-[40vh] overflow-y-auto mb-4 border rounded-sm">
-        <table className="w-full text-sm text-left">
-          {/* <thead className={`sticky text-white ${STYLE_INTERNAL.headerModalPrimary}`} > */}
-          <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm text-gray-800 border-b shadow-sm">
-            <tr>
-              <th className="p-2">Producto</th>
-              <th className="p-2 text-center">Cant.</th>
-              {/* <th className="p-2 text-right">Subtotal</th> */}
-              {!isEditMode && <th className="p-2 text-right">Subtotal</th>}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        {/* SECCIÓN 1 (IZQUIERDA): Tabla de Productos */}
+        <div className="max-h-[60vh] lg:max-h-[500px] overflow-y-auto border rounded-sm">
+          <table className="w-full text-sm text-left">
+            <thead className="sticky top-0 bg-gray-100/95 backdrop-blur-sm text-gray-800 border-b shadow-sm z-10">
+              <tr>
+                <th className="p-2">Producto</th>
+                <th className="p-2 text-center">Cant.</th>
+                {!isEditMode && <th className="p-2 text-right">Subtotal</th>}
 
-              {isEditMode && (
-                <>
-                  <th className="p-2 text-left">Razón</th>
-                  <th className="p-2 text-right">Nuevo Subtotal</th>
-                </>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {editableItems.map((item) => {
-              const isExpanded = expandedItems.includes(item.id);
-
-              return (
-                <Fragment key={item.id}>
-                  {/* ==========================
-          PRODUCTO PRINCIPAL
-      ========================== */}
-
-                  <tr className="border-b hover:bg-gray-50 transition-colors">
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-
-                        {item.cartItemDetail?.length ? (
-                          <button
-                            onClick={() => toggleItem(item.id)}
-                            className="text-gray-500 hover:text-blue-600"
-                          >
-                            {isExpanded ? (
-                              <ChevronDown size={18} />
-                            ) : (
-                              <ChevronRight size={18} />
-                            )}
-                          </button>
-                        ) : (
-                          <div className="w-[18px]" />
-                        )}
-
-                        <span className="font-medium">
-                          {item.name}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="p-2 text-center">
-                      <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
-                        {item.quantity}
-                      </span>
-                    </td>
-
-                    {!isEditMode && (
-                      <td className="p-2 text-right">
-                        Bs {(item.modifiedSubtotal ?? item.price * item.quantity).toLocaleString()}
-                      </td>
-                    )}
-
-                    {isEditMode && (
-                      <>
-                        <td className="p-2">
-                          <input
-                            type="text"
-                            value={item.reasonModification ?? ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
-
-                              setEditableItems((prev) =>
-                                prev.map((i) =>
-                                  i.id === item.id
-                                    ? {
-                                      ...i,
-                                      reasonModification: value,
-                                    }
-                                    : i
-                                )
-                              );
-                            }}
-                            className="w-full border-b outline-none text-sm"
-                            placeholder="Motivo..."
-                          />
-                        </td>
-
-                        <td className="p-2 text-right">
-                          <input
-                            type="number"
-                            value={item.modifiedSubtotal ?? item.price * item.quantity}
-                            onChange={(e) => {
-                              const value = Number(e.target.value);
-
-                              setEditableItems((prev) =>
-                                prev.map((i) =>
-                                  i.id === item.id
-                                    ? {
-                                      ...i,
-                                      modifiedSubtotal: value,
-                                    }
-                                    : i
-                                )
-                              );
-                            }}
-                            min={1}
-                            className="w-24 text-right border-b outline-none"
-                          />
-                        </td>
-                      </>
-                    )}
-                  </tr>
-
-                  {/* ==========================
-          DETALLE DEL PRODUCTO
-      ========================== */}
-
-                  {isExpanded &&
-                    item.cartItemDetail?.map((detail, index) => {
-                      const detailKey = `${item.id}-${index}`;
-
-                      const detailExpanded =
-                        expandedDetails.includes(detailKey);
-
-                      return (
-                        <Fragment key={detailKey}>
-                          <tr className="bg-blue-50">
-                            <td
-                              colSpan={isEditMode ? 4 : 3}
-                              className="pl-10 py-2"
+                {isEditMode && (
+                  <>
+                    <th className="p-2 text-left">Razón</th>
+                    <th className="p-2 text-right">Nuevo Subtotal</th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {editableItems.map((item) => {
+                const isExpanded = expandedItems.includes(item.id);
+                return (
+                  <Fragment key={item.id}>
+                    <tr className="border-b hover:bg-gray-50 transition-colors">
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          {item.cartItemDetail?.length ? (
+                            <button
+                              onClick={() => toggleItem(item.id)}
+                              className="text-gray-500 hover:text-blue-600"
                             >
-                              <div className="flex items-center gap-2">
+                              {isExpanded ? (
+                                <ChevronDown size={18} />
+                              ) : (
+                                <ChevronRight size={18} />
+                              )}
+                            </button>
+                          ) : (
+                            <div className="w-[18px]" />
+                          )}
 
-                                <button
-                                  onClick={() => toggleDetail(detailKey)}
-                                  className="text-gray-500 hover:text-blue-600"
-                                >
-                                  {detailExpanded ? (
-                                    <ChevronDown size={16} />
-                                  ) : (
-                                    <ChevronRight size={16} />
-                                  )}
-                                </button>
+                          <span className="font-medium">
+                            {item.name}
+                          </span>
+                        </div>
+                      </td>
 
-                                <span className="font-medium">
-                                  {detail.name}
-                                  {/* 🍽 Plato {index + 1} */}
-                                </span>
+                      <td className="p-2 text-center">
+                        <span className="inline-flex items-center justify-center min-w-[24px] px-2 py-1 text-xs font-semibold bg-gray-100 rounded-md">
+                          {item.quantity}
+                        </span>
+                      </td>
 
-                                {detail.orderTypeSend && (
-                                  <span className="text-xs text-blue-600 bg-blue-100 rounded-full px-2 py-1">
-                                    {detail.orderTypeSend}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
+                      {!isEditMode && (
+                        <td className="p-2 text-right">
+                          Bs {(item.modifiedSubtotal ?? item.price * item.quantity).toLocaleString()}
+                        </td>
+                      )}
 
-                          {/* ==========================
-                  PRODUCTOS DEL PLATO
-              ========================== */}
+                      {isEditMode && (
+                        <>
+                          <td className="p-2">
+                            <input
+                              type="text"
+                              value={item.reasonModification ?? ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setEditableItems((prev) =>
+                                  prev.map((i) =>
+                                    i.id === item.id
+                                      ? { ...i, reasonModification: value }
+                                      : i
+                                  )
+                                );
+                              }}
+                              className="w-full border-b outline-none text-sm"
+                              placeholder="Motivo..."
+                            />
+                          </td>
+                          <td className="p-2 text-right">
+                            <input
+                              type="number"
+                              value={item.modifiedSubtotal ?? item.price * item.quantity}
+                              onChange={(e) => {
+                                const value = Number(e.target.value);
+                                setEditableItems((prev) =>
+                                  prev.map((i) =>
+                                    i.id === item.id
+                                      ? { ...i, modifiedSubtotal: value }
+                                      : i
+                                  )
+                                );
+                              }}
+                              min={1}
+                              className="w-24 text-right border-b outline-none"
+                            />
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                    {isExpanded &&
+                      item.cartItemDetail?.map((detail, index) => {
+                        const detailKey = `${item.id}-${index}`;
+                        const detailExpanded = expandedDetails.includes(detailKey);
 
-                          {detailExpanded &&
-                            detail.productDetailProduct?.map((product) => (
-                              <tr
-                                key={product.id}
-                                className="bg-gray-50"
+                        return (
+                          <Fragment key={detailKey}>
+                            <tr className="bg-blue-50">
+                              <td
+                                colSpan={isEditMode ? 4 : 3}
+                                className="pl-10 py-2"
                               >
-                                <td
-                                  colSpan={isEditMode ? 4 : 3}
-                                  className="pl-20 py-2"
-                                >
-                                  <div className="flex items-center justify-between">
-
-                                    <div className="flex items-center gap-2">
-
-                                      <span className="text-green-600">
-                                        •
-                                      </span>
-
-                                      <span>
-                                        {product.name}
-                                      </span>
-
-                                    </div>
-
-                                    <span className="text-xs text-gray-500">
-                                      Bs {product.price}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => toggleDetail(detailKey)}
+                                    className="text-gray-500 hover:text-blue-600"
+                                  >
+                                    {detailExpanded ? (
+                                      <ChevronDown size={16} />
+                                    ) : (
+                                      <ChevronRight size={16} />
+                                    )}
+                                  </button>
+                                  <span className="font-medium">
+                                    {detail.name}
+                                  </span>
+                                  {detail.orderTypeSend && (
+                                    <span className="text-xs text-blue-600 bg-blue-100 rounded-full px-2 py-1">
+                                      {detail.orderTypeSend}
                                     </span>
-
-                                  </div>
-                                </td>
-                              </tr>
-                            ))}
-                        </Fragment>
-                      );
-                    })}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-      <div className="border-t space-y-4 bg-gray-50/50 p-3 rounded-xl border border-slate-100">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
-            Tipo de Orden
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setOrderType(OrderTypeEnum.CONSUMO_LOCAL)}
-              className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.CONSUMO_LOCAL
-                ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                }`}
-            >
-              Para la Mesa
-            </button>
-            <button
-              type="button"
-              onClick={() => setOrderType(OrderTypeEnum.PARA_LLEVAR)}
-              className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.PARA_LLEVAR
-                ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                }`}
-            >
-              Para Llevar
-            </button>
-          </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                            {detailExpanded &&
+                              detail.productDetailProduct?.map((product) => (
+                                <tr
+                                  key={product.id}
+                                  className="bg-gray-50"
+                                >
+                                  <td
+                                    colSpan={isEditMode ? 4 : 3}
+                                    className="pl-20 py-2"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-green-600">•</span>
+                                        <span>{product.name}</span>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
+                                        Bs {product.price}
+                                      </span>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                          </Fragment>
+                        );
+                      })}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        {/* <hr className="border-slate-200/60" /> */}
-        <div className="space-y-3">
-          <div className="p-3 bg-yellow-50/60 border rounded-xl border-yellow-200/70 space-y-3">
-            <p className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
-              Datos de Factura
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-              {/* Razón Social */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                  Nombre / Razón Social
-                </label>
-                <input
-                  type="text"
-                  value={selectedClient?.fullName ?? ""}
-                  onChange={(e) =>
-                    setSelectedClient({
-                      ...(selectedClient || {}),
-                      fullName: e.target.value,
-                    } as any)
-                  }
-                  className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
-                  placeholder="Control Tributario / Nombre"
-                />
-              </div>
-
-              {/* NIT / CI */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                  NIT / CI
-                </label>
-                <input
-                  type="text"
-                  value={selectedClient?.nit ?? ""} // El '?? ""' mitiga el error de null al leer el value
-                  onChange={(e) =>
-                    setSelectedClient({
-                      ...(selectedClient || {}), // Si es null, esparce un objeto vacío
-                      id: selectedClient?.id || 1, // Forzamos a que siempre tenga un ID numérico válido
-                      nit: e.target.value,
-                    } as any) // El 'as any' silencia los choques de propiedades opcionales de la interfaz User
-                  }
-                  className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
-                  placeholder="0 (Sin NIT)"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* CAMBIOS */}
-        <div className="space-y-3">
-          <p className="text-xs font-bold text-[#052A3D] uppercase tracking-wide">
-            Pago en Efectivo y Cambio
-          </p>
-          <div className="grid grid-cols-5 gap-1.5">
-            {Object.values(BolivianCashCuts)
-              .filter((v) => typeof v === "number")
-              .map((cutValue) => (
+        {/* SECCIÓN 2 (DERECHA): Opciones de la Orden, Factura y Pago */}
+        <div className="space-y-4">
+          <div className="border space-y-4 bg-gray-50/50 p-4 rounded-xl border-slate-100">
+            {/* Tipo de Orden */}
+            <div className="space-y-2">
+              {/* <label className="text-xs font-bold text-[#052A3D] uppercase tracking-wider">
+                Tipo de Orden
+              </label> */}
+              <div className="grid grid-cols-2 gap-2">
                 <button
-                  key={cutValue}
                   type="button"
-                  onClick={() => setAmountPaid(Number(cutValue))}
-                  className={`p-2 rounded-lg text-xs font-black transition-all active:scale-95 cursor-pointer border text-center ${amountPaid === cutValue
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                    : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                  onClick={() => setOrderType(OrderTypeEnum.CONSUMO_LOCAL)}
+                  className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.CONSUMO_LOCAL
+                    ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                     }`}
                 >
-                  Bs {cutValue}
+                  Para la Mesa
                 </button>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setOrderType(OrderTypeEnum.PARA_LLEVAR)}
+                  className={`p-2.5 rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer border text-center ${orderType === OrderTypeEnum.PARA_LLEVAR
+                    ? "bg-[#052A3D] text-white border-[#052A3D] shadow-sm"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                    }`}
+                >
+                  Para Llevar
+                </button>
+              </div>
+            </div>
+
+            {/* Datos de Factura */}
+            <div className="p-3 bg-yellow-50/60 border rounded-xl border-yellow-200/70 space-y-3">
+              <p className="text-xs font-bold text-yellow-800 uppercase tracking-wide">
+                Datos del Cliente
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Nombre / Razón Social
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedClient?.fullName ?? ""}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...(selectedClient || {}),
+                        fullName: e.target.value,
+                      } as any)
+                    }
+                    className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
+                    placeholder="Control Tributario / Nombre"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    NIT / CI
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedClient?.nit ?? ""}
+                    onChange={(e) =>
+                      setSelectedClient({
+                        ...(selectedClient || {}),
+                        id: selectedClient?.id || 1,
+                        nit: e.target.value,
+                      } as any)
+                    }
+                    className="w-full pb-1 bg-transparent outline-none font-semibold text-slate-800 border-b border-yellow-300 focus:border-yellow-600 text-sm placeholder:text-slate-400 placeholder:font-normal"
+                    placeholder="0 (Sin NIT)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-rest-primary">
+                Método de Pago
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {["cash", "qr", "mixed"].map((method) => (
+                  <button
+                    key={method}
+                    onClick={() => dispatch(setPaymentType(method as any))}
+                    className={`py-2 px-3 text-sm font-medium transition-colors cursor-pointer rounded-md text-center ${paymentType === method
+                      ? "bg-[#facc15] text-rest-primary"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                      }`}
+                  >
+                    {method === "cash"
+                      ? "Efectivo"
+                      : method === "qr"
+                        ? "QR"
+                        : "Mixto"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Pago en Efectivo y Cambio */}
+            <div className="space-y-3">
+              <p className="text-xs font-bold text-[#052A3D] uppercase tracking-wide">
+                Pago en Efectivo y Cambio
+              </p>
+              <div className="grid grid-cols-5 gap-1.5">
+                {Object.values(BolivianCashCuts)
+                  .filter((v) => typeof v === "number")
+                  .map((cutValue) => (
+                    <button
+                      key={cutValue}
+                      type="button"
+                      onClick={() => setAmountPaid(Number(cutValue))}
+                      className={`p-2 rounded-lg text-xs font-black transition-all active:scale-95 cursor-pointer border text-center ${amountPaid === cutValue
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                        : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                        }`}
+                    >
+                      Bs {cutValue}
+                    </button>
+                  ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Monto Recibido
+                  </label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-0 text-sm font-semibold text-slate-500 pb-0.5">Bs</span>
+                    <input
+                      type="number"
+                      value={amountPaid === 0 ? "" : amountPaid}
+                      onChange={(e) => setAmountPaid(Number(e.target.value))}
+                      min={0}
+                      className="w-full pl-6 pb-1 bg-transparent outline-none font-bold text-slate-800 border-b border-slate-300 focus:border-[#052A3D] text-lg"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                    Cambio a Devolver
+                  </label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-0 text-sm font-semibold text-emerald-600 pb-0.5">Bs</span>
+                    <input
+                      type="text"
+                      readOnly
+                      value={changeReturned.toFixed(2)}
+                      className={`w-full pl-6 pb-1 bg-transparent outline-none font-black border-b border-transparent text-lg ${changeReturned > 0 ? "text-emerald-600" : "text-slate-400"
+                        }`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                Monto Recibido
-              </label>
-              <div className="relative flex items-center">
-                <span className="absolute left-0 text-sm font-semibold text-slate-500 pb-0.5">Bs</span>
-                <input
-                  type="number"
-                  value={amountPaid === 0 ? "" : amountPaid}
-                  onChange={(e) => setAmountPaid(Number(e.target.value))}
-                  min={0}
-                  className="w-full pl-6 pb-1 bg-transparent outline-none font-bold text-slate-800 border-b border-slate-300 focus:border-[#052A3D] text-lg"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                Cambio a Devolver
-              </label>
-              <div className="relative flex items-center">
-                <span className="absolute left-0 text-sm font-semibold text-emerald-600 pb-0.5">Bs</span>
-                <input
-                  type="text"
-                  readOnly
-                  value={changeReturned.toFixed(2)}
-                  className={`w-full pl-6 pb-1 bg-transparent outline-none font-black border-b border-transparent text-lg ${changeReturned > 0 ? "text-emerald-600" : "text-slate-400"
-                    }`}
-                />
-              </div>
-            </div>
+          {/* Total a pagar */}
+          <div className="flex justify-between items-center px-4 py-2 bg-slate-100 rounded-xl">
+            <span className="text-lg font-bold">Total a pagar:</span>
+            <span className="text-2xl font-black text-[#052A3D]">
+              Bs {total.toLocaleString()}
+            </span>
           </div>
         </div>
-      </div>
-      <div className="flex justify-between items-center px-2">
-        <span className="text-lg font-bold">Total a pagar:</span>
-        <span className="text-2xl font-black text-[#052A3D]">
-          Bs {total.toLocaleString()}
-        </span>
       </div>
     </ResponsiveModal>
   );

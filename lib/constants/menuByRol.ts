@@ -31,7 +31,7 @@ export const MENU_BY_ROL: Record<RoleType, MenuConfig> = {
       { label: "Carrito de Compras", icon: ShoppingCart, href: "/cart" },
       { label: "Ventas", icon: Beef, href: "/sales" },
       { label: "Productos", icon: Package, href: "/product" },
-      { label: "Reportes", icon: File, href: "/report" },
+      { label: "Reportes", icon: File, href: "/report2" },
       { label: "Cocina", icon: ChefHat, href: "/kitchen" },
       // lucide lucide-chef-hat
     ],
