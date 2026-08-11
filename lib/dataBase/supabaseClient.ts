@@ -1,8 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-// 1. Obtenemos las variables de entorno de tu archivo .env.local
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// ROJO ROJO CAMBIAR DESPUES DE LAS PRUEBAS A ESTO
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabaseUrl = "https://uzhyjvqftsyqdpvkoxji.supabase.co";
+const supabaseAnonKey = "sb_publishable_NhxXZg4zO9TjhY_fAOHMCg_ZaAPuW4G";
 
 // 2. Control de seguridad: Validamos que las variables existan para evitar errores silenciosos
 if (!supabaseUrl || !supabaseAnonKey) {

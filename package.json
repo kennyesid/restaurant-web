@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
-    "build": "next build",
+    "dev": "next dev --webpack -H 0.0.0.0",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint ."
   },
@@ -48,6 +48,7 @@
     "crypto-js": "^4.2.0",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.6.0",
+    "exceljs": "^4.4.0",
     "input-otp": "1.4.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

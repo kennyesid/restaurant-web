@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Pencil,
   X,
+  Ban,
 } from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
@@ -589,10 +590,10 @@ export default function SalesPage() {
                                 setSaleToDelete(sale.id);
                                 setAlertOpen(true);
                               }}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer"
                               title="Eliminar"
                             >
-                              <Trash2 size={18} />
+                              <Ban size={18} />
                             </button>
                             {/* <Button
                           size="icon"

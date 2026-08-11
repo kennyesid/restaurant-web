@@ -18,6 +18,8 @@ import {
   ChevronRight,
   Pencil,
   X,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
 import { handleResponse } from "@/utils/api-helpers";
 import ButtonGeneric from "@/components/common/button/ButtonGeneric";
@@ -34,6 +36,10 @@ import { startEditSale, toggleCartSide, setToggleCartFalse } from "@/store/store
 import { useRouter } from "next/navigation";
 import { ShoppingCart } from "@/components/cart/Shopping-cart";
 import { cn } from "@/lib/utils";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import ExcelJS from "exceljs";
 
 export default function SalesPage() {
   const dispatch = useAppDispatch();
@@ -220,6 +226,503 @@ export default function SalesPage() {
       </div>
     );
 
+  const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+
+    // Estilos reutilizables
+    const headerFill: ExcelJS.Fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF052A3D" }, // Color #052A3D
+    };
+
+    const headerFont: Partial<ExcelJS.Font> = {
+      name: "Calibri",
+      bold: true,
+      color: { argb: "FFFFFFFF" }, // Texto blanco
+      size: 11,
+    };
+
+    // ----------------------------------------------------
+    // HOJA 1: RESUMEN DE VENTAS
+    // ----------------------------------------------------
+    const wsSales = workbook.addWorksheet("Resumen Ventas");
+
+    wsSales.columns = [
+      { header: "Nro. Pedido", key: "orderNumber", width: 15 },
+      { header: "Fecha", key: "date", width: 15 },
+      { header: "Hora", key: "time", width: 15 },
+      { header: "Cliente", key: "client", width: 25 },
+      { header: "CI / NIT", key: "document", width: 18 },
+      { header: "Tipo de Orden", key: "orderType", width: 18 },
+      { header: "Operador", key: "operator", width: 20 },
+      { header: "Método de Pago", key: "paymentType", width: 18 },
+      { header: "Monto Recibido (Bs)", key: "amountPaid", width: 20 },
+      { header: "Cambio (Bs)", key: "changeReturned", width: 15 },
+      { header: "Total Venta (Bs)", key: "total", width: 18 },
+    ];
+
+    filteredSales.forEach((sale) => {
+      wsSales.addRow([
+        `#${sale.orderNumber}`,
+        new Date(sale.createdAt).toLocaleDateString("es-BO"),
+        new Date(sale.createdAt).toLocaleTimeString("es-BO"),
+        sale.userCustomerName || "Sin Nombre",
+        sale.userDocument || "-",
+        sale.orderType,
+        sale.userName || "-",
+        getPaymentTypeLabel(sale.paymentType),
+        sale.amountPaid || 0,
+        sale.changeReturned || 0,
+        sale.total || 0
+      ]);
+    });
+
+    // Estilar la fila de cabecera de la Hoja 1
+    const headerRowSales = wsSales.getRow(1);
+    headerRowSales.eachCell((cell) => {
+      cell.fill = headerFill;
+      cell.font = headerFont;
+      cell.alignment = { vertical: "middle", horizontal: "center" };
+    });
+
+    // ----------------------------------------------------
+    // HOJA 2: DETALLE DE PRODUCTOS
+    // ----------------------------------------------------
+    const itemsDataForExcel: any[] = [];
+    filteredSales.forEach((sale) => {
+      sale.detail?.forEach((item: any) => {
+        if (item.cartItemDetail && item.cartItemDetail.length > 0) {
+          item.cartItemDetail.forEach((detail: any) => {
+            // Se usa Boolean() para asegurar compatibilidad si 'selected' viene como true/1/"true"
+            const selectedSubProducts =
+              detail.productDetailProduct?.filter((p: any) => Boolean(p.selected)) || [];
+
+            selectedSubProducts.forEach((sub: any) => {
+              itemsDataForExcel.push([
+                `#${sale.orderNumber}`,
+                new Date(sale.createdAt).toLocaleDateString("es-BO"),
+                item.name || "-",
+                detail.name || "-",
+                sub.name || "-",
+                1,
+                0,
+                0,
+              ]);
+            });
+          });
+        } else {
+          const qty = item.quantity || 0;
+          const price = item.price || 0;
+
+          itemsDataForExcel.push([
+            `#${sale.orderNumber}`,
+            new Date(sale.createdAt).toLocaleDateString("es-BO"),
+            "-",
+            "-",
+            item.name || "-",
+            qty,
+            price,
+            qty * price,
+          ]);
+        }
+      });
+    });
+
+    if (itemsDataForExcel.length > 0) {
+      const wsItems = workbook.addWorksheet("Detalle Productos");
+
+      wsItems.columns = [
+        { header: "Nro. Pedido", key: "orderNumber", width: 15 },
+        { header: "Fecha", key: "date", width: 15 },
+        { header: "Producto Combo", key: "comboProduct", width: 25 },
+        { header: "Grupo/Plato", key: "groupDish", width: 20 },
+        { header: "Producto Seleccionado", key: "selectedProduct", width: 25 },
+        { header: "Cant.", key: "quantity", width: 10 },
+        { header: "Precio Unit. (Bs)", key: "unitPrice", width: 18 },
+        { header: "Subtotal (Bs)", key: "subTotal", width: 18 },
+      ];
+
+      itemsDataForExcel.forEach((item) => {
+        wsItems.addRow(item);
+      });
+
+      // Estilar la fila de cabecera de la Hoja 2
+      const headerRowItems = wsItems.getRow(1);
+      headerRowItems.eachCell((cell) => {
+        cell.fill = headerFill;
+        cell.font = headerFont;
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+      });
+    }
+
+    // ----------------------------------------------------
+    // GENERAR Y DESCARGAR ARCHIVO EXCEL
+    // ----------------------------------------------------
+    const buffer = await workbook.xlsx.writeBuffer();
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `Reporte_Ventas_${dateStr}.xlsx`;
+    anchor.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // const exportToExcel = () => {
+  //   const salesDataForExcel = filteredSales.map((sale) => {
+  //     return {
+  //       "Nro. Pedido": `#${sale.orderNumber}`,
+  //       "Fecha": new Date(sale.createdAt).toLocaleDateString("es-BO"),
+  //       "Hora": new Date(sale.createdAt).toLocaleTimeString("es-BO"),
+  //       "Cliente": sale.userCustomerName || "Sin Nombre",
+  //       "CI / NIT": sale.userDocument || "-",
+  //       "Tipo de Orden": sale.orderType,
+  //       "Operador": sale.userName || "-",
+  //       "Método de Pago": getPaymentTypeLabel(sale.paymentType),
+  //       "Monto Recibido (Bs)": sale.amountPaid || 0,
+  //       "Cambio (Bs)": sale.changeReturned || 0,
+  //       "Total Venta (Bs)": sale.total,
+  //     };
+  //   });
+
+  //   const itemsDataForExcel: any[] = [];
+  //   filteredSales.forEach((sale) => {
+  //     sale.detail?.forEach((item) => {
+  //       if (item.cartItemDetail && item.cartItemDetail.length > 0) {
+  //         item.cartItemDetail.forEach((detail: any) => {
+  //           const selectedSubProducts = detail.productDetailProduct?.filter((p: any) => p.selected === true) || [];
+  //           selectedSubProducts.forEach((sub: any) => {
+  //             itemsDataForExcel.push({
+  //               "Nro. Pedido": `#${sale.orderNumber}`,
+  //               "Fecha": new Date(sale.createdAt).toLocaleDateString("es-BO"),
+  //               "Producto Combo": item.name,
+  //               "Grupo/Plato": detail.name,
+  //               "Producto Seleccionado": sub.name,
+  //               "Cant.": 1,
+  //               "Precio Unit. (Bs)": 0,
+  //               "Subtotal (Bs)": 0,
+  //             });
+  //           });
+  //         });
+  //       } else {
+  //         itemsDataForExcel.push({
+  //           "Nro. Pedido": `#${sale.orderNumber}`,
+  //           "Fecha": new Date(sale.createdAt).toLocaleDateString("es-BO"),
+  //           "Producto Combo": "-",
+  //           "Grupo/Plato": "-",
+  //           "Producto Seleccionado": item.name,
+  //           "Cant.": item.quantity,
+  //           "Precio Unit. (Bs)": item.price,
+  //           "Subtotal (Bs)": item.quantity * item.price,
+  //         });
+  //       }
+  //     });
+  //   });
+
+  //   const wb = XLSX.utils.book_new();
+  //   const wsSales = XLSX.utils.json_to_sheet(salesDataForExcel);
+  //   XLSX.utils.book_append_sheet(wb, wsSales, "Resumen Ventas");
+
+  //   if (itemsDataForExcel.length > 0) {
+  //     const wsItems = XLSX.utils.json_to_sheet(itemsDataForExcel);
+  //     XLSX.utils.book_append_sheet(wb, wsItems, "Detalle Productos");
+  //   }
+
+  //   const dateStr = new Date().toISOString().slice(0, 10);
+  //   XLSX.writeFile(wb, `Reporte_Ventas_${dateStr}.xlsx`);
+  // };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // Paleta de Colores
+    const primaryColor: [number, number, number] = [5, 42, 61];     // #052A3D
+    const accentRed: [number, number, number] = [217, 83, 79];       // #D9534F
+    const textColor: [number, number, number] = [51, 65, 85];        // #334155
+    const lightBg: [number, number, number] = [248, 250, 252];       // #F8FAFC
+    const borderGray: [number, number, number] = [226, 232, 240];    // #E2E8F0
+
+    // ----------------------------------------------------
+    // 1. ENCABEZADO Y BANNER
+    // ----------------------------------------------------
+    // Fondo superior
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 42, "F");
+
+    // Nombre del Restaurante
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("RESTAURANTE YESHUA", 15, 17);
+
+    // Subtítulo
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(114, 178, 208); // Azul claro
+    doc.text("Reporte de Control de Ventas", 15, 24);
+
+    // Fecha de Emisión
+    doc.setFontSize(8.5);
+    doc.setTextColor(209, 226, 235);
+    doc.text(`Fecha de Emisión: ${new Date().toLocaleString("es-BO")}`, 15, 30);
+
+    // Badge para el Rango de Fechas
+    const startDate = appliedFilters.startDate ? new Date(appliedFilters.startDate).toLocaleDateString("es-BO") : "-";
+    const endDate = appliedFilters.endDate ? new Date(appliedFilters.endDate).toLocaleDateString("es-BO") : "-";
+    const filterText = `Filtros: Rango del ${startDate} al ${endDate}`;
+
+    doc.setFillColor(255, 255, 255);
+    doc.setFillColor(255, 255, 255, 0.15); // Transparencia sutil
+    doc.roundedRect(15, 33, doc.getTextWidth(filterText) + 6, 6, 1, 1, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.text(filterText, 18, 37.2);
+
+    // ----------------------------------------------------
+    // 2. TARJETAS DE MÉTRICAS (KPIs)
+    // ----------------------------------------------------
+    // Card 1: Total Ingresos
+    doc.setFillColor(...lightBg);
+    doc.setDrawColor(...borderGray);
+    doc.roundedRect(15, 48, 87, 24, 2, 2, "FD");
+
+    // Borde acentuado izquierdo rojo para el total
+    doc.setFillColor(...accentRed);
+    doc.rect(15, 48, 2, 24, "F");
+
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("TOTAL INGRESOS", 22, 54);
+
+    doc.setFontSize(16);
+    doc.setTextColor(...accentRed);
+    doc.text(`Bs. ${(totalSales || 0).toLocaleString("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 22, 64);
+
+    // Card 2: Cantidad Transacciones
+    doc.setFillColor(...lightBg);
+    doc.setDrawColor(...borderGray);
+    doc.roundedRect(108, 48, 87, 24, 2, 2, "FD");
+
+    // Borde acentuado izquierdo azul para las ventas
+    doc.setFillColor(...primaryColor);
+    doc.rect(108, 48, 2, 24, "F");
+
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.text("CANTIDAD TRANSACCIONES", 115, 54);
+
+    doc.setFontSize(16);
+    doc.setTextColor(...primaryColor);
+    doc.text(`${filteredSales.length} Ventas`, 115, 64);
+
+    // ----------------------------------------------------
+    // 3. PREPARACIÓN Y GENERACIÓN DE LA TABLA
+    // ----------------------------------------------------
+    const headers = [
+      ["Pedido", "Fecha / Hora", "Cliente", "Tipo Orden", "Pago", "Total"]
+    ];
+
+    const rows = filteredSales.map((sale) => [
+      `#${sale.orderNumber}`,
+      `${new Date(sale.createdAt).toLocaleDateString("es-BO")} ${new Date(sale.createdAt).toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit" })}`,
+      sale.userCustomerName || "Sin Nombre",
+      sale.orderType || "-",
+      getPaymentTypeLabel ? getPaymentTypeLabel(sale.paymentType) : sale.paymentType,
+      `Bs. ${(sale.total || 0).toLocaleString("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    ]);
+
+    autoTable(doc, {
+      head: headers,
+      body: rows,
+      startY: 78,
+      theme: "striped",
+      headStyles: {
+        fillColor: primaryColor,
+        textColor: [255, 255, 255],
+        fontSize: 8.5,
+        fontStyle: "bold",
+        halign: "left",
+        cellPadding: 3,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: textColor,
+        cellPadding: 2.5,
+      },
+      alternateRowStyles: {
+        fillColor: lightBg,
+      },
+      columnStyles: {
+        0: { cellWidth: 20, fontStyle: "bold", textColor: primaryColor },
+        1: { cellWidth: 38 },
+        2: { cellWidth: 46 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 24 },
+        5: { cellWidth: 24, halign: "right", fontStyle: "bold" },
+      },
+      margin: { left: 15, right: 15, bottom: 20 },
+
+      // Pie de página dinámico (Paginación)
+      didDrawPage: (data: any) => {
+        const totalPages = doc.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+          `Página ${data.pageNumber} de ${totalPages}`,
+          195,
+          287,
+          { align: "right" }
+        );
+      }
+    });
+
+    // ----------------------------------------------------
+    // 4. RESUMEN AL FINAL DE LA TABLA
+    // ----------------------------------------------------
+    const finalY = (doc as any).lastAutoTable.finalY + 6;
+
+    // Si la tabla termina muy abajo, agrega una página para el total
+    if (finalY < 270) {
+      doc.setFillColor(...lightBg);
+      doc.setDrawColor(...borderGray);
+      doc.roundedRect(130, finalY, 65, 11, 2, 2, "FD");
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...primaryColor);
+      doc.text("TOTAL GENERAL:", 134, finalY + 7);
+
+      doc.setTextColor(...accentRed);
+      doc.text(
+        `Bs. ${(totalSales || 0).toLocaleString("es-BO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        191,
+        finalY + 7,
+        { align: "right" }
+      );
+    }
+
+    // Descarga del documento
+    const dateStr = new Date().toISOString().slice(0, 10);
+    doc.save(`Reporte_Ventas_${dateStr}.pdf`);
+  };
+
+  // const exportToPDF = () => {
+  //   const doc = new jsPDF({
+  //     orientation: "portrait",
+  //     unit: "mm",
+  //     format: "a4",
+  //   });
+
+  //   const primaryColor = [5, 42, 61];
+  //   const textColor = [51, 51, 51];
+  //   const lightGray = [245, 247, 250];
+
+  //   doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  //   doc.rect(0, 0, 210, 40, "F");
+
+  //   doc.setTextColor(255, 255, 255);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(22);
+  //   doc.text("RESTAURANTE YESHUA", 15, 18);
+
+  //   doc.setFont("helvetica", "normal");
+  //   doc.setFontSize(12);
+  //   doc.text("Reporte de Control de Ventas", 15, 25);
+  //   doc.text(`Fecha de Emisión: ${new Date().toLocaleString("es-BO")}`, 15, 31);
+
+  //   doc.setTextColor(220, 220, 220);
+  //   doc.setFontSize(9);
+  //   doc.text(
+  //     `Filtros: Rango del ${new Date(appliedFilters.startDate).toLocaleDateString("es-BO")} al ${new Date(appliedFilters.endDate).toLocaleDateString("es-BO")}`,
+  //     15,
+  //     37
+  //   );
+
+  //   doc.setFillColor(255, 255, 255);
+  //   doc.setDrawColor(220, 220, 220);
+  //   doc.rect(15, 48, 85, 24);
+  //   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(10);
+  //   doc.text("TOTAL INGRESOS", 20, 54);
+  //   doc.setFontSize(18);
+  //   doc.setTextColor(217, 83, 79);
+  //   doc.text(`Bs. ${totalSales.toLocaleString()}`, 20, 64);
+
+  //   doc.setFillColor(255, 255, 255);
+  //   doc.rect(110, 48, 85, 24);
+  //   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(10);
+  //   doc.text("CANTIDAD TRANSACCIONES", 115, 54);
+  //   doc.setFontSize(18);
+  //   doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+  //   doc.text(`${filteredSales.length} Ventas`, 115, 64);
+
+  //   const headers = [
+  //     ["Pedido", "Fecha/Hora", "Cliente", "Tipo Orden", "Pago", "Total"]
+  //   ];
+
+  //   const rows = filteredSales.map((sale) => [
+  //     `#${sale.orderNumber}`,
+  //     `${new Date(sale.createdAt).toLocaleDateString("es-BO")} ${new Date(sale.createdAt).toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit" })}`,
+  //     sale.userCustomerName || "Sin Nombre",
+  //     sale.orderType || "-",
+  //     getPaymentTypeLabel(sale.paymentType),
+  //     `Bs. ${sale.total.toLocaleString()}`
+  //   ]);
+
+  //   autoTable(doc, {
+  //     head: headers,
+  //     body: rows,
+  //     startY: 80,
+  //     theme: "grid",
+  //     headStyles: {
+  //       fillColor: primaryColor as [number, number, number], // 👈 AÑADIR "as [number, number, number]"
+  //       textColor: [255, 255, 255],
+  //       fontSize: 9,
+  //       fontStyle: "bold",
+  //       halign: "left",
+  //     },
+  //     bodyStyles: {
+  //       fontSize: 8,
+  //       textColor: textColor as [number, number, number],
+
+  //     },
+  //     alternateRowStyles: {
+  //       fillColor: lightGray as [number, number, number],
+
+  //     },
+  //     columnStyles: {
+  //       5: { halign: "right", fontStyle: "bold" },
+  //     },
+  //     margin: { left: 15, right: 15 },
+  //     didDrawPage: (data: any) => {
+  //       doc.setFontSize(8);
+  //       doc.setTextColor(150, 150, 150);
+  //       doc.text(
+  //         `Página ${data.pageNumber} de ${doc.getNumberOfPages()}`,
+  //         180,
+  //         287
+  //       );
+  //     }
+  //   });
+
+  //   const dateStr = new Date().toISOString().slice(0, 10);
+  //   doc.save(`Reporte_Ventas_${dateStr}.pdf`);
+  // };
+
   const togglePromo = (saleId: number, itemIdx: number) => {
     const key = `${saleId}-${itemIdx}`;
     setExpandedPromos((prev) => ({
@@ -234,9 +737,31 @@ export default function SalesPage() {
         title="Reportes"
         subtitle="Reportes de las ventas del sistema"
         action={
-          <Button onClick={loadSales} variant="outline" size="sm">
-            Actualizar Datos
-          </Button>
+          <div className="flex gap-2">
+            <div className="w-50">
+              <ButtonGeneric
+                variant="cancelGray"
+                onClick={exportToExcel}
+              >
+                <div className="flex align-items-center justify-content-center gap-2">
+                  <FileSpreadsheet size={18} className="text-success" />
+                  <span>Exportar Excel</span>
+                </div>
+              </ButtonGeneric>
+            </div>
+
+            <div className="w-50">
+              <ButtonGeneric
+                variant="confirmModalPrimary"
+                onClick={exportToPDF}
+              >
+                <div className="flex align-items-center justify-content-center gap-2">
+                  <FileText size={18} />
+                  <span>Exportar PDF</span>
+                </div>
+              </ButtonGeneric>
+            </div>
+          </div>
         }
       />
       <div
