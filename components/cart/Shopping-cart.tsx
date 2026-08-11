@@ -326,6 +326,8 @@ export function ShoppingCart() {
           "http://localhost/restauranteapi/api/Print/PrintRestaurant",
         );
 
+        // const urlImpresion = "http://localhost:5182/api/Print/PrintRestaurant";
+
         const response = await ApiService.post(
           urlImpresion,
           printPayload,
