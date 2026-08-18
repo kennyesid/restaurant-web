@@ -245,14 +245,13 @@ export function ShoppingCart() {
         userCustomerName: selectedClient?.fullName ?? "S/N",
         userDocument: selectedClient?.nit ?? "0",
         orderNumber: numeroOrdenCalculado,
-        orderStatus: OrderStatusEnum.EN_COCINA,
+        orderStatus: OrderStatusEnum.ENVIADO,
         tenantId: 1,
         state: true,
         total: total,
         amountPaid: amountPaid,
         changeReturned: changeReturned,
         orderType: orderType as OrderTypeEnum,
-        // shift: getCurrentShift(),
         table: table
       };
       console.log('SAVE_TO_DATABASE :: ' + JSON.stringify(newSaleData))

@@ -25,6 +25,8 @@ export interface Sale {
   total: number;
   paymentType: PaymentTypeEnum;
   table: number;
+  salePaid?: boolean;
+  orderStatusName?: string;
   createdAt: Date;
   updatedAt: Date;
   state: boolean;
