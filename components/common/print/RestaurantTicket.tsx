@@ -1,48 +1,6 @@
 import { Sale } from "@/types";
 import React from "react";
 
-// Interfaces basadas exactamente en tus clases de C#
-// interface ProductDetailProduct {
-//     id: number;
-//     productId: number;
-//     name: string;
-//     price: number;
-//     reasonModification?: string;
-//     quantity: number;
-//     productFittings?: string[];
-//     state: boolean;
-// }
-
-// interface OrderDetail {
-//     id: number;
-//     name: string;
-//     quantity: number;
-//     price: number;
-//     categoryId: number;
-//     productDetailProduct?: ProductDetailProduct[];
-//     reasonModification?: string;
-//     isCountable: boolean;
-//     productFittings?: string[];
-// }
-
-// interface OrderPrintRequest {
-//     detail?: OrderDetail[];
-//     paymentType: string;
-//     userId: number;
-//     userCustomerId: number;
-//     userName?: string;
-//     userDocument?: string;
-//     orderNumber: number;
-//     orderStatus: number;
-//     tenantId: number;
-//     state: boolean;
-//     total: number;
-//     orderType: string;
-//     shift?: string;
-//     id: number;
-//     createdAt: string | Date;
-// }
-
 interface RestaurantTicketProps {
     order: Sale;
 }

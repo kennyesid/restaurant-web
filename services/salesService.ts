@@ -3,6 +3,7 @@ import { CartItem, Sale, RespuestaGenericaDto, KitchenPreparationGroup } from "@
 import { ProductFittingsService } from "./productFittingsService"; // Ajusta la ruta a tu archivo de servicio
 import { DateUtils } from "@/utils/date-utils";
 import { configService } from "./configService";
+import { OrderStatusEnum } from "@/types/enum/orderStatusEnum";
 
 const responderExito = <T>(
   contenido: T,
@@ -473,12 +474,17 @@ export async function getAllSalesWithDetailsComboChef(): Promise<RespuestaGeneri
 
     const groupId = configService.getGroupId();
 
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA', { timeZone: 'America/La_Paz' });
+
     const { data: sales, error: salesError } = await supabase
       .from("sales")
       .select("*")
       .eq("groupId", groupId)
-      .eq("orderStatus", 2)
+      .in("orderStatus", [2, 3])
       .eq("state", true)
+      .gte("createdAt", `${todayStr}T00:00:00`)
+      .lt("createdAt", `${todayStr}T23:59:59.999`)
       .order("createdAt", { ascending: true });
 
     if (salesError) throw salesError;
@@ -683,12 +689,17 @@ export async function getAllSalesWithDetailsComboChefById(saleId?: number): Prom
   try {
 
     const groupId = configService.getGroupId();
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA', { timeZone: 'America/La_Paz' });
+
     let query = supabase
       .from("sales")
       .select("*")
       .eq("groupId", groupId)
-      .eq("orderStatus", 2)
-      .eq("state", true);
+      .in("orderStatus", [2, 3])
+      .eq("state", true)
+      .gte("createdAt", `${todayStr}T00:00:00`)
+      .lt("createdAt", `${todayStr}T23:59:59.999`);
 
     if (saleId) {
       query = query.eq("id", saleId);
@@ -1225,6 +1236,19 @@ export async function createSaleCombo(
       ...newSale,
       detail: finalDetail
     };
+
+    const { error: updateError } = await supabase
+      .from("sales")
+      .update({
+        orderStatus: OrderStatusEnum.PENDIENTE,
+        orderStatusName: "PENDIENTE"
+      })
+      .eq("id", saleId);
+
+    if (updateError) {
+      console.error("❌ Error al actualizar estado de venta:", updateError);
+      throw updateError;
+    }
 
     return responderExito(responsePayload, "Venta registrada con éxito");
   } catch (error: any) {
