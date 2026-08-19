@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useState } from "react";
-import { getSales, deleteSale, getAllSalesWithDetails, getAllSalesWithDetailsCombo } from "@/services/salesService";
+import { getSales, deleteSale, getAllSalesWithDetails, getAllSalesWithDetailsCombo, getAllSalesWithDetailsDashboard } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale, User, Product, CartItem } from "@/types";
 import { Card } from "@/components/ui/card";
@@ -75,7 +75,8 @@ export default function SalesPage() {
   const loadSales = async () => {
     try {
       setLoading(true);
-      const data = await getAllSalesWithDetailsCombo();
+      // const data = await getAllSalesWithDetailsCombo();
+      const data = await getAllSalesWithDetailsDashboard();
       console.log("Ventas cargadas:", JSON.stringify(data));
       handleResponse(data, setSales);
     } catch (error) {

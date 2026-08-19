@@ -1081,7 +1081,7 @@ export function ShoppingCart() {
         }}
         title="Ticket de Venta"
         subtitle={`Pedido #${saleData?.orderNumber || ''}`}
-        size="md"
+        size="xl"
         confirmText="Cerrar"
         cancelText=""
         isProcessing={false}

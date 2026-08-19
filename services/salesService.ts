@@ -235,6 +235,7 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
       .select("*")
       .eq("groupId", groupId)
       .eq("state", true)
+      .eq("salePaid", true)
       .order("createdAt", { ascending: false });
 
     if (salesError) throw salesError;
@@ -268,8 +269,6 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         price: combo.price,
         imageUrl: "",
         categoryId: 6,
-        // isPromotion: false,
-        // isCountable: false,
         productDetailProduct: [],
         productId: combo.productId,
         quantity: combo.quantity,
@@ -307,8 +306,6 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
           modifiedSubtotal: detail.modifiedSubtotal,
           reasonModification: detail.reasonModification,
           orderTypeSend: detail.orderTypeSend,
-          // isPromotion: false,
-          // isCountable: true,
           imageUrl: "",
           completed: true,
           createdAt: detail.createdAt,
@@ -332,7 +329,6 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         description: detail.description,
         legend: detail.legend,
         price: detail.price,
-        // isPromotion: detail.isPromotion,
         imageUrl: detail.imageUrl,
         isFeatured: detail.isFeatured,
         isAvailable: true,
@@ -345,7 +341,6 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         updatedAt: detail.updatedAt,
         selected: detail.selected,
         productFittings: [],
-        // productFittings: updatedProductFittings
       });
     });
 
@@ -403,11 +398,7 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
             modified: item.modified,
             modifiedSubtotal: item.modifiedSubtotal,
             reasonModification: item.reasonModification,
-            // isPromotion: item.isPromotion,
-            // isCountable: item.isCountable,
-            // selected: item.selected ?? false,
             productFittings: [],
-            // productFittings: updatedProductFittings,
             productDetailProduct: [],
             createdAt: item.createdAt,
             updatedAt: item.updatedAt,
@@ -440,14 +431,247 @@ export async function getAllSalesWithDetailsCombo(): Promise<RespuestaGenericaDt
         amountPaid: sale.amountPaid,
         changeReturned: sale.changeReturned,
         orderType: sale.orderType,
-        // shift: sale.shift,
-        // table: sale.table,
         createdAt: sale.createdAt,
         updatedAt: sale.updatedAt
       } as Sale;
     });
 
-    console.log("formattedSales", JSON.stringify(formattedSales));
+    // console.log("formattedSales", JSON.stringify(formattedSales));
+
+    return responderExito(
+      formattedSales,
+      "Ventas obtenidas con éxito"
+    );
+
+  } catch (error: any) {
+
+    console.error("❌ Error en getAllSalesWithDetails:", {
+      mensaje: error?.message,
+      detalles: error?.details,
+      codigo: error?.code,
+    });
+
+    return responderFalla(
+      `Error al obtener las ventas: ${error?.message || "Error de datos"}`
+    );
+
+  }
+}
+
+
+export async function getAllSalesWithDetailsDashboard(): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+
+    const groupId = configService.getGroupId();
+
+    const { data: sales, error: salesError } = await supabase
+      .from("sales")
+      .select("*")
+      .eq("groupId", groupId)
+      .eq("state", true)
+      .eq("salePaid", true)
+      .order("createdAt", { ascending: false });
+
+    if (salesError) throw salesError;
+
+    if (!sales || sales.length === 0) {
+      return responderExito([], "Ventas obtenidas con éxito");
+    }
+
+    const saleIds = sales.map(s => s.id);
+
+    const { data: comboGroups, error: comboError } = await supabase
+      .from("sales_detail_group")
+      .select("*")
+      .in("saleId", saleIds);
+
+    if (comboError) throw comboError;
+
+    const { data: details, error: detailError } = await supabase
+      .from("sales_details")
+      .select("*")
+      .eq("selected", true)
+      .in("saleId", saleIds);
+
+    if (detailError) throw detailError;
+
+    const comboMap = new Map<number, any>();
+
+    (comboGroups ?? []).forEach(combo => {
+      comboMap.set(combo.id, {
+        id: combo.productId,
+        name: combo.name,
+        price: combo.price,
+        imageUrl: "",
+        categoryId: 6,
+        productDetailProduct: [],
+        productId: combo.productId,
+        quantity: combo.quantity,
+        subTotal: combo.subtotal,
+        cartItemDetail: [],
+        sales_detail_group_id: combo.id,
+        saleId: combo.saleId
+      });
+    });
+
+    (details ?? []).forEach(detail => {
+      if (!detail.sales_detail_group_id || detail.sales_detail_group_id === 0)
+        return;
+
+      const combo = comboMap.get(detail.sales_detail_group_id);
+
+      if (!combo)
+        return;
+
+      let plate = combo.cartItemDetail.find(
+        (x: any) => x.id === detail.combosecuencia
+      );
+
+      if (!plate) {
+        plate = {
+          id: detail.combosecuencia,
+          cartItemId: combo.productId,
+          name: `Plato ${detail.combosecuencia}`,
+          price: 0,
+          categoryId: combo.categoryId,
+          productId: combo.productId,
+          quantity: 1,
+          modified: detail.modified,
+          subTotal: 0,
+          modifiedSubtotal: detail.modifiedSubtotal,
+          reasonModification: detail.reasonModification,
+          orderTypeSend: detail.orderTypeSend,
+          imageUrl: "",
+          completed: true,
+          createdAt: detail.createdAt,
+          updatedAt: detail.updatedAt,
+          state: detail.state,
+          productFittings: [],
+          productDetailProduct: [],
+        };
+        combo.cartItemDetail.push(plate);
+      }
+
+      //------------------------------------------------------
+      // Agregar producto al plato
+      //------------------------------------------------------
+
+      plate.productDetailProduct.push({
+        id: detail.id,
+        categoryId: detail.categoryId,
+        productId: detail.productId,
+        name: detail.name,
+        description: detail.description,
+        legend: detail.legend,
+        price: detail.price,
+        imageUrl: detail.imageUrl,
+        isFeatured: detail.isFeatured,
+        isAvailable: true,
+        state: detail.state,
+        groupId: detail.groupId,
+        code: detail.code,
+        displayOrder: detail.displayOrder,
+        piecesOfChicken: detail.piecesOfChicken,
+        createdAt: detail.createdAt,
+        updatedAt: detail.updatedAt,
+        selected: detail.selected,
+        productFittings: [],
+      });
+    });
+
+    //==============================================================
+    // 8. AGRUPAR DETALLES POR VENTA
+    //==============================================================
+
+    const detailsBySale = new Map<number, any[]>();
+
+    (details ?? []).forEach(detail => {
+      if (!detailsBySale.has(detail.saleId)) {
+        detailsBySale.set(detail.saleId, []);
+      }
+      detailsBySale.get(detail.saleId)!.push(detail);
+    });
+
+    //==============================================================
+    // 9. AGRUPAR COMBOS POR VENTA
+    //==============================================================
+
+    const combosBySale = new Map<number, any[]>();
+
+    Array.from(comboMap.values()).forEach(combo => {
+
+      if (!combosBySale.has(combo.saleId)) {
+        combosBySale.set(combo.saleId, []);
+      }
+
+      combosBySale.get(combo.saleId)!.push(combo);
+
+    });
+
+    //==============================================================
+    // 10. CONSTRUIR RESPUESTA
+    //==============================================================
+
+    const formattedSales: Sale[] = sales.map((sale: Sale) => {
+
+      //------------------------------------------
+      // Productos normales
+      //------------------------------------------
+
+      const normalProducts = (detailsBySale.get(sale.id) ?? [])
+        .filter(d => !d.sales_detail_group_id || d.sales_detail_group_id === 0)
+        .map((item: CartItem) => {
+          return {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            imageUrl: item.imageUrl,
+            categoryId: item.categoryId,
+            productId: item.productId,
+            quantity: item.quantity,
+            subTotal: item.price * item.quantity,
+            modified: item.modified,
+            modifiedSubtotal: item.modifiedSubtotal,
+            reasonModification: item.reasonModification,
+            productFittings: [],
+            productDetailProduct: [],
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt,
+            state: item.state
+          };
+        });
+
+      const combos = combosBySale.get(sale.id) ?? [];
+
+      const detail = [
+        ...combos,
+        ...normalProducts
+      ];
+
+      return {
+        id: sale.id,
+        detail,
+        paymentType: sale.paymentType,
+        userId: sale.userId,
+        groupId: sale.groupId,
+        userName: sale.userName,
+        userCustomerId: sale.userCustomerId,
+        userCustomerName: sale.userCustomerName,
+        userDocument: sale.userDocument,
+        orderNumber: sale.orderNumber,
+        orderStatus: sale.orderStatus,
+        tenantId: sale.tenantId,
+        state: sale.state,
+        total: sale.total,
+        amountPaid: sale.amountPaid,
+        changeReturned: sale.changeReturned,
+        orderType: sale.orderType,
+        createdAt: sale.createdAt,
+        updatedAt: sale.updatedAt
+      } as Sale;
+    });
+
+    // console.log("formattedSales", JSON.stringify(formattedSales));
 
     return responderExito(
       formattedSales,
