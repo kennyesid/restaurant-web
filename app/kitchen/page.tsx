@@ -56,15 +56,12 @@ export default function KitchenPage() {
     });
   };
 
-  // Play notification chime using standard Web Audio API (cross-browser beep alert)
   const playNotificationSound = () => {
     if (isMutedRef.current) return;
     try {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioContextClass) return;
       const ctx = new AudioContextClass();
-
-      // Chime first beep (Frequency D5)
       const osc1 = ctx.createOscillator();
       const gain1 = ctx.createGain();
       osc1.type = "sine";
@@ -75,8 +72,6 @@ export default function KitchenPage() {
       gain1.connect(ctx.destination);
       osc1.start();
       osc1.stop(ctx.currentTime + 0.12);
-
-      // Chime second beep (higher tone, Frequency A5)
       setTimeout(() => {
         const osc2 = ctx.createOscillator();
         const gain2 = ctx.createGain();
@@ -111,12 +106,20 @@ export default function KitchenPage() {
   const handleAcceptOrder = async (saleId: number, orderNumber: number) => {
     try {
       setUpdatingIds(prev => ({ ...prev, [saleId]: true }));
-      const res = await updateSaleOrderStatus(saleId, 3);
+      const res = await updateSaleOrderStatus(saleId, 4);
+
+      const currentToastBody = {
+        type: res.codigo === 200 ? ToastType.Successfully : ToastType.Fail,
+        message: res.codigo === 200 ? "Exito" : "Error",
+        description: res.codigo === 200
+          ? `Pedido #${orderNumber} marcado como LISTO`
+          : "No se pudo actualizar el pedido",
+        image: null,
+      };
+      toast.custom((t) => <CustomNotification t={t} body={currentToastBody} />, { position: "top-center" });
+
       if (res.codigo === 200) {
-        toast.success(`Pedido #${orderNumber} marcado como LISTO`);
         setSales(prev => prev.filter(s => s.id !== saleId));
-      } else {
-        toast.error(res.mensaje || "No se pudo actualizar el pedido");
       }
     } catch (error) {
       console.error("Error actualizando orden:", error);
@@ -149,48 +152,42 @@ export default function KitchenPage() {
         },
         async (payload: any) => {
           if (!isMounted) return;
-          // console.log("Realtime payload:", payload);
           const { eventType, new: newRow, old: oldRow } = payload;
           const currentGroupId = configService.getGroupId();
           if ((eventType === "INSERT" || eventType === "UPDATE") && newRow.orderStatus === 2 && newRow.state === true) {
-            // Check if matches active groupId
             if (newRow.groupId !== currentGroupId) return;
             const saleId = newRow.id;
-            // Si ya había una espera para esta venta la cancelamos
             const existingTimeout = pendingReloads.current.get(saleId);
             if (existingTimeout) {
               clearTimeout(existingTimeout);
             }
-            const timeout = setTimeout(async () => {
-              const detailRes = await getAllSalesWithDetailsComboChefById(saleId);
-              if (detailRes.codigo === 200 && detailRes.contenido) {
-                const fullSale = detailRes.contenido;
-                setSales(prevSales => {
-                  const exists = prevSales.some(s => s.id === fullSale.id);
-                  if (exists) {
-                    return prevSales.map(s =>
-                      s.id === fullSale.id
-                        ? fullSale
-                        : s
-                    );
-                  }
-                  playNotificationSound();
-                  toast.custom((t) => (
-                    <CustomNotification
-                      t={t}
-                      body={{
-                        type: ToastType.Successfully,
-                        message: "Nueva Solicitud",
-                        description: `Pedido #${fullSale.orderNumber} por ${fullSale.userName || "Cliente"}`
-                      }}
-                    />
-                  ));
-                  return [...prevSales, fullSale];
-                });
-              }
-              pendingReloads.current.delete(saleId);
-            }, 6000);
-            pendingReloads.current.set(saleId, timeout);
+            const detailRes = await getAllSalesWithDetailsComboChefById(saleId);
+            if (detailRes.codigo === 200 && detailRes.contenido) {
+              const fullSale = detailRes.contenido;
+              setSales(prevSales => {
+                const exists = prevSales.some(s => s.id === fullSale.id);
+                if (exists) {
+                  return prevSales.map(s =>
+                    s.id === fullSale.id
+                      ? fullSale
+                      : s
+                  );
+                }
+                playNotificationSound();
+                toast.custom((t) => (
+                  <CustomNotification
+                    t={t}
+                    body={{
+                      type: ToastType.Successfully,
+                      message: "Nueva Solicitud",
+                      description: `Pedido #${fullSale.orderNumber} por ${fullSale.userName || "Cliente"}`
+                    }}
+                  />
+                ));
+                return [...prevSales, fullSale];
+              });
+            }
+            pendingReloads.current.delete(saleId);
           }
           else if (eventType === "UPDATE" || eventType === "DELETE") {
             const targetId = eventType === "DELETE" ? oldRow.id : newRow.id;
@@ -226,32 +223,19 @@ export default function KitchenPage() {
     return `${diffHours}h ${diffMins % 60}m`;
   };
 
-  const getElapsedBadgeClass = (createdAtStr: string | Date) => {
-    const diffMs = now.getTime() - new Date(createdAtStr).getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins >= 15) {
-      return "bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/40 animate-pulse";
-    }
-    if (diffMins >= 8) {
-      return "bg-yellow-500/10 text-yellow-600 border-yellow-500/20 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/40";
-    }
-    return "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700/60";
-  };
-
-  const toggleItem = (idx: number) => {
-    setExpandedItems((prev) => ({
-      ...prev,
-      [idx]: !prev[idx],
-    }));
-  };
-
   return (
     <div className="space-y-6">
       <PageHeader
         title="Panel de Cocina"
         subtitle="Monitoreo y despacho de pedidos en tiempo real"
         action={
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="inline-flex items-center gap-2 bg-rest-primary text-slate-50 dark:bg-slate-100 dark:text-slate-900 px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm">
+              <span>Pendientes</span>
+              <span className="bg-rest-yellow text-rest-primary dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded text-xs font-bold">
+                {sales.length}
+              </span>
+            </div>
             {/* Connection Status Badge */}
             <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${realtimeStatus === "connected"
               ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30"
@@ -262,17 +246,17 @@ export default function KitchenPage() {
               {realtimeStatus === "connected" ? (
                 <>
                   <Wifi className="h-3.5 w-3.5" />
-                  <span>Tiempo Real</span>
+                  {/* <span>Tiempo Real</span> */}
                 </>
               ) : realtimeStatus === "connecting" ? (
                 <>
                   <Wifi className="h-3.5 w-3.5 animate-spin" />
-                  <span>Conectando...</span>
+                  {/* <span>Conectando...</span> */}
                 </>
               ) : (
                 <>
                   <WifiOff className="h-3.5 w-3.5" />
-                  <span>Desconectado</span>
+                  {/* <span>Desconectado</span> */}
                 </>
               )}
             </div>
@@ -288,14 +272,6 @@ export default function KitchenPage() {
             >
               {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
             </button>
-
-            {/* Pending Orders Count Badge */}
-            <div className="inline-flex items-center gap-2 bg-slate-900 text-slate-50 dark:bg-slate-100 dark:text-slate-900 px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm">
-              <span>Pendientes</span>
-              <span className="bg-primary text-primary-foreground dark:bg-secondary/15 dark:text-secondary px-2 py-0.5 rounded text-xs font-bold">
-                {sales.length}
-              </span>
-            </div>
           </div>
         }
       />
@@ -332,7 +308,6 @@ export default function KitchenPage() {
                   : "bg-white text-slate-900 border-slate-200"
                   }`}
               >
-                {/* CARD HEADER */}
                 <div
                   className={`p-4 border-b space-y-3 ${isTable
                     ? "bg-[#031d2a]/60 border-slate-700/50"
@@ -510,8 +485,6 @@ export default function KitchenPage() {
                       })}
                     </div>
                   </TabsContent>
-
-                  {/* ================= PREPARACION ================= */}
                   <TabsContent value="preparacion" className="m-0 flex-1">
                     <div className="p-5 space-y-2 max-h-[480px] overflow-y-auto">
                       {transformKitchenPreparation([sale]).map((group, index) => (
@@ -567,43 +540,18 @@ export default function KitchenPage() {
                     </div>
                   </TabsContent>
                 </Tabs>
-
-                {/* FOOTER */}
                 <div
                   className={`p-4 border-t mt-auto ${isTable
                     ? "bg-[#031d2a]/80 border-slate-800"
                     : "bg-slate-50 border-slate-200"
                     }`}
                 >
-                  {/* <button
-                    onClick={() => handleAcceptOrder(sale.id, sale.orderNumber)}
-                    disabled={updatingIds[sale.id]}
-                    className={`w-full inline-flex items-center justify-center gap-2.5 font-black py-3.5 px-5 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed text-sm cursor-pointer ${isTable
-                      ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
-                      : "bg-slate-950 hover:bg-slate-800 text-yellow-400"
-                      }`}
-                  >
-                    {updatingIds[sale.id] ? (
-                      <>
-                        <div
-                          className={`animate-spin rounded-full h-4 w-4 border-2 border-t-transparent ${isTable ? "border-slate-950" : "border-yellow-400"
-                            }`}
-                        />
-                        <span>Despachando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
-                        <span>Listo / Despachar</span>
-                      </>
-                    )}
-                  </button> */}
                   <ButtonGeneric
                     onClick={() => handleAcceptOrder(sale.id, sale.orderNumber)}
                     disabled={updatingIds[sale.id]}
                     variant={isTable ? "cancelGray" : "primary"}
                   >
-                    Listo / Despachar
+                    Despachar
                   </ButtonGeneric>
                 </div>
               </div>
