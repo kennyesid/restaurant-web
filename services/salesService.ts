@@ -116,6 +116,132 @@ export async function getSales(): Promise<RespuestaGenericaDto<Sale[]>> {
   }
 }
 
+export async function getSalesByDateRange(
+  fechaInicio: Date,
+  fechaFin: Date,
+): Promise<RespuestaGenericaDto<Sale[]>> {
+  try {
+    const groupId = configService.getGroupId();
+
+    const fitingMasterList = await ProductFittingsService.getAll();
+
+    // Inicio del día seleccionado
+    const startDate = new Date(fechaInicio);
+    startDate.setHours(0, 0, 0, 0);
+
+    // Fin exclusivo:
+    // si el usuario selecciona 10/09, buscamos hasta antes del 11/09
+    const endDate = new Date(fechaFin);
+    endDate.setHours(0, 0, 0, 0);
+    endDate.setDate(endDate.getDate() + 1);
+
+    // 1. Obtener únicamente las ventas del rango solicitado
+    const { data: sales, error } = await supabase
+      .from("sales")
+      .select(`
+        *,
+        detail:sales_details(*)
+      `)
+      .eq("groupId", groupId)
+      .eq("sales_details.selected", true)
+      .eq("state", true)
+      .gte("createdAt", startDate.toISOString())
+      .lt("createdAt", endDate.toISOString())
+      .order("createdAt", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    // 2. Obtener IDs de los detalles
+    const allSaleDetailIds = (sales || [])
+      .flatMap((sale) =>
+        (sale.detail || []).map((detail: any) => detail.id),
+      )
+      .filter(Boolean);
+
+    let subDetailsMap: Record<number, any[]> = {};
+
+    // 3. Obtener sub-detalles en una sola consulta
+    if (allSaleDetailIds.length > 0) {
+      const { data: subDetails, error: subError } = await supabase
+        .from("sales_details_details")
+        .select("*")
+        .in("saleDetailId", allSaleDetailIds);
+
+      if (subError) {
+        throw subError;
+      }
+
+      subDetailsMap = (subDetails || []).reduce(
+        (acc: Record<number, any[]>, sub: any) => {
+          if (!acc[sub.saleDetailId]) {
+            acc[sub.saleDetailId] = [];
+          }
+
+          acc[sub.saleDetailId].push(sub);
+
+          return acc;
+        },
+        {},
+      );
+    }
+
+    // 4. Formatear respuesta
+    const formattedSales = (sales || []).map((sale: any) => {
+      const formattedDetail = (sale.detail || []).map((item: any) => {
+        const subDetails = subDetailsMap[item.id] || [];
+
+        // Fittings del detalle principal
+        const updatedProductFitting = Array.isArray(item.productFittings)
+          ? item.productFittings
+            .map((fittingId: number) =>
+              fitingMasterList.find((fitting) => fitting.id === fittingId),
+            )
+            .filter(Boolean)
+          : [];
+
+        // Sub-detalles
+        const formattedSubDetails = subDetails.map((sub: any) => {
+          const updatedSubFittings = Array.isArray(sub.productFittings)
+            ? sub.productFittings
+              .map((fittingId: number) =>
+                fitingMasterList.find(
+                  (fitting) => fitting.id === fittingId,
+                ),
+              )
+              .filter(Boolean)
+            : [];
+
+          return {
+            ...sub,
+            productFittings: updatedSubFittings,
+          };
+        });
+
+        return {
+          ...item,
+          productFittings: updatedProductFitting,
+          productDetailProduct: formattedSubDetails,
+        };
+      });
+
+      return {
+        ...sale,
+        detail: formattedDetail,
+      };
+    });
+
+    return responderExito(formattedSales as Sale[]);
+  } catch (error) {
+    console.error("❌ Error en getSalesByDateRange:", error);
+
+    return responderFalla(
+      "Error al obtener las ventas del período seleccionado",
+    );
+  }
+}
+
 export async function getAllSalesWithDetails(): Promise<RespuestaGenericaDto<Sale[]>> {
   try {
     const groupId = configService.getGroupId();

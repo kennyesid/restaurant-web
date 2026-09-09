@@ -563,7 +563,7 @@ import {
 import { format, subDays, eachDayOfInterval, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Sale, User, Product, Category, Inventory } from "@/types";
-import { getAllSalesWithDetailsDashboard, getSales } from "@/services/salesService";
+import { getAllSalesWithDetailsDashboard, getSales, getSalesByDateRange } from "@/services/salesService";
 import { getUsers } from "@/services/usersService";
 import { getProducts } from "@/services/productsSservice";
 import { getCategories } from "@/services/categoriesService";
@@ -623,64 +623,323 @@ export default function DashboardRecap() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadAllData = useCallback(async () => {
-    setIsRefreshing(true);
+  const loadMasterData = useCallback(async () => {
     try {
-      const [salesRes, usersRes, categoriesRes, productsRes, inventoryRes] =
-        await Promise.all([
-          getSales(),
-          getUsers(),
-          getCategories(),
-          getProducts(),
-          getInventory(),
-        ]);
-      setSales(salesRes.contenido || []);
-      console.log('Datos', JSON.stringify(salesRes));
+      const [
+        usersRes,
+        categoriesRes,
+        productsRes,
+        inventoryRes,
+      ] = await Promise.all([
+        getUsers(),
+        getCategories(),
+        getProducts(),
+        getInventory(),
+      ]);
+
       setUsers(usersRes || []);
       setCategories(categoriesRes || []);
       setProducts(productsRes || []);
       setInventory(inventoryRes || []);
-
-      if (salesRes.contenido && salesRes.contenido.length > 0) {
-        const latestSale = [...salesRes.contenido].sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )[0];
-        setSelectedDate(format(new Date(latestSale.createdAt), "yyyy-MM-dd"));
-      }
     } catch (error) {
-      console.error("Error cargando datos:", error);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      console.error(
+        "Error cargando datos maestros:",
+        error,
+      );
     }
   }, []);
 
+  const loadSales = useCallback(async () => {
+    if (!dateRange.from || !dateRange.to) {
+      return;
+    }
+
+    setIsRefreshing(true);
+
+    try {
+      const salesRes = await getSalesByDateRange(
+        dateRange.from,
+        dateRange.to,
+      );
+
+      const salesData = salesRes.contenido || [];
+
+      setSales(salesData);
+
+      if (salesData.length > 0) {
+        setSelectedDate(
+          format(
+            new Date(salesData[0].createdAt),
+            "yyyy-MM-dd",
+          ),
+        );
+      } else {
+        setSelectedDate("");
+      }
+    } catch (error) {
+      console.error(
+        "Error cargando ventas:",
+        error,
+      );
+
+      setSales([]);
+      setSelectedDate("");
+    } finally {
+      setIsRefreshing(false);
+      setIsLoading(false);
+    }
+  }, [dateRange.from, dateRange.to]);
+
   useEffect(() => {
-    loadAllData();
-  }, [loadAllData]);
+    loadMasterData();
+  }, [loadMasterData]);
 
-  // Ventas filtradas
-  const filteredSales = useMemo(() => {
-    return sales.filter((sale) => {
-      const saleDate = startOfDay(new Date(sale.createdAt));
-      const from = dateRange?.from && !isNaN(dateRange.from.getTime()) ? startOfDay(dateRange.from) : null;
-      const to = dateRange?.to && !isNaN(dateRange.to.getTime()) ? startOfDay(dateRange.to) : null;
+  useEffect(() => {
+    loadSales();
+  }, [loadSales]);
 
-      const inDateRange =
-        (!from || saleDate >= from) && (!to || saleDate <= to);
-      const matchesUser =
-        selectedUserId === "all" || sale.userId?.toString() === selectedUserId;
+  const availableUsers = useMemo(() => {
+    const userIds = new Set<number>();
+
+    sales.forEach((sale) => {
       const matchesCategory =
         selectedCategoryId === "all" ||
         sale.detail?.some((item) => {
-          const product = products.find((p) => p.id === item.productId);
-          return product?.categoryId.toString() === selectedCategoryId;
+          const product = products.find(
+            (product) => product.id === item.productId
+          );
+
+          return (
+            product?.categoryId?.toString() ===
+            selectedCategoryId
+          );
         });
 
-      return inDateRange && matchesUser && matchesCategory;
+      const matchesProduct =
+        selectedProduct === 0 ||
+        sale.detail?.some(
+          (item) => item.productId === selectedProduct
+        );
+
+      if (
+        matchesCategory &&
+        matchesProduct &&
+        sale.userId
+      ) {
+        userIds.add(sale.userId);
+      }
     });
-  }, [sales, dateRange, selectedUserId, selectedCategoryId, products]);
+
+    return users.filter((user) =>
+      userIds.has(user.id)
+    );
+  }, [
+    sales,
+    users,
+    products,
+    selectedCategoryId,
+    selectedProduct,
+  ]);
+
+  const availableCategories = useMemo(() => {
+    const categoryIds = new Set<number>();
+
+    sales.forEach((sale) => {
+      const matchesUser =
+        selectedUserId === "all" ||
+        sale.userId?.toString() === selectedUserId;
+
+      const matchesProduct =
+        selectedProduct === 0 ||
+        sale.detail?.some(
+          (item) => item.productId === selectedProduct
+        );
+
+      if (!matchesUser || !matchesProduct) {
+        return;
+      }
+
+      sale.detail?.forEach((item) => {
+        const product = products.find(
+          (product) => product.id === item.productId
+        );
+
+        if (product?.categoryId) {
+          categoryIds.add(product.categoryId);
+        }
+      });
+    });
+
+    return categories.filter((category) =>
+      categoryIds.has(category.id)
+    );
+  }, [
+    sales,
+    categories,
+    products,
+    selectedUserId,
+    selectedProduct,
+  ]);
+
+  const availableProducts = useMemo(() => {
+    const productIds = new Set<number>();
+
+    sales.forEach((sale) => {
+      const matchesUser =
+        selectedUserId === "all" ||
+        sale.userId?.toString() === selectedUserId;
+
+      if (!matchesUser) {
+        return;
+      }
+
+      sale.detail?.forEach((item) => {
+        const product = products.find(
+          (product) => product.id === item.productId
+        );
+
+        if (!product) {
+          return;
+        }
+
+        const matchesCategory =
+          selectedCategoryId === "all" ||
+          product.categoryId?.toString() ===
+          selectedCategoryId;
+
+        if (matchesCategory) {
+          productIds.add(product.id);
+        }
+      });
+    });
+
+    return products.filter((product) =>
+      productIds.has(product.id)
+    );
+  }, [
+    sales,
+    products,
+    selectedUserId,
+    selectedCategoryId,
+  ]);
+
+  useEffect(() => {
+    if (
+      selectedUserId !== "all" &&
+      !availableUsers.some(
+        (user) => user.id.toString() === selectedUserId
+      )
+    ) {
+      setSelectedUserId("all");
+    }
+  }, [
+    availableUsers,
+    selectedUserId,
+  ]);
+
+  useEffect(() => {
+    if (
+      selectedCategoryId !== "all" &&
+      !availableCategories.some(
+        (category) =>
+          category.id.toString() === selectedCategoryId
+      )
+    ) {
+      setSelectedCategoryId("all");
+    }
+  }, [
+    availableCategories,
+    selectedCategoryId,
+  ]);
+
+  useEffect(() => {
+    if (
+      selectedProduct !== 0 &&
+      !availableProducts.some(
+        (product) => product.id === selectedProduct
+      )
+    ) {
+      setSelectedProduct(0);
+    }
+  }, [
+    availableProducts,
+    selectedProduct,
+  ]);
+
+  const filteredSales = useMemo(() => {
+    return sales.filter((sale) => {
+      // =========================
+      // FILTRO USUARIO
+      // =========================
+      const matchesUser =
+        selectedUserId === "all" ||
+        sale.userId?.toString() === selectedUserId;
+
+      // =========================
+      // FILTRO CATEGORÍA
+      // =========================
+      const matchesCategory =
+        selectedCategoryId === "all" ||
+        sale.detail?.some((item) => {
+          const product = products.find(
+            (product) => product.id === item.productId,
+          );
+
+          return (
+            product?.categoryId?.toString() === selectedCategoryId
+          );
+        });
+
+      // =========================
+      // FILTRO PRODUCTO
+      // =========================
+      const matchesProduct =
+        selectedProduct === 0 ||
+        sale.detail?.some(
+          (item) => item.productId === selectedProduct
+        );
+
+      return (
+        matchesUser &&
+        matchesCategory &&
+        matchesProduct
+      );
+    });
+  }, [
+    sales,
+    selectedUserId,
+    selectedCategoryId,
+    selectedProduct,
+    products,
+  ]);
+
+  // const filteredSales = useMemo(() => {
+  //   return sales.filter((sale) => {
+  //     const matchesUser =
+  //       selectedUserId === "all" ||
+  //       sale.userId?.toString() === selectedUserId;
+
+  //     const matchesCategory =
+  //       selectedCategoryId === "all" ||
+  //       sale.detail?.some((item) => {
+  //         const product = products.find(
+  //           (product) => product.id === item.productId,
+  //         );
+
+  //         return (
+  //           product?.categoryId?.toString() ===
+  //           selectedCategoryId
+  //         );
+  //       });
+
+  //     return matchesUser && matchesCategory;
+  //   });
+  // }, [
+  //   sales,
+  //   selectedUserId,
+  //   selectedCategoryId,
+  //   products,
+  // ]);
 
   const totalInventoryCost = useMemo(() => {
     return inventory.reduce((sum, item) => {
@@ -724,61 +983,6 @@ export default function DashboardRecap() {
       };
     });
   }, [filteredSales, dateRange, products, selectedCategoryId]);
-
-  const combinedChartData = useMemo(() => {
-    return dailyRevenueData.map((day) => ({
-      ...day,
-      expenses: day.revenue * 0.65,
-      profit: day.revenue * 0.35,
-    }));
-  }, [dailyRevenueData]);
-
-  const hourlyStackedData = useMemo(() => {
-    const HORA_INICIO = 8;
-    const HORA_FIN = 23;
-
-    // Inicializar mapa para cada hora del rango
-    const hourMap = new Map<number, Map<string, number>>();
-    for (let hour = HORA_INICIO; hour <= HORA_FIN; hour++) {
-      hourMap.set(hour, new Map());
-    }
-
-    // Acumular ventas por hora y categoría
-    filteredSales.forEach((sale) => {
-      const saleDate = new Date(sale.createdAt);
-      if (isNaN(saleDate.getTime())) return;
-      const hour = saleDate.getHours();
-      if (hour < HORA_INICIO || hour > HORA_FIN) return;
-
-      sale.detail?.forEach((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) return;
-        const category = categories.find((c) => c.id === product.categoryId);
-        const categoryName = category?.name || "Sin categoría";
-        const itemRevenue = item.price * item.quantity;
-
-        const catMap = hourMap.get(hour)!;
-        catMap.set(categoryName, (catMap.get(categoryName) || 0) + itemRevenue);
-      });
-    });
-
-    // Convertir a array en orden ascendente (8:00 a 23:00)
-    const result: any[] = [];
-    for (let hour = HORA_INICIO; hour <= HORA_FIN; hour++) {
-      const catMap = hourMap.get(hour)!;
-      const dataPoint: any = {
-        hour,
-        formattedHour: `${hour.toString().padStart(2, "0")}:00`,
-      };
-      // Añadir cada categoría con su valor (0 si no tiene)
-      for (const cat of categories) {
-        const catName = cat.name;
-        dataPoint[catName] = catMap.get(catName) || 0;
-      }
-      result.push(dataPoint);
-    }
-    return result;
-  }, [filteredSales, products, categories]);
 
   // 3. Datos para PieChart (día seleccionado)
   const pieData: PieData[] = useMemo(() => {
@@ -847,43 +1051,6 @@ export default function DashboardRecap() {
     if (date) setDateRange((prev) => ({ ...prev, to: date }));
   };
 
-  const stackedCategoryData = useMemo(() => {
-    const catMap = new Map<string, { morning: number; afternoon: number; night: number }>();
-
-    categories.forEach(cat => {
-      catMap.set(cat.name, { morning: 0, afternoon: 0, night: 0 });
-    });
-
-    filteredSales.forEach((sale) => {
-      const saleDate = new Date(sale.createdAt);
-      if (isNaN(saleDate.getTime())) return;
-      const hour = saleDate.getHours();
-
-      sale.detail?.forEach((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        if (!product) return;
-        const category = categories.find((c) => c.id === product.categoryId);
-        if (!category) return;
-        const catName = category.name;
-        const itemRevenue = item.price * item.quantity;
-
-        const data = catMap.get(catName)!;
-
-        if (hour >= 6 && hour < 12) data.morning += itemRevenue;
-        else if (hour >= 12 && hour < 18) data.afternoon += itemRevenue;
-        else if (hour >= 18 && hour < 23) data.night += itemRevenue;
-      });
-    });
-
-    // Convertir a array para Recharts
-    return Array.from(catMap.entries()).map(([category, values]) => ({
-      category,
-      morning: values.morning,
-      afternoon: values.afternoon,
-      night: values.night,
-    }));
-  }, [filteredSales, products, categories]);
-
   const salesByProductHour = useMemo(() => {
     const productCount = new Map<string, number>();
 
@@ -905,41 +1072,8 @@ export default function DashboardRecap() {
 
   }, [filteredSales, selectedProduct]);
 
-  const salesByHour = useMemo(() => {
-
-    const hourMap = new Map<string, number>();
-
-    filteredSales.forEach((sale) => {
-
-      const saleDate = new Date(sale.createdAt);
-
-      if (isNaN(saleDate.getTime())) return;
-
-      const hour = saleDate.toLocaleTimeString("es-CO", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-
-      const currentTotal = hourMap.get(hour) || 0;
-
-      hourMap.set(hour, currentTotal + sale.total);
-
-    });
-
-    return Array.from(hourMap.entries()).map(([hour, total]) => ({
-      hour,
-      total,
-    }));
-
-  }, [filteredSales]);
-
   const qrSales = useMemo(() => {
     return filteredSales.filter(sale => sale.paymentType === "qr");
-  }, [filteredSales]);
-
-  const cashSales = useMemo(() => {
-    return filteredSales.filter(sale => sale.paymentType === "cash");
   }, [filteredSales]);
 
   if (isLoading) {
@@ -1004,8 +1138,16 @@ export default function DashboardRecap() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos los usuarios</SelectItem>
-            {users.map((user) => (
+            {/* {users.map((user) => (
               <SelectItem key={user.id} value={user.id.toString()}>{user.fullName}</SelectItem>
+            ))} */}
+            {availableUsers.map((user) => (
+              <SelectItem
+                key={user.id}
+                value={user.id.toString()}
+              >
+                {user.fullName}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -1017,8 +1159,16 @@ export default function DashboardRecap() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas las categorías</SelectItem>
-            {categories.map((cat) => (
+            {/* {categories.map((cat) => (
               <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
+            ))} */}
+            {availableCategories.map((cat) => (
+              <SelectItem
+                key={cat.id}
+                value={String(cat.id)}
+              >
+                {cat.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -1030,8 +1180,16 @@ export default function DashboardRecap() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="0">Todos los productos</SelectItem>
-            {products.map((product) => (
+            {/* {products.map((product) => (
               <SelectItem key={product.id} value={String(product.id)}>
+                {product.name}
+              </SelectItem>
+            ))} */}
+            {availableProducts.map((product) => (
+              <SelectItem
+                key={product.id}
+                value={String(product.id)}
+              >
                 {product.name}
               </SelectItem>
             ))}

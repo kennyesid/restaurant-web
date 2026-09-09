@@ -199,7 +199,6 @@ export default function SalesPage() {
   const qrSales = filteredSales.filter((s) => s.paymentType === "qr");
   const cashSales = filteredSales.filter((s) => s.paymentType === "cash");
   const mixedSales = filteredSales.filter((s) => s.paymentType === "mixed");
-
   const totalSales = filteredSales.reduce((acc, sale) => acc + sale.total, 0);
 
   useEffect(() => {
@@ -253,9 +252,9 @@ export default function SalesPage() {
             isCartSideOpen ? "lg:col-span-3" : "lg:col-span-1",
           )}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 ">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 ">
 
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-2">
               <div className="relative overflow-hidden rounded-xl p-4 text-white shadow-xl bg-gradient-to-br from-[#052A3D] via-[#0b3f5c] to-[#052A3D]">
                 {/* Efectos decorativos */}
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
