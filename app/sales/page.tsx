@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { getSales, deleteSale, getAllSalesWithDetails, getAllSalesWithDetailsCombo, getAllSalesWithDetailsDashboard } from "@/services/salesService";
 import { Button } from "@/components/ui/button";
 import { Sale, User, Product, CartItem } from "@/types";
@@ -201,6 +201,47 @@ export default function SalesPage() {
   const mixedSales = filteredSales.filter((s) => s.paymentType === "mixed");
   const totalSales = filteredSales.reduce((acc, sale) => acc + sale.total, 0);
 
+  const soldProducts = useMemo(() => {
+    const productMap = new Map<
+      number,
+      {
+        id: number;
+        name: string;
+        quantity: number;
+      }
+    >();
+
+    filteredSales.forEach((sale) => {
+      sale.detail?.forEach((detail) => {
+        const productId = detail.productId;
+
+        if (!productId) return;
+
+        const product = products.find(
+          (item) => item.id === productId
+        );
+
+        if (!product) return;
+
+        const current = productMap.get(productId);
+
+        if (current) {
+          current.quantity += detail.quantity ?? 1;
+        } else {
+          productMap.set(productId, {
+            id: productId,
+            name: product.name,
+            quantity: detail.quantity ?? 1,
+          });
+        }
+      });
+    });
+
+    return Array.from(productMap.values()).sort(
+      (a, b) => b.quantity - a.quantity
+    );
+  }, [filteredSales, products]);
+
   useEffect(() => {
     dispatch(setToggleCartFalse());
   }, []);
@@ -261,9 +302,7 @@ export default function SalesPage() {
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-400/20 rounded-full blur-2xl"></div>
 
                 {/* Layout de dos columnas */}
-                <div className="relative z-10 grid grid-cols-1 md:grid-cols-2">
-
-                  {/* COLUMNA IZQUIERDA - Desglose por tipo de pago con burbujas */}
+                <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2.5">
                     {/* Total General - solo para mobile */}
                     <div className="md:hidden flex flex-col items-center border-b border-white/10 pb-3 mb-1">
@@ -280,7 +319,6 @@ export default function SalesPage() {
                     <div className="bg-white/5 rounded-lg overflow-hidden">
                       <table className="w-full text-center">
                         <tbody>
-                          {/* Fila Efectivo */}
                           {/* Fila Efectivo */}
                           <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
                             <td className="py-1.5 px-2 flex items-center justify-between">
@@ -332,6 +370,63 @@ export default function SalesPage() {
                       </table>
                     </div>
                   </div>
+
+
+
+                  {/* COLUMNA CENTRAL - Productos vendidos */}
+                  <div className="flex flex-col justify-center min-w-0">
+                    <div className="max-h-[90px] overflow-y-auto">
+                      {soldProducts.length > 0 ? (
+                        <div className="flex flex-wrap justify-start gap-1.5">
+                          {soldProducts.map((product) => (
+                            <div
+                              key={product.id}
+                              className="
+              inline-flex
+              items-center
+              gap-1.5
+              rounded-full
+              bg-white/10
+              border
+              border-white/10
+              px-2
+              py-1
+              hover:bg-white/15
+              transition-colors
+            "
+                            >
+                              <span className="text-[10px] font-medium truncate max-w-[85px]">
+                                {product.name}
+                              </span>
+                              <span
+                                className="
+                flex
+                h-5
+                min-w-5
+                items-center
+                justify-center
+                rounded-full
+                bg-[#facc15]
+                px-1
+                text-[9px]
+                font-black
+                text-[#052A3D]
+              "
+                              >
+                                {product.quantity}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-white/50 text-center py-3">
+                          No hay productos vendidos
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+
 
                   {/* COLUMNA DERECHA - Métricas resumen simplificadas */}
                   <div className="flex flex-col justify-between">
@@ -595,14 +690,6 @@ export default function SalesPage() {
                             >
                               <Ban size={18} />
                             </button>
-                            {/* <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleEditSale(sale)}
-                          title="Editar"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button> */}
                           </div>
                         </td>
                       </tr>
