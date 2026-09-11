@@ -77,7 +77,7 @@ export default function SalesPage() {
       setLoading(true);
       // const data = await getAllSalesWithDetailsCombo();
       const data = await getAllSalesWithDetailsDashboard();
-      console.log("Ventas cargadas:", JSON.stringify(data));
+      // console.log("Ventas cargadas:", JSON.stringify(data));
       handleResponse(data, setSales);
     } catch (error) {
       console.error("Error loading sales:", error);
